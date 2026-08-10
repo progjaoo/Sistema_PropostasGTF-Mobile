@@ -7,6 +7,8 @@ import { TIMELINE_STEP_LABELS } from '@/src/utils/enums';
 import { useColors } from '@/hooks/useColors';
 import { ProposalBoardCard } from './ProposalBoardCard';
 import { MoveProposalSheet } from './MoveProposalSheet';
+import { UIBadge, UICard, UIEmptyState } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 const STAGES: ProposalTimelineStep[] = [
   'LEAD_CREATED',
@@ -51,12 +53,10 @@ export function ProposalStagePager({
           const stageItems = proposals.filter((proposal) => proposal.currentStep === stage);
           return (
             <View style={[styles.column, { width: columnWidth, height: columnHeight }]}>
-              <View style={styles.columnHeader}>
+              <UICard variant="muted" style={styles.columnHeader}>
                 <Text style={[styles.stage, { color: colors.foreground }]}>{TIMELINE_STEP_LABELS[stage]}</Text>
-                <View style={[styles.count, { backgroundColor: colors.muted }]}>
-                  <Text style={[styles.countText, { color: colors.mutedForeground }]}>{stageItems.length}</Text>
-                </View>
-              </View>
+                <UIBadge label={String(stageItems.length)} variant={stageItems.length ? 'info' : 'default'} size="sm" />
+              </UICard>
               <FlatList
                 data={stageItems}
                 keyExtractor={(item) => item.id}
@@ -73,7 +73,12 @@ export function ProposalStagePager({
                   />
                 )}
                 ListEmptyComponent={
-                  <Text style={[styles.empty, { color: colors.mutedForeground }]}>Nenhuma proposta nesta etapa.</Text>
+                  <UIEmptyState
+                    icon="inbox"
+                    title="Sem propostas"
+                    description="Nenhuma proposta nesta etapa."
+                    style={styles.emptyState}
+                  />
                 }
               />
             </View>
@@ -106,10 +111,8 @@ function dedupeProposals(proposals: ProgressBoardProposal[]): ProgressBoardPropo
 
 const styles = StyleSheet.create({
   column: { paddingHorizontal: 16 },
-  columnHeader: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 8 },
-  stage: { fontFamily: 'Inter_700Bold', fontSize: 18 },
-  count: { borderRadius: 99, paddingHorizontal: 9, paddingVertical: 3 },
-  countText: { fontFamily: 'Inter_600SemiBold', fontSize: 12 },
-  cards: { gap: 10, paddingBottom: 130 },
-  empty: { paddingVertical: 32, textAlign: 'center', fontFamily: 'Inter_400Regular' },
+  columnHeader: { minHeight: 58, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, marginBottom: spacing.sm },
+  stage: { flex: 1, fontFamily: 'Inter_800ExtraBold', fontSize: 18 },
+  cards: { gap: spacing.md, paddingBottom: 130 },
+  emptyState: { flex: 0, paddingVertical: 44 },
 });

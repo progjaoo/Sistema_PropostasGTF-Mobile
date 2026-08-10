@@ -1,7 +1,8 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { useColors } from '@/hooks/useColors';
+import { UIChip } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 export type ProposalEditorStep = 'context' | 'period' | 'products' | 'investment' | 'review';
 
@@ -20,7 +21,6 @@ export function ProposalEditorStepper({
   value: ProposalEditorStep;
   onChange: (step: ProposalEditorStep) => void;
 }) {
-  const colors = useColors();
   return (
     <ScrollView
       horizontal
@@ -31,21 +31,17 @@ export function ProposalEditorStepper({
       {STEPS.map((step) => {
         const selected = value === step.id;
         return (
-          <TouchableOpacity
+          <UIChip
             key={step.id}
             accessibilityRole="tab"
             accessibilityState={{ selected }}
             accessibilityLabel={`Etapa ${step.label}`}
-            style={[
-              styles.step,
-              { borderColor: selected ? colors.primary : colors.border },
-              selected && { backgroundColor: colors.primary },
-            ]}
+            icon={step.icon}
+            label={step.label}
+            active={selected}
+            style={styles.step}
             onPress={() => onChange(step.id)}
-          >
-            <Feather name={step.icon} size={15} color={selected ? '#FFF' : colors.mutedForeground} />
-            <Text style={[styles.label, { color: selected ? '#FFF' : colors.foreground }]}>{step.label}</Text>
-          </TouchableOpacity>
+          />
         );
       })}
     </ScrollView>
@@ -53,15 +49,9 @@ export function ProposalEditorStepper({
 }
 
 const styles = StyleSheet.create({
-  content: { gap: 8, paddingRight: 16 },
+  content: { gap: spacing.sm, paddingRight: spacing.lg },
   step: {
     minHeight: 44,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
+    paddingHorizontal: spacing.lg,
   },
-  label: { fontFamily: 'Inter_600SemiBold', fontSize: 12 },
 });

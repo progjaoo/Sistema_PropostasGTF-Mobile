@@ -1,6 +1,5 @@
 import React, { useDeferredValue, useMemo, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +16,8 @@ import { useColors } from '@/hooks/useColors';
 import { EmptyState } from '@/components/EmptyState';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useToast } from '@/components/ToastProvider';
+import { UIButton, UIChip, UIHeader, UIInput } from '@/src/ui';
+import { shadows, spacing, tokens } from '@/src/theme';
 
 export function ProposalBoardScreen() {
   const colors = useColors();
@@ -66,89 +67,82 @@ export function ProposalBoardScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <View>
-          <Text style={[styles.title, { color: colors.foreground }]}>Propostas</Text>
-          <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>Acompanhe o andamento por etapa</Text>
-        </View>
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel="Criar nova proposta"
-          style={[styles.newButton, { backgroundColor: colors.primary }]}
-          onPress={() => router.push('/proposal/new')}
-        >
-          <Feather name="plus" size={20} color="#FFF" />
-        </TouchableOpacity>
+      <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.background }]}>
+        <UIHeader
+          title="Propostas"
+          subtitle="Acompanhe o andamento por etapa"
+          action={
+            <UIButton
+              accessibilityLabel="Criar nova proposta"
+              iconLeft="plus"
+              size="lg"
+              style={styles.newButton}
+              onPress={() => router.push('/proposal/new')}
+            />
+          }
+        />
       </View>
-      <View style={[styles.filters, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+      <View style={[styles.filters, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={styles.filterTop}>
           {status && (
-            <TouchableOpacity
-              style={[styles.activeFilter, { borderColor: colors.primary }]}
+            <UIChip
+              label={isProposalStatus(status) ? PROPOSAL_STATUS_LABELS[status] : status}
+              active
+              icon="x"
               onPress={() => {
                 setAdvancedFilters((current) => ({ ...current, status: undefined }));
                 router.setParams({ status: undefined });
               }}
-            >
-              <Text style={[styles.activeFilterText, { color: colors.primary }]}>
-                {isProposalStatus(status) ? PROPOSAL_STATUS_LABELS[status] : status}
-              </Text>
-              <Feather name="x" size={15} color={colors.primary} />
-            </TouchableOpacity>
+            />
           )}
-          <TouchableOpacity
+          <UIButton
+            variant="outline"
+            size="sm"
+            iconLeft="filter"
             style={[styles.filterButton, { borderColor: colors.border }]}
             onPress={() => setFiltersOpen(true)}
             accessibilityRole="button"
             accessibilityLabel="Abrir filtros de propostas"
           >
-            <Feather name="filter" size={15} color={localFilterCount ? colors.primary : colors.foreground} />
             {!!localFilterCount && (
               <View style={[styles.filterBadge, { backgroundColor: colors.primary }]}>
                 <Text style={styles.filterBadgeText}>{localFilterCount}</Text>
               </View>
             )}
-          </TouchableOpacity>
+          </UIButton>
           <View style={[styles.modeToggle, { borderColor: colors.border, backgroundColor: colors.muted }]}>
             {(['board', 'programs', 'list'] as const).map((mode) => (
-              <TouchableOpacity
+              <UIChip
                 key={mode}
-                style={[styles.modeOption, viewMode === mode && { backgroundColor: colors.card }]}
+                label={mode === 'board' ? 'Etapas' : mode === 'programs' ? 'Programas' : 'Lista'}
+                icon={mode === 'board' ? 'columns' : mode === 'programs' ? 'grid' : 'list'}
+                active={viewMode === mode}
+                style={styles.modeOption}
                 onPress={() => setViewMode(mode)}
-              >
-                <Feather name={mode === 'board' ? 'columns' : mode === 'programs' ? 'grid' : 'list'} size={15} color={viewMode === mode ? colors.primary : colors.mutedForeground} />
-                <Text style={[styles.modeText, { color: viewMode === mode ? colors.primary : colors.mutedForeground }]}>
-                  {mode === 'board' ? 'Etapas' : mode === 'programs' ? 'Programas' : 'Lista'}
-                </Text>
-              </TouchableOpacity>
+              />
             ))}
           </View>
         </View>
-        <View style={[styles.search, { borderColor: colors.border, backgroundColor: colors.muted }]}>
-          <Feather name="search" size={17} color={colors.mutedForeground} />
-          <TextInput
-            style={[styles.input, { color: colors.foreground }]}
-            placeholder="Cliente, proposta ou responsavel"
-            placeholderTextColor={colors.mutedForeground}
-            value={search}
-            onChangeText={setSearch}
-          />
-        </View>
+        <UIInput
+          leftIcon="search"
+          placeholder="Cliente, proposta ou responsável"
+          value={search}
+          onChangeText={setSearch}
+          returnKeyType="search"
+        />
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.programs}>
-          <TouchableOpacity
-            style={[styles.chip, { borderColor: colors.border }, !programId && { backgroundColor: colors.primary, borderColor: colors.primary }]}
+          <UIChip
+            label="Todos"
+            active={!programId}
             onPress={() => setProgramId(undefined)}
-          >
-            <Text style={[styles.chipText, { color: !programId ? '#FFF' : colors.foreground }]}>Todos</Text>
-          </TouchableOpacity>
+          />
           {programs.map((program) => (
-            <TouchableOpacity
+            <UIChip
               key={program.id}
-              style={[styles.chip, { borderColor: colors.border }, programId === program.id && { backgroundColor: colors.primary, borderColor: colors.primary }]}
+              label={program.name}
+              active={programId === program.id}
               onPress={() => setProgramId(program.id)}
-            >
-              <Text style={[styles.chipText, { color: programId === program.id ? '#FFF' : colors.foreground }]}>{program.name}</Text>
-            </TouchableOpacity>
+            />
           ))}
         </ScrollView>
       </View>
@@ -200,25 +194,16 @@ export function ProposalBoardScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontFamily: 'Inter_700Bold', fontSize: 24 },
-  subtitle: { fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 2 },
-  newButton: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  filters: { padding: 12, gap: 10, borderBottomWidth: 1 },
+  header: { paddingHorizontal: spacing.lg, paddingBottom: spacing.md },
+  newButton: { width: 44, paddingHorizontal: 0, borderRadius: tokens.radius.lg },
+  filters: { marginHorizontal: spacing.lg, padding: spacing.md, gap: spacing.md, borderWidth: 1, borderRadius: tokens.radius.xl, ...shadows.sm },
   filterTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-  activeFilter: { minHeight: 40, alignSelf: 'flex-start', borderWidth: 1, borderRadius: 99, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 7 },
-  activeFilterText: { fontFamily: 'Inter_600SemiBold', fontSize: 12 },
-  filterButton: { width: 38, height: 38, borderWidth: 1, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
+  filterButton: { width: 38, minHeight: 38, paddingHorizontal: 0, borderRadius: 999 },
   filterBadge: { position: 'absolute', top: -5, right: -5, minWidth: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
   filterBadgeText: { color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 10 },
   modeToggle: { flexDirection: 'row', borderWidth: 1, borderRadius: 999, padding: 3, marginLeft: 'auto' },
-  modeOption: { minHeight: 32, borderRadius: 999, paddingHorizontal: 10, flexDirection: 'row', alignItems: 'center', gap: 5 },
-  modeText: { fontFamily: 'Inter_600SemiBold', fontSize: 12 },
-  search: { minHeight: 44, borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 8 },
-  input: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 14 },
+  modeOption: { minHeight: 32 },
   programs: { gap: 8 },
-  chip: { minHeight: 40, borderWidth: 1, borderRadius: 99, paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center' },
-  chipText: { fontFamily: 'Inter_500Medium', fontSize: 13 },
 });
 
 function isProposalStatus(value?: string): value is ProposalStatus {

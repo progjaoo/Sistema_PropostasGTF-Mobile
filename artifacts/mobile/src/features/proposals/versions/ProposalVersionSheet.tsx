@@ -1,9 +1,11 @@
 import React from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import type { ProposalVersion } from '@/src/types';
 import { useColors } from '@/hooks/useColors';
 import { formatDateTime } from '@/src/utils/format';
+import { UIBottomSheet, UIButton, UICard } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 interface Props {
   visible: boolean;
@@ -21,9 +23,7 @@ export function ProposalVersionSheet({ visible, version, loading, restoring, onC
   const products = Array.isArray(snapshot?.products) ? snapshot.products : [];
 
   return (
-    <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable style={[styles.sheet, { backgroundColor: colors.card }]} onPress={(event) => event.stopPropagation()}>
+    <UIBottomSheet visible={visible} onClose={onClose} style={styles.sheet}>
           <View style={styles.header}>
             <View style={{ flex: 1 }}>
               <Text style={[styles.title, { color: colors.foreground }]}>Versão da proposta</Text>
@@ -33,9 +33,9 @@ export function ProposalVersionSheet({ visible, version, loading, restoring, onC
                 </Text>
               )}
             </View>
-            <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Pressable onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityRole="button" accessibilityLabel="Fechar versão">
               <Feather name="x" size={22} color={colors.foreground} />
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {loading ? (
@@ -50,51 +50,47 @@ export function ProposalVersionSheet({ visible, version, loading, restoring, onC
               <Info label="Status" value={String(snapshot?.status ?? 'Sem status')} />
               <Info label="Investimento" value={String(snapshot?.investValue ?? 'Sem valor')} />
               <Info label="Produtos" value={`${products.length} produto(s)`} />
-              <View style={[styles.warning, { backgroundColor: colors.warning + '18' }]}>
+              <UICard variant="muted" style={[styles.warning, { backgroundColor: colors.warning + '18' }]}>
                 <Feather name="alert-triangle" size={17} color={colors.warning} />
                 <Text style={[styles.warningText, { color: colors.foreground }]}>
                   Restaurar substitui os campos editáveis atuais pelo conteúdo salvo nesta versão.
                 </Text>
-              </View>
+              </UICard>
             </ScrollView>
           )}
 
-          <TouchableOpacity
+          <UIButton
             disabled={!version || loading || restoring}
-            style={[styles.restore, { backgroundColor: colors.primary, opacity: !version || loading || restoring ? 0.6 : 1 }]}
+            size="lg"
             onPress={onRestore}
           >
-            {restoring ? <ActivityIndicator color="#FFF" /> : <Text style={styles.restoreText}>Restaurar esta versão</Text>}
-          </TouchableOpacity>
-        </Pressable>
-      </Pressable>
-    </Modal>
+            {restoring ? <ActivityIndicator color={colors.primaryForeground} /> : <Text style={styles.restoreText}>Restaurar esta versão</Text>}
+          </UIButton>
+    </UIBottomSheet>
   );
 }
 
 function Info({ label, value }: { label: string; value: string }) {
   const colors = useColors();
   return (
-    <View style={[styles.info, { borderColor: colors.border }]}>
+    <UICard variant="outlined" style={styles.info}>
       <Text style={[styles.infoLabel, { color: colors.mutedForeground }]}>{label}</Text>
       <Text style={[styles.infoValue, { color: colors.foreground }]} numberOfLines={2}>{value}</Text>
-    </View>
+    </UICard>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,.45)', justifyContent: 'flex-end' },
-  sheet: { maxHeight: '86%', borderTopLeftRadius: 18, borderTopRightRadius: 18, padding: 18, gap: 14 },
+  sheet: { maxHeight: '86%' },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   title: { fontFamily: 'Inter_700Bold', fontSize: 22 },
   subtitle: { fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 3 },
   loading: { minHeight: 180, alignItems: 'center', justifyContent: 'center', gap: 10 },
   content: { gap: 10 },
-  info: { borderWidth: 1, borderRadius: 12, padding: 12, gap: 3 },
+  info: { gap: 3 },
   infoLabel: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.6, textTransform: 'uppercase' },
   infoValue: { fontFamily: 'Inter_600SemiBold', fontSize: 15 },
-  warning: { borderRadius: 12, padding: 12, flexDirection: 'row', gap: 10 },
+  warning: { flexDirection: 'row', gap: spacing.sm },
   warningText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18 },
-  restore: { minHeight: 50, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   restoreText: { color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 15 },
 });

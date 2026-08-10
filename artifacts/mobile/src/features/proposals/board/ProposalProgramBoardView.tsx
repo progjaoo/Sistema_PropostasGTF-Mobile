@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import type { ProgramBoardProposal, ProposalProgramBoard, ProposalProgramBoardProgram } from '@/src/api/contracts';
 import { useColors } from '@/hooks/useColors';
 import { formatCurrency, formatDateTime } from '@/src/utils/format';
 import { PROPOSAL_STATUS_LABELS } from '@/src/utils/enums';
+import { UIBadge, UICard, UIChip, UIEmptyState } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 interface Props {
   board: ProposalProgramBoard;
@@ -44,7 +46,7 @@ export function ProposalProgramBoardView({ board, refreshing, onRefresh }: Props
               />
             )}
             ListEmptyComponent={
-              <Text style={[styles.empty, { color: colors.mutedForeground }]}>Nenhum programa encontrado.</Text>
+              <UIEmptyState icon="grid" title="Sem programas" description="Nenhum programa encontrado." style={styles.emptyState} />
             }
           />
           {selectedProgram && <ProgramSummary program={selectedProgram} />}
@@ -52,7 +54,12 @@ export function ProposalProgramBoardView({ board, refreshing, onRefresh }: Props
       }
       renderItem={({ item }) => <ProgramProposalCard proposal={item} />}
       ListEmptyComponent={
-        <Text style={[styles.empty, { color: colors.mutedForeground }]}>Nenhuma proposta vinculada a este programa.</Text>
+        <UIEmptyState
+          icon="file-text"
+          title="Sem propostas"
+          description="Nenhuma proposta vinculada a este programa."
+          style={styles.emptyState}
+        />
       }
     />
   );
@@ -69,10 +76,11 @@ function ProgramChip({
 }) {
   const colors = useColors();
   return (
-    <TouchableOpacity
+    <UICard
+      variant={selected ? 'muted' : 'default'}
       style={[
         styles.programChip,
-        { borderColor: selected ? (program.primaryColor ?? colors.primary) : colors.border, backgroundColor: selected ? colors.accent : colors.card },
+        { borderColor: selected ? (program.primaryColor ?? colors.primary) : colors.border },
       ]}
       onPress={onPress}
       accessibilityRole="button"
@@ -87,7 +95,7 @@ function ProgramChip({
           {program.stationName ?? 'Sem empresa'} · {program.proposals.length} proposta(s)
         </Text>
       </View>
-    </TouchableOpacity>
+    </UICard>
   );
 }
 
@@ -95,7 +103,7 @@ function ProgramSummary({ program }: { program: ProposalProgramBoardProgram }) {
   const colors = useColors();
   const total = program.proposals.reduce((sum, proposal) => sum + parseMoney(proposal.investValue), 0);
   return (
-    <View style={[styles.summary, { backgroundColor: colors.card, borderColor: colors.border }]}>
+    <UICard variant="elevated" style={styles.summary}>
       <Text style={[styles.summaryLabel, { color: colors.mutedForeground }]}>PROGRAMA SELECIONADO</Text>
       <Text style={[styles.summaryTitle, { color: colors.foreground }]}>{program.name}</Text>
       {!!program.description && <Text style={[styles.summaryText, { color: colors.mutedForeground }]}>{program.description}</Text>}
@@ -104,25 +112,26 @@ function ProgramSummary({ program }: { program: ProposalProgramBoardProgram }) {
         <Metric label="Investimento" value={formatCurrency(total)} />
         <Metric label="Produtos" value={String(program.products.length)} />
       </View>
-    </View>
+    </UICard>
   );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
   const colors = useColors();
   return (
-    <View style={[styles.metric, { backgroundColor: colors.muted }]}>
+    <UICard variant="muted" style={styles.metric}>
       <Text style={[styles.metricValue, { color: colors.foreground }]}>{value}</Text>
       <Text style={[styles.metricLabel, { color: colors.mutedForeground }]}>{label}</Text>
-    </View>
+    </UICard>
   );
 }
 
 function ProgramProposalCard({ proposal }: { proposal: ProgramBoardProposal }) {
   const colors = useColors();
   return (
-    <TouchableOpacity
-      style={[styles.proposalCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+    <UICard
+      variant="elevated"
+      style={styles.proposalCard}
       onPress={() => router.push(`/proposal/${proposal.id}`)}
       accessibilityRole="button"
       accessibilityLabel={`Abrir proposta de ${proposal.advertiserName ?? 'cliente sem nome'}`}
@@ -136,9 +145,7 @@ function ProgramProposalCard({ proposal }: { proposal: ProgramBoardProposal }) {
             {proposal.proposalTypeName} · {proposal.stationName ?? 'Sem empresa'} · {proposal.createdByName}
           </Text>
         </View>
-        <View style={[styles.statusPill, { backgroundColor: colors.muted }]}>
-          <Text style={[styles.statusText, { color: colors.foreground }]}>{PROPOSAL_STATUS_LABELS[proposal.status]}</Text>
-        </View>
+        <UIBadge label={PROPOSAL_STATUS_LABELS[proposal.status]} variant={getStatusVariant(proposal.status)} size="sm" />
       </View>
       <View style={styles.proposalFooter}>
         <Text style={[styles.proposalValue, { color: colors.foreground }]}>
@@ -148,20 +155,14 @@ function ProgramProposalCard({ proposal }: { proposal: ProgramBoardProposal }) {
       </View>
       <View style={styles.products}>
         {proposal.products.slice(0, 4).map((product) => (
-          <View key={product.id} style={[styles.productPill, { backgroundColor: colors.muted }]}>
-            <Text style={[styles.productText, { color: colors.foreground }]} numberOfLines={1}>
-              {product.qty}x {product.title}
-            </Text>
-          </View>
+          <UIChip key={product.id} label={`${product.qty}x ${product.title}`} style={styles.productPill} />
         ))}
         {proposal.products.length > 4 && (
-          <View style={[styles.productPill, { backgroundColor: colors.muted }]}>
-            <Text style={[styles.productText, { color: colors.mutedForeground }]}>+{proposal.products.length - 4}</Text>
-          </View>
+          <UIBadge label={`+${proposal.products.length - 4}`} variant="default" size="sm" />
         )}
       </View>
       <Feather name="chevron-right" size={18} color={colors.mutedForeground} style={styles.chevron} />
-    </TouchableOpacity>
+    </UICard>
   );
 }
 
@@ -173,34 +174,39 @@ function parseMoney(value: string | null | undefined) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function getStatusVariant(status: ProgramBoardProposal['status']) {
+  if (status === 'DRAFT') return 'draft';
+  if (status === 'SENT') return 'sent';
+  if (status === 'APPROVED') return 'approved';
+  if (status === 'REJECTED') return 'rejected';
+  return 'archived';
+}
+
 const styles = StyleSheet.create({
-  content: { padding: 16, gap: 12, paddingBottom: 120 },
+  content: { padding: 16, gap: spacing.md, paddingBottom: 120 },
   headerArea: { gap: 12 },
   programs: { gap: 10 },
-  programChip: { width: 250, minHeight: 76, borderWidth: 1.5, borderRadius: 14, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  programChip: { width: 250, minHeight: 76, borderWidth: 1.5, flexDirection: 'row', alignItems: 'center', gap: 10 },
   programDot: { width: 12, height: 42, borderRadius: 999 },
   programName: { fontFamily: 'Inter_700Bold', fontSize: 15 },
   programMeta: { fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 3 },
-  summary: { borderWidth: 1, borderRadius: 14, padding: 14, gap: 8 },
+  summary: { gap: 8 },
   summaryLabel: { fontFamily: 'Inter_700Bold', fontSize: 11, letterSpacing: 0.8 },
   summaryTitle: { fontFamily: 'Inter_700Bold', fontSize: 22 },
   summaryText: { fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18 },
   summaryMetrics: { flexDirection: 'row', gap: 8 },
-  metric: { flex: 1, borderRadius: 12, padding: 10, gap: 2 },
+  metric: { flex: 1, padding: 10, gap: 2 },
   metricValue: { fontFamily: 'Inter_700Bold', fontSize: 15 },
   metricLabel: { fontFamily: 'Inter_400Regular', fontSize: 11 },
-  proposalCard: { borderWidth: 1, borderRadius: 14, padding: 14, gap: 12 },
+  proposalCard: { gap: 12 },
   proposalHead: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   proposalTitle: { fontFamily: 'Inter_700Bold', fontSize: 17 },
   proposalMeta: { fontFamily: 'Inter_400Regular', fontSize: 12, lineHeight: 17, marginTop: 3 },
-  statusPill: { borderRadius: 99, paddingHorizontal: 8, paddingVertical: 4 },
-  statusText: { fontFamily: 'Inter_700Bold', fontSize: 11 },
   proposalFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   proposalValue: { fontFamily: 'Inter_700Bold', fontSize: 15 },
   proposalDate: { fontFamily: 'Inter_400Regular', fontSize: 11 },
   products: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
-  productPill: { borderRadius: 99, paddingHorizontal: 9, paddingVertical: 5 },
-  productText: { fontFamily: 'Inter_600SemiBold', fontSize: 11, maxWidth: 210 },
+  productPill: { maxWidth: 220 },
   chevron: { position: 'absolute', right: 10, bottom: 10 },
-  empty: { paddingVertical: 40, textAlign: 'center', fontFamily: 'Inter_400Regular' },
+  emptyState: { flex: 0, paddingVertical: 40 },
 });
