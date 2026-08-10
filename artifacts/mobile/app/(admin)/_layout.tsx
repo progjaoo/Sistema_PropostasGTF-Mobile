@@ -9,6 +9,8 @@ import { NativeTabs, Icon, Label } from 'expo-router/unstable-native-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { useAuthStore } from '@/src/store/authStore';
+import { shadows, spacing, tokens } from '@/src/theme';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 function NativeTabLayout() {
   return (
@@ -54,11 +56,17 @@ function ClassicTabLayout() {
         tabBarStyle: {
           position: 'absolute',
           backgroundColor: isIOS ? 'transparent' : colors.background,
-          borderTopWidth: isWeb ? 1 : 0,
+          borderTopWidth: 1,
           borderTopColor: colors.border,
           elevation: 0,
-          paddingBottom: safeAreaInsets.bottom,
-          ...(isWeb ? { height: 84 } : {}),
+          height: 72 + safeAreaInsets.bottom,
+          marginHorizontal: isWeb ? 0 : spacing.lg,
+          marginBottom: isWeb ? 0 : Math.max(safeAreaInsets.bottom, spacing.sm),
+          paddingBottom: isWeb ? safeAreaInsets.bottom : Math.max(safeAreaInsets.bottom, spacing.sm),
+          borderRadius: isWeb ? 0 : tokens.radius.full,
+          borderCurve: 'continuous',
+          overflow: 'hidden',
+          ...(isWeb ? {} : shadows.lg),
         },
         tabBarBackground: () =>
           isIOS ? (
@@ -79,7 +87,7 @@ function ClassicTabLayout() {
 
 export default function AdminLayout() {
   const { user, isInitialized } = useAuthStore();
-  if (!isInitialized) return null;
+  if (!isInitialized) return <LoadingSpinner message="Carregando sessão..." />;
   if (user?.role !== 'ADMIN') return <Redirect href={user ? '/(comercial)' : '/(public)/login'} />;
   if (isLiquidGlassAvailable()) return <NativeTabLayout />;
   return <ClassicTabLayout />;
