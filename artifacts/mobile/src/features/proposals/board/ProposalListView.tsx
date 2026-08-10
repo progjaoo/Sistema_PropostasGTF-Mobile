@@ -6,6 +6,8 @@ import { useColors } from '@/hooks/useColors';
 import { TIMELINE_STEP_LABELS } from '@/src/utils/enums';
 import { ProposalBoardCard } from './ProposalBoardCard';
 import { MoveProposalSheet } from './MoveProposalSheet';
+import { UIBadge, UIEmptyState } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 interface Props {
   board: ProposalProgressBoard;
@@ -37,8 +39,8 @@ export function ProposalListView({ board, refreshing, moving, onRefresh, onMove 
         renderItem={({ item }) => (
           <View style={styles.item}>
             <View style={styles.context}>
-              <Text style={[styles.program, { color: colors.primary }]}>{item.programName}</Text>
-              <Text style={[styles.step, { color: colors.mutedForeground }]}>{TIMELINE_STEP_LABELS[item.currentStep]}</Text>
+              <Text style={[styles.program, { color: colors.primary }]} numberOfLines={1}>{item.programName}</Text>
+              <UIBadge label={TIMELINE_STEP_LABELS[item.currentStep]} variant="info" size="sm" />
             </View>
             <ProposalBoardCard
               proposal={item}
@@ -48,7 +50,12 @@ export function ProposalListView({ board, refreshing, moving, onRefresh, onMove 
           </View>
         )}
         ListEmptyComponent={
-          <Text style={[styles.empty, { color: colors.mutedForeground }]}>Nenhuma proposta encontrada.</Text>
+          <UIEmptyState
+            icon="file-text"
+            title="Nenhuma proposta"
+            description="Nenhuma proposta encontrada com os filtros atuais."
+            style={styles.empty}
+          />
         }
       />
       <MoveProposalSheet
@@ -66,12 +73,11 @@ export function ProposalListView({ board, refreshing, moving, onRefresh, onMove 
 }
 
 const styles = StyleSheet.create({
-  list: { padding: 16, gap: 12, paddingBottom: 120 },
+  list: { padding: 16, gap: spacing.md, paddingBottom: 120 },
   item: { gap: 8 },
   context: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-  program: { fontFamily: 'Inter_700Bold', fontSize: 13 },
-  step: { fontFamily: 'Inter_500Medium', fontSize: 12 },
-  empty: { paddingVertical: 44, textAlign: 'center', fontFamily: 'Inter_400Regular' },
+  program: { flex: 1, fontFamily: 'Inter_700Bold', fontSize: 13 },
+  empty: { flex: 0, paddingVertical: 44 },
 });
 
 function dedupeProposals<T extends ProgressBoardProposal>(proposals: Array<T & { programName: string }>) {

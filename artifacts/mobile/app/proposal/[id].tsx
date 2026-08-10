@@ -42,6 +42,8 @@ import {
   ProposalEditorStepper,
   type ProposalEditorStep,
 } from '@/src/features/proposals/editor/ProposalEditorStepper';
+import { UIButton, UIInput } from '@/src/ui';
+import { shadows, spacing, tokens } from '@/src/theme';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 const PRODUCT_COLORS = ['BLUE', 'YELLOW', 'RED', 'GREEN', 'DARK'] as const;
@@ -477,10 +479,8 @@ export default function ProposalDetailScreen() {
         {canEdit && editorStep === 'investment' && (
           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>INVESTIMENTO</Text>
-            <TextInput
-              style={[styles.investInput, { color: colors.foreground, borderColor: colors.border }]}
+            <UIInput
               placeholder="Ex: 5000.00"
-              placeholderTextColor={colors.mutedForeground}
               value={investValue}
               onChangeText={handleInvestChange}
               keyboardType="decimal-pad"
@@ -488,10 +488,10 @@ export default function ProposalDetailScreen() {
             <Text style={[styles.investHint, { color: colors.mutedForeground }]}>
               Valor final em reais. Salvo automaticamente.
             </Text>
-            <TextInput
-              style={[styles.timelineNoteInput, { color: colors.foreground, borderColor: colors.border }]}
+            <UIInput
+              containerStyle={styles.timelineNoteInput}
+              style={styles.multilineInput}
               placeholder="Descricao do investimento"
-              placeholderTextColor={colors.mutedForeground}
               value={investDesc}
               multiline
               onChangeText={(value) => {
@@ -508,20 +508,19 @@ export default function ProposalDetailScreen() {
                     {formatCurrency(String(suggestedInvestment))}
                   </Text>
                 </View>
-                <TouchableOpacity
-                  style={[styles.suggestionButton, { borderColor: colors.primary }]}
+                <UIButton
+                  title="Usar valor"
+                  variant="outline"
+                  size="sm"
+                  style={styles.suggestionButton}
                   onPress={() => handleInvestChange(suggestedInvestment.toFixed(2))}
-                >
-                  <Text style={[styles.suggestionButtonText, { color: colors.primary }]}>Usar valor</Text>
-                </TouchableOpacity>
+                />
               </View>
             )}
             <View style={[styles.divider, { backgroundColor: colors.border }]} />
             <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>CONTATO NA PROPOSTA</Text>
-            <TextInput
-              style={[styles.investInput, { color: colors.foreground, borderColor: colors.border }]}
+            <UIInput
               placeholder="Nome do contato"
-              placeholderTextColor={colors.mutedForeground}
               value={contactName}
               onChangeText={(value) => {
                 setContactName(value);
@@ -529,10 +528,8 @@ export default function ProposalDetailScreen() {
                 scheduleAutosave({ contactName: value || null });
               }}
             />
-            <TextInput
-              style={[styles.investInput, { color: colors.foreground, borderColor: colors.border }]}
+            <UIInput
               placeholder="Cargo ou funcao"
-              placeholderTextColor={colors.mutedForeground}
               value={contactRole}
               onChangeText={(value) => {
                 setContactRole(value);
@@ -540,10 +537,8 @@ export default function ProposalDetailScreen() {
                 scheduleAutosave({ contactRole: value || null });
               }}
             />
-            <TextInput
-              style={[styles.investInput, { color: colors.foreground, borderColor: colors.border }]}
+            <UIInput
               placeholder="Telefone de contato"
-              placeholderTextColor={colors.mutedForeground}
               value={contactPhone}
               keyboardType="phone-pad"
               onChangeText={(value) => {
@@ -577,19 +572,17 @@ export default function ProposalDetailScreen() {
             </Text>
             {showPeriod && (
               <View style={styles.dateRow}>
-                <TextInput
-                  style={[styles.dateInput, { color: colors.foreground, borderColor: colors.border }]}
+                <UIInput
+                  containerStyle={styles.dateInput}
                   placeholder="Inicio (DD/MM/AAAA)"
-                  placeholderTextColor={colors.mutedForeground}
                   value={dateStart}
                   keyboardType="number-pad"
                   onChangeText={(value) => handleDateChange('dateStart', value)}
                   onEndEditing={() => validateDate(dateStart)}
                 />
-                <TextInput
-                  style={[styles.dateInput, { color: colors.foreground, borderColor: colors.border }]}
+                <UIInput
+                  containerStyle={styles.dateInput}
                   placeholder="Fim (DD/MM/AAAA)"
-                  placeholderTextColor={colors.mutedForeground}
                   value={dateEnd}
                   keyboardType="number-pad"
                   onChangeText={(value) => handleDateChange('dateEnd', value)}
@@ -598,10 +591,10 @@ export default function ProposalDetailScreen() {
               </View>
             )}
             {showPeriod && (
-              <TextInput
-                style={[styles.timelineNoteInput, { color: colors.foreground, borderColor: colors.border }]}
+              <UIInput
+                containerStyle={styles.timelineNoteInput}
+                style={styles.multilineInput}
                 placeholder="Nota do periodo, ex: veiculacao de segunda a sexta"
-                placeholderTextColor={colors.mutedForeground}
                 value={periodDesc}
                 multiline
                 onChangeText={(value) => {
@@ -618,10 +611,8 @@ export default function ProposalDetailScreen() {
         {canEdit && editorStep === 'context' && (
           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>CLIENTE / ANUNCIANTE</Text>
-            <TextInput
-              style={[styles.investInput, { color: colors.foreground, borderColor: colors.border }]}
+            <UIInput
               placeholder="Nome do cliente na proposta"
-              placeholderTextColor={colors.mutedForeground}
               value={clientLine1}
               onChangeText={handleClientLine1Change}
             />
@@ -809,10 +800,10 @@ export default function ProposalDetailScreen() {
             ))}
             {canEdit && (
               <View style={styles.addTimeline}>
-                <TextInput
-                  style={[styles.timelineNoteInput, { borderColor: colors.border, color: colors.foreground }]}
+                <UIInput
+                  containerStyle={styles.timelineNoteInput}
+                  style={styles.multilineInput}
                   placeholder="Nota opcional..."
-                  placeholderTextColor={colors.mutedForeground}
                   value={timelineNote}
                   onChangeText={setTimelineNote}
                   multiline
@@ -850,23 +841,23 @@ export default function ProposalDetailScreen() {
         </View>
         <View style={styles.actionsSection}>
           <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>DOCUMENTO</Text>
-          <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: colors.primary, borderColor: colors.primary }]}
+          <UIButton
+            variant="primary"
+            iconLeft="share-2"
+            title={isGenerating ? 'Gerando PDF...' : 'Gerar e compartilhar PDF'}
+            style={styles.actionBtn}
             disabled={isGenerating}
             onPress={() => shareProposalPdf(proposal).catch(() => showToast('Erro ao gerar PDF.', 'error'))}
-          >
-            <Feather name="share-2" size={16} color="#FFF" />
-            <Text style={[styles.actionBtnText, { color: '#FFF' }]}>{isGenerating ? 'Gerando PDF...' : 'Gerar e compartilhar PDF'}</Text>
-          </TouchableOpacity>
+          />
           {canEdit && (
-            <TouchableOpacity
-              style={[styles.actionBtn, { borderColor: colors.border }]}
+            <UIButton
+              variant="outline"
+              iconLeft="copy"
+              title="Duplicar proposta"
+              style={styles.actionBtn}
               disabled={duplicateMutation.isPending}
               onPress={() => duplicateMutation.mutate()}
-            >
-              <Feather name="copy" size={16} color={colors.foreground} />
-              <Text style={[styles.actionBtnText, { color: colors.foreground }]}>Duplicar proposta</Text>
-            </TouchableOpacity>
+            />
           )}
         </View>
 
@@ -961,8 +952,8 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 17, fontFamily: 'Inter_600SemiBold' },
   headerSub: { fontSize: 12, fontFamily: 'Inter_400Regular' },
   saveIndicator: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
-  content: { padding: 16, gap: 12 },
-  card: { borderRadius: 12, borderWidth: 1, padding: 16, gap: 10 },
+  content: { padding: spacing.lg, gap: spacing.md },
+  card: { borderRadius: tokens.radius.xl, borderWidth: 1, padding: spacing.lg, gap: spacing.md, ...shadows.sm },
   cardRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   cardLabel: { fontSize: 13, fontFamily: 'Inter_400Regular', width: 100 },
   cardValue: { fontSize: 14, fontFamily: 'Inter_500Medium', flex: 1, textAlign: 'right' },
@@ -973,12 +964,11 @@ const styles = StyleSheet.create({
   switch: { width: 48, height: 28, borderRadius: 99, padding: 3, justifyContent: 'center' },
   switchKnob: { width: 22, height: 22, borderRadius: 11, backgroundColor: '#FFF' },
   dateRow: { gap: 8 },
-  dateInput: { minHeight: 46, borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, fontFamily: 'Inter_400Regular' },
+  dateInput: { flex: 1 },
   suggestion: { padding: 12, borderRadius: 10, flexDirection: 'row', alignItems: 'center', gap: 12 },
   suggestionLabel: { fontSize: 11, fontFamily: 'Inter_400Regular' },
   suggestionValue: { fontSize: 16, fontFamily: 'Inter_700Bold', marginTop: 2 },
-  suggestionButton: { minHeight: 42, borderWidth: 1, borderRadius: 9, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center' },
-  suggestionButtonText: { fontSize: 12, fontFamily: 'Inter_600SemiBold' },
+  suggestionButton: { minHeight: 42 },
   productsHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   addProductButton: { minHeight: 40, borderWidth: 1, borderRadius: 9, paddingHorizontal: 10, flexDirection: 'row', alignItems: 'center', gap: 6 },
   addProductText: { fontSize: 12, fontFamily: 'Inter_600SemiBold' },
@@ -1005,7 +995,8 @@ const styles = StyleSheet.create({
   timelineNote: { fontSize: 13, fontFamily: 'Inter_400Regular' },
   timelineDate: { fontSize: 11, fontFamily: 'Inter_400Regular' },
   addTimeline: { gap: 8, marginTop: 8 },
-  timelineNoteInput: { borderWidth: 1, borderRadius: 8, padding: 10, fontSize: 14, fontFamily: 'Inter_400Regular', minHeight: 60 },
+  timelineNoteInput: { minHeight: 72 },
+  multilineInput: { minHeight: 68, paddingTop: 12, textAlignVertical: 'top' },
   addTimelineBtn: { padding: 10, borderRadius: 8, alignItems: 'center' },
   addTimelineBtnText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#FFF' },
   timelineActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -1022,6 +1013,6 @@ const styles = StyleSheet.create({
   previewSummaryText: { fontSize: 14, fontFamily: 'Inter_700Bold' },
   actionsSection: { gap: 10 },
   actionButtons: { gap: 8 },
-  actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: 12, borderWidth: 1 },
+  actionBtn: { minHeight: 50 },
   actionBtnText: { fontSize: 15, fontFamily: 'Inter_600SemiBold' },
 });

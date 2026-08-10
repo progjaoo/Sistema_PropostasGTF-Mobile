@@ -1,9 +1,11 @@
 import React from 'react';
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import type { ProposalTimelineStep } from '@/src/types';
 import { TIMELINE_STEP_LABELS } from '@/src/utils/enums';
 import { useColors } from '@/hooks/useColors';
 import { showConfirm } from '@/components/ConfirmDialog';
+import { UIBadge, UIBottomSheet, UICard } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 const STEPS: ProposalTimelineStep[] = [
   'IN_CONVERSATION',
@@ -45,41 +47,45 @@ export function MoveProposalSheet({
   };
 
   return (
-    <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable style={[styles.sheet, { backgroundColor: colors.card }]} onPress={(event) => event.stopPropagation()}>
-          <Text style={[styles.title, { color: colors.foreground }]}>Mover para etapa</Text>
-          {STEPS.map((step) => (
-            <TouchableOpacity
-              key={step}
-              disabled={pending}
-              style={[styles.option, { borderBottomColor: colors.border }]}
-              onPress={() => handleSelect(step)}
+    <UIBottomSheet visible={visible} onClose={onClose}>
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: colors.foreground }]}>Mover para etapa</Text>
+        {pending ? <UIBadge label="Salvando" variant="info" size="sm" /> : null}
+      </View>
+      <View style={styles.options}>
+        {STEPS.map((step) => (
+          <UICard
+            key={step}
+            variant={step === 'APPROVED' ? 'muted' : 'default'}
+            disabled={pending}
+            style={[
+              styles.option,
+              step === 'APPROVED' && { borderColor: colors.success },
+              step === 'REJECTED' && { borderColor: colors.destructive },
+            ]}
+            onPress={() => handleSelect(step)}
+          >
+            <Text
+              style={[
+                styles.optionText,
+                { color: colors.foreground },
+                step === 'APPROVED' && { color: colors.success },
+                step === 'REJECTED' && { color: colors.destructive },
+              ]}
             >
-              <Text
-                style={[
-                  styles.optionText,
-                  { color: colors.foreground },
-                  step === 'APPROVED' && styles.approved,
-                  step === 'REJECTED' && styles.rejected,
-                ]}
-              >
-                {step === 'APPROVED' ? 'Aprovada' : TIMELINE_STEP_LABELS[step]}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </Pressable>
-      </Pressable>
-    </Modal>
+              {step === 'APPROVED' ? 'Aprovada' : TIMELINE_STEP_LABELS[step]}
+            </Text>
+          </UICard>
+        ))}
+      </View>
+    </UIBottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
-  sheet: { padding: 20, paddingBottom: 36, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
-  title: { fontFamily: 'Inter_700Bold', fontSize: 20, marginBottom: 12 },
-  option: { minHeight: 52, justifyContent: 'center', borderBottomWidth: 1 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
+  title: { fontFamily: 'Inter_800ExtraBold', fontSize: 22 },
+  options: { gap: spacing.sm },
+  option: { minHeight: 54, justifyContent: 'center' },
   optionText: { fontFamily: 'Inter_500Medium', fontSize: 16 },
-  approved: { color: '#16A34A' },
-  rejected: { color: '#DC2626' },
 });
