@@ -15,6 +15,8 @@ type UIButtonProps = Omit<PressableProps, 'style' | 'children'> & {
   size?: ButtonSize;
   iconLeft?: keyof typeof Feather.glyphMap;
   iconRight?: keyof typeof Feather.glyphMap;
+  iconColor?: string;
+  iconSize?: number;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
 };
@@ -26,6 +28,8 @@ export function UIButton({
   size = 'md',
   iconLeft,
   iconRight,
+  iconColor,
+  iconSize,
   disabled,
   style,
   textStyle,
@@ -34,7 +38,7 @@ export function UIButton({
   const colors = useColors();
   const variantStyle = getVariantStyle(variant, colors);
   const contentColor = getContentColor(variant, colors);
-  const iconSize = size === 'sm' ? 15 : 17;
+  const resolvedIconSize = iconSize ?? (size === 'sm' ? 15 : 17);
 
   return (
     <Pressable
@@ -50,13 +54,13 @@ export function UIButton({
         style,
       ]}
     >
-      {iconLeft ? <Feather name={iconLeft} size={iconSize} color={contentColor} /> : null}
+      {iconLeft ? <Feather name={iconLeft} size={resolvedIconSize} color={iconColor ?? contentColor} /> : null}
       {children ?? (
         <Text style={[styles.text, styles[`${size}Text`], { color: contentColor }, textStyle]} numberOfLines={1}>
           {title}
         </Text>
       )}
-      {iconRight ? <Feather name={iconRight} size={iconSize} color={contentColor} /> : null}
+      {iconRight ? <Feather name={iconRight} size={resolvedIconSize} color={iconColor ?? contentColor} /> : null}
     </Pressable>
   );
 }

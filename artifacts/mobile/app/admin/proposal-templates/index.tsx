@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,8 +8,9 @@ import type { Proposal, ProposalCategory, ProposalTemplate } from '@/src/types';
 import { useColors } from '@/hooks/useColors';
 import { useToast } from '@/components/ToastProvider';
 import { showConfirm } from '@/components/ConfirmDialog';
-import { EmptyState } from '@/components/EmptyState';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { UIBottomSheet, UIButton, UICard, UIChip, UIEmptyState, UIHeader, UIInput } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 export default function ProposalTemplatesScreen() {
   const colors = useColors();
@@ -83,22 +83,21 @@ export default function ProposalTemplatesScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()}><Feather name="arrow-left" size={24} color={colors.foreground} /></TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.title, { color: colors.foreground }]}>Modelos de Proposta</Text>
-          <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>Crie propostas rapidamente a partir de modelos.</Text>
-        </View>
-        <TouchableOpacity style={[styles.add, { backgroundColor: colors.primary }]} onPress={() => openForm(null)}>
-          <Feather name="plus" size={20} color="#FFF" />
-        </TouchableOpacity>
+      <View style={[styles.header, { paddingTop: topPad + spacing.md, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+        <UIButton variant="ghost" iconLeft="arrow-left" size="sm" onPress={() => router.back()} accessibilityLabel="Voltar" />
+        <UIHeader
+          title="Modelos de Proposta"
+          subtitle="Crie propostas rapidamente a partir de modelos."
+          style={styles.headerCopy}
+          action={<UIButton iconLeft="plus" title="Novo" size="sm" onPress={() => openForm(null)} />}
+        />
       </View>
 
       {query.isLoading ? <LoadingSpinner message="Carregando..." /> : (
         <ScrollView refreshControl={<RefreshControl refreshing={query.isFetching} onRefresh={query.refetch} />} contentContainerStyle={styles.list}>
-          {!query.data?.length && <EmptyState icon="file-text" title="Nenhum modelo cadastrado" />}
+          {!query.data?.length && <UIEmptyState icon="file-text" title="Nenhum modelo cadastrado" />}
           {(query.data ?? []).map((template) => (
-            <View key={template.id} style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <UICard key={template.id} variant="elevated" style={styles.card}>
               <View style={styles.cardHeader}>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.cardTitle, { color: colors.foreground }]}>{template.name}</Text>
@@ -110,15 +109,13 @@ export default function ProposalTemplatesScreen() {
               </View>
               {!!template.description && <Text style={[styles.description, { color: colors.mutedForeground }]}>{template.description}</Text>}
               <View style={styles.actions}>
-                <TouchableOpacity style={[styles.action, { backgroundColor: colors.primary }]} onPress={() => useTemplateMutation.mutate(template.id)}>
-                  <Feather name="play" size={15} color="#FFF" />
-                  <Text style={styles.actionPrimaryText}>Usar modelo</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.iconAction, { borderColor: colors.border }]} onPress={() => openForm(template)}>
-                  <Feather name="edit-2" size={16} color={colors.foreground} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.iconAction, { borderColor: colors.destructive + '40' }]}
+                <UIButton iconLeft="play" title="Usar modelo" size="sm" style={styles.action} onPress={() => useTemplateMutation.mutate(template.id)} />
+                <UIButton variant="outline" iconLeft="edit-2" size="sm" title="Editar" onPress={() => openForm(template)} />
+                <UIButton
+                  variant="destructive"
+                  iconLeft="trash-2"
+                  size="sm"
+                  title="Excluir"
                   onPress={() => showConfirm({
                     title: 'Excluir modelo?',
                     message: `${template.name} sera removido do catalogo de modelos.`,
@@ -126,68 +123,50 @@ export default function ProposalTemplatesScreen() {
                     destructive: true,
                     onConfirm: () => deleteMutation.mutate(template.id),
                   })}
-                >
-                  <Feather name="trash-2" size={16} color={colors.destructive} />
-                </TouchableOpacity>
+                />
               </View>
-            </View>
+            </UICard>
           ))}
         </ScrollView>
       )}
 
-      <Modal transparent visible={editing !== undefined} animationType="slide" onRequestClose={() => setEditing(undefined)}>
-        <Pressable style={styles.backdrop} onPress={() => setEditing(undefined)}>
-          <Pressable style={[styles.sheet, { backgroundColor: colors.card }]} onPress={(event) => event.stopPropagation()}>
+      <UIBottomSheet visible={editing !== undefined} onClose={() => setEditing(undefined)}>
             <Text style={[styles.sheetTitle, { color: colors.foreground }]}>{editing ? 'Editar modelo' : 'Novo modelo'}</Text>
-            <TextInput style={[styles.input, { borderColor: colors.border, color: colors.foreground }]} value={name} onChangeText={setName} placeholder="Nome do modelo" placeholderTextColor={colors.mutedForeground} />
-            <TextInput style={[styles.input, { borderColor: colors.border, color: colors.foreground }]} value={propType} onChangeText={setPropType} placeholder="Tipo exibido na proposta" placeholderTextColor={colors.mutedForeground} />
-            <TextInput style={[styles.input, { borderColor: colors.border, color: colors.foreground, minHeight: 78 }]} value={description} onChangeText={setDescription} placeholder="Descricao interna" placeholderTextColor={colors.mutedForeground} multiline />
+            <UIInput value={name} onChangeText={setName} placeholder="Nome do modelo" />
+            <UIInput value={propType} onChangeText={setPropType} placeholder="Tipo exibido na proposta" />
+            <UIInput containerStyle={styles.descriptionInput} style={styles.descriptionTextInput} value={description} onChangeText={setDescription} placeholder="Descricao interna" multiline />
             <Text style={[styles.label, { color: colors.mutedForeground }]}>Programa/Categoria</Text>
             <ScrollView horizontal contentContainerStyle={styles.categories}>
               {(categoriesQuery.data ?? []).map((category) => (
-                <TouchableOpacity key={category.id} style={[styles.chip, { borderColor: categoryId === category.id ? colors.primary : colors.border, backgroundColor: categoryId === category.id ? colors.primary + '12' : colors.card }]} onPress={() => setCategoryId(category.id)}>
-                  <Text style={{ color: categoryId === category.id ? colors.primary : colors.foreground, fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>{category.name}</Text>
-                </TouchableOpacity>
+                <UIChip key={category.id} label={category.name} active={categoryId === category.id} onPress={() => setCategoryId(category.id)} />
               ))}
             </ScrollView>
-            <TouchableOpacity
+            <UIButton
+              title="Salvar modelo"
               disabled={!name.trim() || !propType.trim() || !categoryId || saveMutation.isPending}
-              style={[styles.save, { backgroundColor: name.trim() && propType.trim() && categoryId ? colors.primary : colors.muted }]}
               onPress={() => saveMutation.mutate()}
-            >
-              <Text style={styles.saveText}>Salvar modelo</Text>
-            </TouchableOpacity>
-          </Pressable>
-        </Pressable>
-      </Modal>
+            />
+      </UIBottomSheet>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  title: { fontFamily: 'Inter_700Bold', fontSize: 19 },
-  subtitle: { fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 2 },
-  add: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  list: { padding: 12, gap: 12, paddingBottom: 44 },
-  card: { borderWidth: 1, borderRadius: 14, padding: 14, gap: 10 },
+  header: { paddingHorizontal: spacing.lg, paddingBottom: spacing.md, borderBottomWidth: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  headerCopy: { flex: 1 },
+  list: { padding: spacing.md, gap: spacing.md, paddingBottom: 44 },
+  card: { gap: spacing.sm },
   cardHeader: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
   cardTitle: { fontSize: 16, fontFamily: 'Inter_700Bold' },
   meta: { fontSize: 12, fontFamily: 'Inter_400Regular', marginTop: 3 },
   usage: { fontSize: 12, fontFamily: 'Inter_700Bold' },
   description: { fontSize: 13, fontFamily: 'Inter_400Regular', lineHeight: 18 },
   actions: { flexDirection: 'row', gap: 8, alignItems: 'center' },
-  action: { minHeight: 42, borderRadius: 10, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, flex: 1 },
-  actionPrimaryText: { color: '#FFF', fontSize: 13, fontFamily: 'Inter_700Bold' },
-  iconAction: { width: 42, height: 42, borderRadius: 10, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,.45)' },
-  sheet: { padding: 20, paddingBottom: 36, borderTopLeftRadius: 16, borderTopRightRadius: 16, gap: 12 },
+  action: { flex: 1 },
   sheetTitle: { fontSize: 20, fontFamily: 'Inter_700Bold' },
-  input: { minHeight: 48, borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontFamily: 'Inter_400Regular' },
+  descriptionInput: { minHeight: 84 },
+  descriptionTextInput: { minHeight: 80, paddingTop: 12, textAlignVertical: 'top' },
   label: { fontFamily: 'Inter_600SemiBold', fontSize: 12 },
-  categories: { gap: 8 },
-  chip: { minHeight: 40, borderWidth: 1, borderRadius: 99, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center' },
-  save: { minHeight: 50, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  saveText: { color: '#FFF', fontFamily: 'Inter_600SemiBold' },
+  categories: { gap: spacing.sm },
 });

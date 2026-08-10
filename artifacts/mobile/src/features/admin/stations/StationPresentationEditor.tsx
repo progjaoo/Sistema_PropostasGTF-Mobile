@@ -1,9 +1,10 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { StyleSheet, Text, View } from 'react-native';
 import { FormInput } from '@/components/FormInput';
 import type { StationPresentationItem } from '@/src/types';
 import { useColors } from '@/hooks/useColors';
+import { UIButton, UICard } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 export function StationPresentationEditor({
   items,
@@ -16,36 +17,40 @@ export function StationPresentationEditor({
   return (
     <View style={styles.container}>
       {items.map((item, index) => (
-        <View key={index} style={[styles.item, { borderColor: colors.border }]}>
+        <UICard key={index} variant="outlined" style={styles.item}>
           <View style={styles.heading}>
             <Text style={[styles.title, { color: colors.foreground }]}>Indicador {index + 1}</Text>
-            <TouchableOpacity
+            <UIButton
+              variant="ghost"
+              iconLeft="trash-2"
+              size="sm"
               accessibilityLabel={`Remover indicador ${index + 1}`}
               onPress={() => onChange(items.filter((_, itemIndex) => itemIndex !== index).map((value, order) => ({ ...value, order })))}
-            >
-              <Feather name="trash-2" size={18} color={colors.destructive} />
-            </TouchableOpacity>
+              style={styles.removeButton}
+              iconColor={colors.destructive}
+              textStyle={{ color: colors.destructive }}
+            />
           </View>
           <FormInput label="Destaque" placeholder="Ex: 34,5%" value={item.highlight} onChangeText={(highlight) => onChange(items.map((value, itemIndex) => itemIndex === index ? { ...value, highlight } : value))} />
           <FormInput label="Descricao" placeholder="Ex: Audiencia mensal" value={item.description} onChangeText={(description) => onChange(items.map((value, itemIndex) => itemIndex === index ? { ...value, description } : value))} />
-        </View>
+        </UICard>
       ))}
       {items.length < 4 && (
-        <TouchableOpacity style={[styles.add, { borderColor: colors.primary }]} onPress={() => onChange([...items, { highlight: '', description: '', order: items.length }])}>
-          <Feather name="plus" size={16} color={colors.primary} />
-          <Text style={[styles.addText, { color: colors.primary }]}>Adicionar indicador</Text>
-        </TouchableOpacity>
+        <UIButton
+          variant="outline"
+          iconLeft="plus"
+          title="Adicionar indicador"
+          onPress={() => onChange([...items, { highlight: '', description: '', order: items.length }])}
+        />
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { gap: 12 },
-  item: { borderWidth: 1, borderRadius: 12, padding: 12, gap: 10 },
+  container: { gap: spacing.md },
+  item: { gap: spacing.sm },
   heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { fontFamily: 'Inter_600SemiBold', fontSize: 14 },
-  add: { minHeight: 46, borderWidth: 1, borderRadius: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
-  addText: { fontFamily: 'Inter_600SemiBold', fontSize: 13 },
+  removeButton: { borderColor: 'transparent', minWidth: 44 },
 });
-
