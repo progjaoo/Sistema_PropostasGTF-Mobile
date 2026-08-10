@@ -1,9 +1,11 @@
 import React from 'react';
 import { Image } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { pickImageDataUrl } from '@/src/utils/imagePicker';
+import { UIButton, UICard } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 interface Props {
   label: string;
@@ -38,7 +40,7 @@ export function ImagePickerField({
   return (
     <View style={styles.wrapper}>
       <Text style={[styles.label, { color: colors.foreground }]}>{label}</Text>
-      <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.card }]}>
+      <UICard variant="outlined" style={styles.card}>
         <View
           style={[
             styles.preview,
@@ -58,46 +60,47 @@ export function ImagePickerField({
             PNG, JPEG ou WebP em base64. Limite validado pela API.
           </Text>
         </View>
-        <TouchableOpacity
+        <UIButton
+          variant="outline"
+          iconLeft={pending ? undefined : 'upload'}
+          size="sm"
           accessibilityRole="button"
           accessibilityLabel={`Selecionar ${label}`}
-          style={[styles.button, { borderColor: colors.primary }]}
+          style={styles.button}
           onPress={handlePick}
           disabled={pending}
         >
-          {pending ? (
-            <ActivityIndicator size="small" color={colors.primary} />
-          ) : (
-            <Feather name="upload" size={16} color={colors.primary} />
-          )}
-        </TouchableOpacity>
-      </View>
+          {pending ? <ActivityIndicator size="small" color={colors.primary} /> : null}
+        </UIButton>
+      </UICard>
       {!!value && (
-        <TouchableOpacity
+        <UIButton
+          variant="ghost"
+          iconLeft="trash-2"
+          title="Remover imagem"
+          size="sm"
           accessibilityRole="button"
           accessibilityLabel={`Remover ${label}`}
           style={styles.remove}
+          iconColor={colors.destructive}
+          textStyle={{ color: colors.destructive }}
           onPress={() => onChange(null)}
           disabled={pending}
-        >
-          <Feather name="trash-2" size={15} color={colors.destructive} />
-          <Text style={[styles.removeText, { color: colors.destructive }]}>Remover imagem</Text>
-        </TouchableOpacity>
+        />
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: { gap: 8 },
+  wrapper: { gap: spacing.sm },
   label: { fontSize: 14, fontFamily: 'Inter_500Medium' },
-  card: { minHeight: 82, borderWidth: 1, borderRadius: 12, padding: 10, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  card: { minHeight: 82, flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   preview: { width: 58, height: 58, borderRadius: 12, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
   circlePreview: { borderRadius: 29 },
   info: { flex: 1, gap: 3 },
   title: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
   hint: { fontSize: 11, fontFamily: 'Inter_400Regular', lineHeight: 15 },
-  button: { width: 42, height: 42, borderRadius: 10, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  remove: { minHeight: 36, alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6 },
-  removeText: { fontSize: 12, fontFamily: 'Inter_600SemiBold' },
+  button: { width: 44, paddingHorizontal: 0 },
+  remove: { alignSelf: 'flex-start' },
 });

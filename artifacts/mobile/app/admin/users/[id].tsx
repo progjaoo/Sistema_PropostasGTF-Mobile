@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Platform, ActivityIndicator } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,6 +12,8 @@ import { useToast } from '@/components/ToastProvider';
 import { apiCall, ApiError } from '@/src/api/client';
 import { Station, User, UserRole, UserStationAccess } from '@/src/types';
 import { useColors } from '@/hooks/useColors';
+import { UIButton, UICard, UIChip, UIHeader } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 export default function UserDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -147,34 +149,38 @@ export default function UserDetailScreen() {
   return (
     <KeyboardAwareScrollViewCompat style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ paddingBottom: bottomPad + 40 }} keyboardShouldPersistTaps="handled" bottomOffset={20}>
       <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Feather name="arrow-left" size={24} color={colors.foreground} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>{isNew ? 'Novo Usuário' : user?.name ?? 'Usuário'}</Text>
+        <UIButton variant="ghost" iconLeft="arrow-left" size="sm" onPress={() => router.back()} accessibilityLabel="Voltar" />
+        <UIHeader
+          title={isNew ? 'Novo Usuário' : user?.name ?? 'Usuário'}
+          subtitle="Defina perfil, status e empresas permitidas."
+          style={styles.headerCopy}
+        />
         {isDirty && (
-          <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }, saveMutation.isPending && styles.disabled]} onPress={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-            {saveMutation.isPending ? <ActivityIndicator size="small" color="#FFF" /> : <Text style={styles.saveBtnText}>Salvar</Text>}
-          </TouchableOpacity>
+          <UIButton title={saveMutation.isPending ? 'Salvando' : 'Salvar'} size="sm" onPress={() => saveMutation.mutate()} disabled={saveMutation.isPending} />
         )}
       </View>
 
-      <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+      <UICard variant="elevated" style={styles.form}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>DADOS</Text>
         <FormInput label="Nome" required leftIcon="user" value={name} onChangeText={(t) => { setName(t); setIsDirty(true); }} />
         <FormInput label="E-mail" required leftIcon="mail" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={(t) => { setEmail(t); setIsDirty(true); }} />
         {isNew && <FormInput label="Senha" required leftIcon="lock" isPassword value={password} onChangeText={(t) => { setPassword(t); setIsDirty(true); }} hint="Mínimo 8 caracteres." />}
-      </View>
+      </UICard>
 
-      <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+      <UICard variant="elevated" style={styles.form}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>PERFIL</Text>
         <View style={styles.toggleRow}>
           {(['ADMIN', 'COMERCIAL'] as UserRole[]).map((r) => (
-            <TouchableOpacity key={r} style={[styles.toggleBtn, { borderColor: colors.border }, role === r && { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={() => { setRole(r); setIsDirty(true); }}>
-              <Text style={[styles.toggleText, { color: role === r ? '#FFF' : colors.mutedForeground }]}>{r === 'ADMIN' ? 'Administrador' : 'Comercial'}</Text>
-            </TouchableOpacity>
+            <UIChip
+              key={r}
+              label={r === 'ADMIN' ? 'Administrador' : 'Comercial'}
+              active={role === r}
+              style={styles.roleChip}
+              onPress={() => { setRole(r); setIsDirty(true); }}
+            />
           ))}
         </View>
-        <TouchableOpacity
+        <Pressable
           style={[styles.activeRow, { borderColor: colors.border }]}
           onPress={() => { setActive((value) => !value); setIsDirty(true); }}
           accessibilityRole="switch"
@@ -187,11 +193,11 @@ export default function UserDetailScreen() {
           <View style={[styles.switchTrack, { backgroundColor: active ? colors.primary : colors.muted }]}>
             <View style={[styles.switchThumb, active && styles.switchThumbOn]} />
           </View>
-        </TouchableOpacity>
-      </View>
+        </Pressable>
+      </UICard>
 
       {role === 'COMERCIAL' && (
-        <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+        <UICard variant="elevated" style={styles.form}>
           <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>ACESSO ÀS EMPRESAS</Text>
           {stationsLoading ? (
             <View style={styles.inlineLoading}>
@@ -199,18 +205,18 @@ export default function UserDetailScreen() {
               <Text style={[styles.inlineText, { color: colors.mutedForeground }]}>Carregando empresas...</Text>
             </View>
           ) : stationsError ? (
-            <TouchableOpacity style={[styles.retryAccess, { borderColor: colors.border }]} onPress={() => refetchStations()}>
+            <Pressable style={[styles.retryAccess, { borderColor: colors.border }]} onPress={() => refetchStations()} accessibilityRole="button">
               <Feather name="alert-circle" size={16} color={colors.destructive} />
               <Text style={[styles.retryAccessText, { color: colors.foreground }]}>Erro ao carregar empresas. Tocar para tentar novamente.</Text>
-            </TouchableOpacity>
+            </Pressable>
           ) : (stations ?? []).length === 0 ? (
             <Text style={[styles.inlineText, { color: colors.mutedForeground }]}>Nenhuma empresa ativa cadastrada.</Text>
           ) : (
             (stations ?? []).map((station) => {
               const access = getStationAccess(station.id);
               return (
-                <View key={station.id} style={[styles.accessCard, { borderColor: colors.border, backgroundColor: colors.background }]}>
-                  <TouchableOpacity
+                <UICard key={station.id} variant="muted" style={styles.accessCard}>
+                  <Pressable
                     style={styles.accessHeader}
                     onPress={() => updateStationAccess(station.id, {
                       active: !access.active,
@@ -226,49 +232,46 @@ export default function UserDetailScreen() {
                     <View style={[styles.switchTrack, { backgroundColor: access.active ? colors.primary : colors.muted }]}>
                       <View style={[styles.switchThumb, access.active && styles.switchThumbOn]} />
                     </View>
-                  </TouchableOpacity>
+                  </Pressable>
                   {access.active && (
                     <View style={styles.permissionRow}>
-                      <TouchableOpacity
-                        style={[styles.permissionPill, { borderColor: access.canCreateProposals ? colors.primary : colors.border, backgroundColor: access.canCreateProposals ? colors.primary + '14' : colors.card }]}
+                      <UIChip
+                        label="Criar propostas"
+                        icon={access.canCreateProposals ? 'check-circle' : 'circle'}
+                        active={access.canCreateProposals}
                         onPress={() => updateStationAccess(station.id, { canCreateProposals: !access.canCreateProposals })}
-                      >
-                        <Feather name={access.canCreateProposals ? 'check-circle' : 'circle'} size={14} color={access.canCreateProposals ? colors.primary : colors.mutedForeground} />
-                        <Text style={[styles.permissionText, { color: access.canCreateProposals ? colors.primary : colors.mutedForeground }]}>Criar propostas</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.permissionPill, { borderColor: access.canViewCatalog ? colors.primary : colors.border, backgroundColor: access.canViewCatalog ? colors.primary + '14' : colors.card }]}
+                      />
+                      <UIChip
+                        label="Ver catálogo"
+                        icon={access.canViewCatalog ? 'check-circle' : 'circle'}
+                        active={access.canViewCatalog}
                         onPress={() => updateStationAccess(station.id, { canViewCatalog: !access.canViewCatalog })}
-                      >
-                        <Feather name={access.canViewCatalog ? 'check-circle' : 'circle'} size={14} color={access.canViewCatalog ? colors.primary : colors.mutedForeground} />
-                        <Text style={[styles.permissionText, { color: access.canViewCatalog ? colors.primary : colors.mutedForeground }]}>Ver catálogo</Text>
-                      </TouchableOpacity>
+                      />
                     </View>
                   )}
-                </View>
+                </UICard>
               );
             })
           )}
-        </View>
+        </UICard>
       )}
 
       {!isNew && (
         <View style={{ padding: 20, gap: 12 }}>
           {user?.active && (
-            <TouchableOpacity style={[styles.dangerBtn, { borderColor: colors.danger + '40', backgroundColor: colors.danger + '08' }]}
+            <UIButton
+              variant="destructive"
+              iconLeft="user-x"
+              title="Desativar usuário"
               onPress={() => showConfirm({ title: 'Desativar usuário', message: 'O usuário será desativado e não poderá mais fazer login.', confirmText: 'Desativar', destructive: true, onConfirm: () => deactivateMutation.mutate() })}>
-              <Feather name="user-x" size={16} color={colors.danger} />
-              <Text style={[styles.dangerText, { color: colors.danger }]}>Desativar usuário</Text>
-            </TouchableOpacity>
+            </UIButton>
           )}
         </View>
       )}
 
       {isNew && (
         <View style={{ padding: 20 }}>
-          <TouchableOpacity style={[styles.createBtn, { backgroundColor: name.trim() && email.trim() && password ? colors.primary : colors.muted }]} onPress={() => saveMutation.mutate()} disabled={!name.trim() || !email.trim() || !password || saveMutation.isPending} activeOpacity={0.8}>
-            {saveMutation.isPending ? <ActivityIndicator color="#FFF" /> : <Text style={styles.createBtnText}>Criar usuário</Text>}
-          </TouchableOpacity>
+          <UIButton title={saveMutation.isPending ? 'Criando usuário' : 'Criar usuário'} size="lg" onPress={() => saveMutation.mutate()} disabled={!name.trim() || !email.trim() || !password || saveMutation.isPending} />
         </View>
       )}
     </KeyboardAwareScrollViewCompat>
@@ -276,16 +279,12 @@ export default function UserDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1, gap: 12 },
-  headerTitle: { flex: 1, fontSize: 18, fontFamily: 'Inter_600SemiBold' },
-  saveBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 8 },
-  saveBtnText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#FFF' },
-  disabled: { opacity: 0.7 },
-  form: { padding: 20, gap: 16, borderTopWidth: 1, borderBottomWidth: 1, marginTop: 12 },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.lg, paddingBottom: spacing.md, borderBottomWidth: 1, gap: spacing.sm },
+  headerCopy: { flex: 1 },
+  form: { margin: spacing.md, marginBottom: 0, gap: spacing.lg },
   sectionLabel: { fontSize: 12, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.5 },
-  toggleRow: { flexDirection: 'row', gap: 10 },
-  toggleBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, borderWidth: 1.5, alignItems: 'center' },
-  toggleText: { fontSize: 13, fontFamily: 'Inter_600SemiBold' },
+  toggleRow: { flexDirection: 'row', gap: spacing.sm },
+  roleChip: { flex: 1 },
   activeRow: { flexDirection: 'row', alignItems: 'center', borderRadius: 12, borderWidth: 1, padding: 14, gap: 12 },
   activeTextWrap: { flex: 1, gap: 2 },
   activeTitle: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
@@ -297,15 +296,9 @@ const styles = StyleSheet.create({
   inlineText: { fontSize: 13, fontFamily: 'Inter_400Regular' },
   retryAccess: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 12, borderWidth: 1 },
   retryAccessText: { flex: 1, fontSize: 13, fontFamily: 'Inter_500Medium' },
-  accessCard: { borderWidth: 1, borderRadius: 12, padding: 12, gap: 10 },
+  accessCard: { gap: spacing.sm },
   accessHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   stationDot: { width: 12, height: 12, borderRadius: 6 },
   accessStationName: { flex: 1, fontSize: 14, fontFamily: 'Inter_600SemiBold' },
-  permissionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingLeft: 22 },
-  permissionPill: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 99, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 7 },
-  permissionText: { fontSize: 12, fontFamily: 'Inter_600SemiBold' },
-  dangerBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: 12, borderWidth: 1, justifyContent: 'center' },
-  dangerText: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
-  createBtn: { height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  createBtnText: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: '#FFF' },
+  permissionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, paddingLeft: 22 },
 });

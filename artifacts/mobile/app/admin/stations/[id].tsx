@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +13,8 @@ import { apiCall, ApiError } from '@/src/api/client';
 import { Station, StationPresentationItem } from '@/src/types';
 import { useColors } from '@/hooks/useColors';
 import { StationPresentationEditor } from '@/src/features/admin/stations/StationPresentationEditor';
+import { UIButton, UICard, UIHeader } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 export default function StationDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -110,9 +112,7 @@ export default function StationDetailScreen() {
       <View style={[styles.centerState, { backgroundColor: colors.background }]}>
         <Feather name="alert-circle" size={34} color={colors.destructive} />
         <Text style={[styles.centerTitle, { color: colors.foreground }]}>{message}</Text>
-        <TouchableOpacity style={[styles.retryBtn, { backgroundColor: colors.primary }]} onPress={() => refetch()}>
-          <Text style={styles.retryBtnText}>Tentar novamente</Text>
-        </TouchableOpacity>
+        <UIButton title="Tentar novamente" onPress={() => refetch()} />
       </View>
     );
   }
@@ -120,18 +120,18 @@ export default function StationDetailScreen() {
   return (
     <KeyboardAwareScrollViewCompat style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ paddingBottom: bottomPad + 40 }} keyboardShouldPersistTaps="handled" bottomOffset={20}>
       <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Feather name="arrow-left" size={24} color={colors.foreground} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>{isNew ? 'Nova Empresa' : station?.name ?? 'Empresa'}</Text>
+        <UIButton variant="ghost" iconLeft="arrow-left" size="sm" onPress={() => router.back()} accessibilityLabel="Voltar" />
+        <UIHeader
+          title={isNew ? 'Nova Empresa' : station?.name ?? 'Empresa'}
+          subtitle={isNew ? 'Cadastre uma nova emissora.' : 'Edite dados, marca e apresentação padrão.'}
+          style={styles.headerCopy}
+        />
         {isDirty && (
-          <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }, saveMutation.isPending && styles.disabled]} onPress={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-            {saveMutation.isPending ? <ActivityIndicator size="small" color="#FFF" /> : <Text style={styles.saveBtnText}>Salvar</Text>}
-          </TouchableOpacity>
+          <UIButton title={saveMutation.isPending ? 'Salvando' : 'Salvar'} size="sm" onPress={() => saveMutation.mutate()} disabled={saveMutation.isPending} />
         )}
       </View>
 
-      <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+      <UICard variant="elevated" style={styles.form}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>IDENTIFICAÇÃO</Text>
         <ImagePickerField
           label="Logo da empresa"
@@ -143,19 +143,17 @@ export default function StationDetailScreen() {
         />
         <FormInput label="Nome" required leftIcon="radio" value={name} onChangeText={(t) => { setName(t); setIsDirty(true); }} />
         <FormInput label="Slogan" leftIcon="type" placeholder="Slogan ou tagline" value={slogan} onChangeText={(t) => { setSlogan(t); setIsDirty(true); }} />
-      </View>
+      </UICard>
 
       {!isNew && (
-        <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+        <UICard variant="elevated" style={styles.form}>
           <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>APRESENTACAO PADRAO</Text>
           <StationPresentationEditor items={presentationItems} onChange={setPresentationItems} />
-          <TouchableOpacity style={[styles.createBtn, { backgroundColor: colors.primary }]} onPress={() => presentationMutation.mutate()} disabled={presentationMutation.isPending}>
-            <Text style={styles.createBtnText}>Salvar apresentacao</Text>
-          </TouchableOpacity>
-        </View>
+          <UIButton title={presentationMutation.isPending ? 'Salvando apresentacao' : 'Salvar apresentacao'} onPress={() => presentationMutation.mutate()} disabled={presentationMutation.isPending} />
+        </UICard>
       )}
 
-      <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+      <UICard variant="elevated" style={styles.form}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>COR DA PROPOSTA</Text>
         <View style={styles.colorRow}>
           <View style={[styles.colorPreview, { backgroundColor: primaryColor }]} />
@@ -169,24 +167,22 @@ export default function StationDetailScreen() {
           />
         </View>
         <Text style={[styles.colorHint, { color: colors.mutedForeground }]}>Código hexadecimal. Ex: #427EFF</Text>
-      </View>
+      </UICard>
 
-      <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+      <UICard variant="elevated" style={styles.form}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>LOCALIZAÇÃO</Text>
         <FormInput label="Cidade" leftIcon="map-pin" value={city} onChangeText={(t) => { setCity(t); setIsDirty(true); }} />
-      </View>
+      </UICard>
 
-      <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+      <UICard variant="elevated" style={styles.form}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>CONTATO</Text>
         <FormInput label="Telefone" leftIcon="phone" keyboardType="phone-pad" value={contactPhone} onChangeText={(t) => { setContactPhone(t); setIsDirty(true); }} />
         <FormInput label="E-mail" leftIcon="mail" keyboardType="email-address" autoCapitalize="none" value={contactEmail} onChangeText={(t) => { setContactEmail(t); setIsDirty(true); }} />
-      </View>
+      </UICard>
 
       {isNew && (
         <View style={{ padding: 20 }}>
-          <TouchableOpacity style={[styles.createBtn, { backgroundColor: name.trim() ? colors.primary : colors.muted }]} onPress={() => saveMutation.mutate()} disabled={!name.trim() || saveMutation.isPending} activeOpacity={0.8}>
-            {saveMutation.isPending ? <ActivityIndicator color="#FFF" /> : <Text style={styles.createBtnText}>Criar empresa</Text>}
-          </TouchableOpacity>
+          <UIButton title={saveMutation.isPending ? 'Criando empresa' : 'Criar empresa'} size="lg" onPress={() => saveMutation.mutate()} disabled={!name.trim() || saveMutation.isPending} />
         </View>
       )}
     </KeyboardAwareScrollViewCompat>
@@ -194,20 +190,13 @@ export default function StationDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1, gap: 12 },
-  headerTitle: { flex: 1, fontSize: 18, fontFamily: 'Inter_600SemiBold' },
-  saveBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 8 },
-  saveBtnText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#FFF' },
-  disabled: { opacity: 0.7 },
-  form: { padding: 20, gap: 16, borderTopWidth: 1, borderBottomWidth: 1, marginTop: 12 },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.lg, paddingBottom: spacing.md, borderBottomWidth: 1, gap: spacing.sm },
+  headerCopy: { flex: 1 },
+  form: { margin: spacing.md, marginBottom: 0, gap: spacing.lg },
   sectionLabel: { fontSize: 12, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.5 },
-  colorRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  colorRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   colorPreview: { width: 40, height: 40, borderRadius: 10 },
   colorHint: { fontSize: 12, fontFamily: 'Inter_400Regular' },
-  createBtn: { height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  createBtnText: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: '#FFF' },
-  centerState: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28, gap: 12 },
+  centerState: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28, gap: spacing.md },
   centerTitle: { fontSize: 17, fontFamily: 'Inter_700Bold', textAlign: 'center' },
-  retryBtn: { paddingHorizontal: 18, paddingVertical: 11, borderRadius: 12 },
-  retryBtnText: { color: '#FFF', fontSize: 14, fontFamily: 'Inter_600SemiBold' },
 });

@@ -75,7 +75,8 @@ export function ProposalBoardScreen() {
             <UIButton
               accessibilityLabel="Criar nova proposta"
               iconLeft="plus"
-              size="lg"
+              iconSize={26}
+              size="md"
               style={styles.newButton}
               onPress={() => router.push('/proposal/new')}
             />
@@ -195,7 +196,7 @@ export function ProposalBoardScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { paddingHorizontal: spacing.lg, paddingBottom: spacing.md },
-  newButton: { width: 44, paddingHorizontal: 0, borderRadius: tokens.radius.lg },
+  newButton: { width: 52, height: 52, minHeight: 52, paddingHorizontal: 0, borderRadius: 18 },
   filters: { marginHorizontal: spacing.lg, padding: spacing.md, gap: spacing.md, borderWidth: 1, borderRadius: tokens.radius.xl, ...shadows.sm },
   filterTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   filterButton: { width: 38, minHeight: 38, paddingHorizontal: 0, borderRadius: 999 },

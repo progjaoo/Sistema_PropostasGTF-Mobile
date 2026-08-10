@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, RefreshControl, Platform } from 'react-native';
+import { View, Text, StyleSheet, FlatList, RefreshControl, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { EmptyState } from '@/components/EmptyState';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { apiCall } from '@/src/api/client';
 import { Station } from '@/src/types';
 import { useColors } from '@/hooks/useColors';
+import { UIBadge, UIButton, UICard, UIEmptyState, UIHeader, UIInput } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 export default function StationsScreen() {
   const colors = useColors();
@@ -29,41 +30,49 @@ export default function StationsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Feather name="arrow-left" size={24} color={colors.foreground} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>Empresas</Text>
-        <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.primary }]} onPress={() => router.push('/admin/stations/new')}>
-          <Feather name="plus" size={20} color="#FFF" />
-        </TouchableOpacity>
+        <UIButton variant="ghost" iconLeft="arrow-left" size="sm" onPress={() => router.back()} accessibilityLabel="Voltar" />
+        <UIHeader
+          title="Empresas"
+          subtitle="Gerencie emissoras, cores e contatos comerciais."
+          style={styles.headerCopy}
+          action={<UIButton iconLeft="plus" title="Nova" size="sm" onPress={() => router.push('/admin/stations/new')} />}
+        />
       </View>
       <View style={[styles.searchRow, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <View style={[styles.searchInput, { backgroundColor: colors.muted, borderColor: colors.border }]}>
-          <Feather name="search" size={16} color={colors.mutedForeground} />
-          <TextInput style={[styles.searchText, { color: colors.foreground }]} placeholder="Buscar empresa..." placeholderTextColor={colors.mutedForeground} value={search} onChangeText={setSearch} />
-          {search.length > 0 && <TouchableOpacity onPress={() => setSearch('')}><Feather name="x" size={16} color={colors.mutedForeground} /></TouchableOpacity>}
-        </View>
+        <UIInput
+          leftIcon="search"
+          rightIcon={search.length > 0 ? 'x' : undefined}
+          onRightIconPress={() => setSearch('')}
+          placeholder="Buscar empresa..."
+          value={search}
+          onChangeText={setSearch}
+        />
       </View>
       {isLoading ? <LoadingSpinner message="Carregando..." /> : isError ? (
-        <EmptyState icon="alert-circle" title="Erro ao carregar" actionLabel="Tentar novamente" onAction={refetch} />
+        <UIEmptyState icon="alert-circle" title="Erro ao carregar" actionLabel="Tentar novamente" onAction={refetch} />
       ) : (
         <FlatList
           data={filtered}
           keyExtractor={(s) => s.id}
           contentContainerStyle={styles.listContent}
           refreshControl={<RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={colors.primary} />}
-          ListEmptyComponent={<EmptyState icon="radio" title="Nenhuma empresa encontrada" />}
+          ListEmptyComponent={<UIEmptyState icon="radio" title="Nenhuma empresa encontrada" />}
           scrollEnabled={filtered.length > 0}
           renderItem={({ item: station }) => (
-            <TouchableOpacity style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, borderLeftColor: station.primaryColor ?? colors.primary }]} onPress={() => router.push(`/admin/stations/${station.id}`)} activeOpacity={0.7}>
+            <UICard
+              variant="elevated"
+              style={[styles.card, { borderLeftColor: station.primaryColor ?? colors.primary }]}
+              onPress={() => router.push(`/admin/stations/${station.id}`)}
+              accessibilityLabel={`Abrir empresa ${station.name}`}
+            >
               <View style={[styles.colorDot, { backgroundColor: station.primaryColor ?? colors.primary }]} />
               <View style={styles.cardInfo}>
                 <Text style={[styles.stationName, { color: colors.foreground }]}>{station.name}</Text>
                 {station.city && <Text style={[styles.stationCity, { color: colors.mutedForeground }]}>{station.city}</Text>}
               </View>
-              {!station.active && <View style={[styles.inactiveBadge, { backgroundColor: colors.danger + '15' }]}><Text style={[styles.inactiveText, { color: colors.danger }]}>Inativo</Text></View>}
+              {!station.active && <UIBadge label="Inativo" color={colors.danger} size="sm" />}
               <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
-            </TouchableOpacity>
+            </UICard>
           )}
         />
       )}
@@ -73,18 +82,13 @@ export default function StationsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1, gap: 12 },
-  headerTitle: { flex: 1, fontSize: 22, fontFamily: 'Inter_700Bold' },
-  addBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
-  searchRow: { paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1 },
-  searchInput: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 10, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8 },
-  searchText: { flex: 1, fontSize: 14, fontFamily: 'Inter_400Regular' },
-  listContent: { paddingTop: 8, paddingBottom: 40 },
-  card: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginVertical: 5, padding: 14, borderRadius: 12, borderWidth: 1, borderLeftWidth: 4, gap: 12 },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.lg, paddingBottom: spacing.md, borderBottomWidth: 1, gap: spacing.sm },
+  headerCopy: { flex: 1 },
+  searchRow: { padding: spacing.md, borderBottomWidth: 1 },
+  listContent: { padding: spacing.md, gap: spacing.sm, paddingBottom: 44 },
+  card: { flexDirection: 'row', alignItems: 'center', borderLeftWidth: 4, gap: spacing.md },
   colorDot: { width: 12, height: 12, borderRadius: 6 },
   cardInfo: { flex: 1, gap: 2 },
   stationName: { fontSize: 15, fontFamily: 'Inter_600SemiBold' },
   stationCity: { fontSize: 12, fontFamily: 'Inter_400Regular' },
-  inactiveBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99 },
-  inactiveText: { fontSize: 11, fontFamily: 'Inter_600SemiBold' },
 });
