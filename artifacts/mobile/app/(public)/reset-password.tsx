@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { FormInput } from '@/components/FormInput';
 import { useToast } from '@/components/ToastProvider';
 import { apiCall, ApiError } from '@/src/api/client';
 import { useColors } from '@/hooks/useColors';
+import { AuthScaffold } from '@/src/features/auth/AuthScaffold';
+import { UICard, UIButton } from '@/src/ui';
 
 export default function ResetPasswordScreen() {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const { showToast } = useToast();
   const params = useLocalSearchParams<{ token?: string | string[] }>();
   const token = Array.isArray(params.token) ? params.token[0] : params.token;
@@ -65,27 +64,13 @@ export default function ResetPasswordScreen() {
     }
   };
 
-  const topPad = Platform.OS === 'web' ? 67 : insets.top;
-  const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom;
-
   return (
-    <KeyboardAwareScrollViewCompat
-      style={{ flex: 1, backgroundColor: colors.background }}
-      contentContainerStyle={[styles.content, { paddingTop: topPad + 16, paddingBottom: bottomPad + 24 }]}
-      keyboardShouldPersistTaps="handled"
-      bottomOffset={20}
+    <AuthScaffold
+      title="Redefinir senha"
+      subtitle="Crie uma nova senha para acessar o GTF Propostas."
+      showBack
+      onBack={() => router.replace('/(public)/login')}
     >
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.replace('/(public)/login')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Feather name="arrow-left" size={24} color={colors.foreground} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>Redefinir senha</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      <Text style={[styles.description, { color: colors.mutedForeground }]}>
-        Crie uma nova senha para acessar o GTF Propostas.
-      </Text>
 
       {!token && (
         <View style={[styles.warning, { backgroundColor: colors.warning + '14', borderColor: colors.warning + '50' }]}>
@@ -94,7 +79,7 @@ export default function ResetPasswordScreen() {
         </View>
       )}
 
-      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <UICard variant="elevated" style={styles.card}>
         <FormInput
           label="Nova senha"
           required
@@ -123,31 +108,25 @@ export default function ResetPasswordScreen() {
           autoComplete="new-password"
           accessibilityLabel="Confirmar nova senha"
         />
-        <TouchableOpacity
-          style={[styles.btn, { backgroundColor: token ? colors.primary : colors.muted }, loading && styles.disabled]}
+        <UIButton
+          variant={token ? 'primary' : 'secondary'}
+          size="lg"
           onPress={handleReset}
           disabled={!token || loading}
-          activeOpacity={0.8}
           accessibilityRole="button"
           accessibilityLabel="Salvar nova senha"
           accessibilityState={{ disabled: !token || loading, busy: loading }}
         >
-          {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.btnText}>Salvar nova senha</Text>}
-        </TouchableOpacity>
-      </View>
-    </KeyboardAwareScrollViewCompat>
+          {loading ? <ActivityIndicator color={colors.primaryForeground} /> : <Text style={[styles.btnText, { color: token ? colors.primaryForeground : colors.foreground }]}>Salvar nova senha</Text>}
+        </UIButton>
+      </UICard>
+    </AuthScaffold>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { padding: 24, gap: 20 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  headerTitle: { fontSize: 18, fontFamily: 'Inter_600SemiBold' },
-  description: { fontSize: 14, fontFamily: 'Inter_400Regular', lineHeight: 20 },
   warning: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 12, borderWidth: 1, padding: 14 },
   warningText: { flex: 1, fontSize: 13, fontFamily: 'Inter_500Medium', lineHeight: 18 },
-  card: { borderRadius: 16, borderWidth: 1, padding: 20, gap: 16 },
-  btn: { height: 50, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  btnText: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: '#FFF' },
-  disabled: { opacity: 0.7 },
+  card: { gap: 16 },
+  btnText: { fontSize: 16, fontFamily: 'Inter_700Bold' },
 });

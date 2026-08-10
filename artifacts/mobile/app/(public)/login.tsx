@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Image, Platform, ActivityIndicator,
-} from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { FormInput } from '@/components/FormInput';
 import { useToast } from '@/components/ToastProvider';
 import { useAuthStore } from '@/src/store/authStore';
 import { apiCall, ApiError } from '@/src/api/client';
 import { MobileAuthResponse } from '@/src/types';
 import { useColors } from '@/hooks/useColors';
+import { AuthScaffold } from '@/src/features/auth/AuthScaffold';
+import { UICard, UIButton } from '@/src/ui';
 
 export default function LoginScreen() {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const { showToast } = useToast();
   const { setAuth } = useAuthStore();
 
@@ -69,27 +65,30 @@ export default function LoginScreen() {
     }
   };
 
-  const topPad = Platform.OS === 'web' ? 67 : insets.top;
-  const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom;
-
   return (
-    <KeyboardAwareScrollViewCompat
-      style={{ flex: 1, backgroundColor: colors.background }}
-      contentContainerStyle={[styles.content, { paddingTop: topPad + 40, paddingBottom: bottomPad + 24 }]}
-      keyboardShouldPersistTaps="handled"
-      bottomOffset={20}
+    <AuthScaffold
+      showBrand
+      footer={
+        <Pressable
+          onPress={() => router.push('/(public)/register')}
+          accessibilityRole="button"
+          accessibilityLabel="Criar acesso comercial"
+          style={({ pressed }) => [styles.registerLink, { opacity: pressed ? 0.7 : 1 }]}
+        >
+          <Text style={[styles.registerText, { color: colors.mutedForeground }]}>
+            Não tem acesso?{' '}
+            <Text style={{ color: colors.primary, fontFamily: 'Inter_700Bold' }}>
+              Criar acesso comercial
+            </Text>
+          </Text>
+        </Pressable>
+      }
     >
-      <View style={styles.brand}>
-        <Image
-          source={require('@/assets/brand/gtf-logo-completa.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>Sistema Comercial GTF</Text>
-      </View>
-
-      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={[styles.title, { color: colors.foreground }]}>Entrar</Text>
+      <UICard variant="elevated" style={styles.card}>
+        <Text style={[styles.title, { color: colors.foreground }]}>Entrar no sistema</Text>
+        <Text style={[styles.cardSubtitle, { color: colors.mutedForeground }]}>
+          Acesse suas propostas, clientes e avisos comerciais.
+        </Text>
 
         <FormInput
           label="E-mail"
@@ -124,71 +123,49 @@ export default function LoginScreen() {
           accessibilityHint="Informe sua senha de acesso"
         />
 
-        <TouchableOpacity
-          style={[styles.forgotBtn]}
+        <Pressable
+          style={({ pressed }) => [styles.forgotBtn, { opacity: pressed ? 0.7 : 1 }]}
           onPress={() => router.push('/(public)/forgot-password')}
           accessibilityRole="button"
           accessibilityLabel="Esqueceu a senha"
         >
           <Text style={[styles.forgotText, { color: colors.primary }]}>Esqueceu a senha?</Text>
-        </TouchableOpacity>
+        </Pressable>
 
-        <TouchableOpacity
-          style={[styles.loginBtn, { backgroundColor: colors.primary }, loading && styles.disabled]}
+        <UIButton
+          variant="primary"
+          size="lg"
           onPress={handleLogin}
           disabled={loading}
-          activeOpacity={0.8}
           accessibilityRole="button"
           accessibilityLabel="Entrar no sistema"
           accessibilityState={{ disabled: loading, busy: loading }}
         >
           {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={colors.primaryForeground} />
           ) : (
-            <Text style={styles.loginBtnText}>Entrar</Text>
+            <Text style={[styles.loginBtnText, { color: colors.primaryForeground }]}>Entrar</Text>
           )}
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity style={styles.registerLink} onPress={() => router.push('/(public)/register')}>
-        <Text style={[styles.registerText, { color: colors.mutedForeground }]}>
-          Não tem acesso?{' '}
-          <Text style={{ color: colors.primary, fontFamily: 'Inter_600SemiBold' }}>
-            Criar acesso comercial
-          </Text>
-        </Text>
-      </TouchableOpacity>
-    </KeyboardAwareScrollViewCompat>
+        </UIButton>
+      </UICard>
+    </AuthScaffold>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
-    padding: 24,
-    gap: 24,
-  },
-  brand: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  logo: {
-    width: 200,
-    height: 72,
-  },
-  subtitle: {
-    fontSize: 14,
-    fontFamily: 'Inter_400Regular',
-  },
   card: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 24,
     gap: 16,
   },
   title: {
-    fontSize: 22,
-    fontFamily: 'Inter_700Bold',
-    marginBottom: 4,
+    fontSize: 24,
+    lineHeight: 30,
+    fontFamily: 'Inter_800ExtraBold',
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontFamily: 'Inter_400Regular',
+    marginTop: -8,
   },
   forgotBtn: {
     alignSelf: 'flex-end',
@@ -198,20 +175,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'Inter_500Medium',
   },
-  loginBtn: {
-    height: 50,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 4,
-  },
   loginBtnText: {
     fontSize: 16,
-    fontFamily: 'Inter_600SemiBold',
-    color: '#FFFFFF',
-  },
-  disabled: {
-    opacity: 0.7,
+    fontFamily: 'Inter_700Bold',
   },
   registerLink: {
     alignItems: 'center',

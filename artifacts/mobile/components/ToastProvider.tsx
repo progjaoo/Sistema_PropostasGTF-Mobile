@@ -2,6 +2,8 @@ import React, { createContext, useCallback, useContext, useRef, useState } from 
 import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColors } from '@/hooks/useColors';
+import { shadows, spacing, tokens } from '@/src/theme';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -21,16 +23,22 @@ export function useToast() {
   return useContext(ToastContext);
 }
 
-const TOAST_COLORS: Record<ToastType, { bg: string; text: string; icon: string }> = {
-  success: { bg: '#16A34A', text: '#FFFFFF', icon: 'check-circle' },
-  error: { bg: '#DC2626', text: '#FFFFFF', icon: 'alert-circle' },
-  warning: { bg: '#D97706', text: '#FFFFFF', icon: 'alert-triangle' },
-  info: { bg: '#0284C7', text: '#FFFFFF', icon: 'info' },
+const TOAST_ICONS: Record<ToastType, keyof typeof Feather.glyphMap> = {
+  success: 'check-circle',
+  error: 'alert-circle',
+  warning: 'alert-triangle',
+  info: 'info',
 };
 
 function ToastItem({ toast, onRemove }: { toast: ToastMessage; onRemove: () => void }) {
   const opacity = useRef(new Animated.Value(0)).current;
-  const colors = TOAST_COLORS[toast.type];
+  const colors = useColors();
+  const palette = {
+    success: { bg: colors.success, text: colors.successForeground },
+    error: { bg: colors.destructive, text: colors.destructiveForeground },
+    warning: { bg: colors.warning, text: colors.warningForeground },
+    info: { bg: colors.info, text: colors.infoForeground },
+  }[toast.type];
 
   React.useEffect(() => {
     Animated.sequence([
@@ -41,9 +49,9 @@ function ToastItem({ toast, onRemove }: { toast: ToastMessage; onRemove: () => v
   }, []);
 
   return (
-    <Animated.View style={[styles.toast, { backgroundColor: colors.bg, opacity }]}>
-      <Feather name={colors.icon as any} size={18} color={colors.text} />
-      <Text style={[styles.toastText, { color: colors.text }]} numberOfLines={3}>
+    <Animated.View style={[styles.toast, { backgroundColor: palette.bg, opacity }]}>
+      <Feather name={TOAST_ICONS[toast.type]} size={18} color={palette.text} />
+      <Text style={[styles.toastText, { color: palette.text }]} numberOfLines={3}>
         {toast.message}
       </Text>
     </Animated.View>
@@ -81,23 +89,20 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    left: 16,
-    right: 16,
+    left: spacing.lg,
+    right: spacing.lg,
     zIndex: 9999,
-    gap: 8,
+    gap: spacing.sm,
   },
   toast: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 5,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: tokens.radius.lg,
+    borderCurve: 'continuous',
+    ...shadows.lg,
   },
   toastText: {
     flex: 1,

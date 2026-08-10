@@ -12,6 +12,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { Feather } from '@expo/vector-icons';
 import { reloadAppAsync } from 'expo';
+import { UIButton, UIEmptyState } from '@/src/ui';
+import { spacing, tokens } from '@/src/theme';
 
 export type ErrorFallbackProps = {
   error: Error;
@@ -68,31 +70,13 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
       ) : null}
 
       <View style={styles.content}>
-        <Text style={[styles.title, { color: colors.foreground }]}>
-          Something went wrong
-        </Text>
-
-        <Text style={[styles.message, { color: colors.mutedForeground }]}>
-          Please reload the app to continue.
-        </Text>
-
-        <Pressable
-          onPress={handleRestart}
-          style={({ pressed }) => [
-            styles.button,
-            {
-              backgroundColor: colors.primary,
-              opacity: pressed ? 0.9 : 1,
-              transform: [{ scale: pressed ? 0.98 : 1 }],
-            },
-          ]}
-        >
-          <Text
-            style={[styles.buttonText, { color: colors.primaryForeground }]}
-          >
-            Try Again
-          </Text>
-        </Pressable>
+        <UIEmptyState
+          icon="alert-triangle"
+          title="Algo saiu do esperado"
+          description="Recarregue o aplicativo para continuar usando o sistema."
+          style={styles.empty}
+        />
+        <UIButton title="Recarregar aplicativo" onPress={handleRestart} size="lg" style={styles.retryButton} />
       </View>
 
       {__DEV__ ? (
@@ -179,51 +163,23 @@ const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 16,
+    gap: spacing.md,
     width: '100%',
     maxWidth: 600,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    textAlign: 'center',
-    lineHeight: 40,
-  },
-  message: {
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
+  empty: { flex: 0 },
   topButton: {
     position: 'absolute',
     right: 16,
     width: 44,
     height: 44,
-    borderRadius: 8,
+    borderRadius: tokens.radius.full,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
   },
-  button: {
-    paddingVertical: 16,
-    borderRadius: 8,
-    paddingHorizontal: 24,
-    minWidth: 200,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  buttonText: {
-    fontWeight: '600',
-    textAlign: 'center',
-    fontSize: 16,
-  },
+  retryButton: { minWidth: 220 },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',

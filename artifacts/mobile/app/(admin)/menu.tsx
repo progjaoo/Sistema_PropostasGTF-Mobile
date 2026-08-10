@@ -6,8 +6,9 @@ import { Feather } from '@expo/vector-icons';
 import { showConfirm } from '@/components/ConfirmDialog';
 import { useAuthStore } from '@/src/store/authStore';
 import { apiCall, getRefreshToken } from '@/src/api/client';
-import { getInitials } from '@/src/utils/format';
 import { useColors } from '@/hooks/useColors';
+import { UIBadge, UICard, UIAvatar, UIButton, UIHeader, UISeparator } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 const MENU_SECTIONS = [
   {
@@ -36,7 +37,6 @@ export default function AdminMenuScreen() {
   const { user, clearAuth } = useAuthStore();
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom;
-  const initials = getInitials(user?.name);
 
   const handleLogout = () => {
     showConfirm({
@@ -60,33 +60,33 @@ export default function AdminMenuScreen() {
       style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={{ paddingBottom: bottomPad + 120 }}
     >
-      <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>Menu</Text>
+      <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.background }]}>
+        <UIHeader
+          title="Menu"
+          subtitle="Configurações administrativas e dados da sua conta."
+        />
       </View>
 
       {/* Profile mini */}
-      <TouchableOpacity
-        style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+      <UICard
+        variant="elevated"
+        style={styles.profileCard}
         onPress={() => router.push('/admin/profile')}
-        activeOpacity={0.7}
+        accessibilityLabel="Abrir meu perfil"
       >
-        <View style={[styles.avatar, { backgroundColor: colors.accent }]}>
-          <Text style={[styles.avatarText, { color: colors.primary }]}>{initials}</Text>
-        </View>
+        <UIAvatar name={user?.name} size={52} />
         <View style={styles.profileInfo}>
           <Text style={[styles.profileName, { color: colors.foreground }]}>{user?.name}</Text>
           <Text style={[styles.profileEmail, { color: colors.mutedForeground }]}>{user?.email}</Text>
-          <View style={[styles.roleBadge, { backgroundColor: colors.primary + '15' }]}>
-            <Text style={[styles.roleText, { color: colors.primary }]}>ADMIN</Text>
-          </View>
+          <UIBadge label="ADMIN" variant="info" size="sm" style={styles.roleBadge} />
         </View>
         <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
-      </TouchableOpacity>
+      </UICard>
 
       {MENU_SECTIONS.map((section) => (
         <View key={section.title} style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>{section.title.toUpperCase()}</Text>
-          <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <UICard variant="elevated" style={styles.sectionCard}>
             {section.items.map((item, idx) => (
               <React.Fragment key={item.label}>
                 <TouchableOpacity
@@ -110,48 +110,40 @@ export default function AdminMenuScreen() {
                     </View>
                   )}
                 </TouchableOpacity>
-                {idx < section.items.length - 1 && (
-                  <View style={[styles.divider, { backgroundColor: colors.border }]} />
-                )}
+                {idx < section.items.length - 1 && <UISeparator style={styles.divider} />}
               </React.Fragment>
             ))}
-          </View>
+          </UICard>
         </View>
       ))}
 
-      <TouchableOpacity
-        style={[styles.logoutBtn, { borderColor: colors.destructive + '40', backgroundColor: colors.destructive + '08' }]}
+      <UIButton
+        variant="destructive"
+        iconLeft="log-out"
+        title="Sair do aplicativo"
         onPress={handleLogout}
-        activeOpacity={0.7}
-      >
-        <Feather name="log-out" size={18} color={colors.destructive} />
-        <Text style={[styles.logoutText, { color: colors.destructive }]}>Sair do aplicativo</Text>
-      </TouchableOpacity>
+        style={styles.logoutBtn}
+      />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1 },
-  headerTitle: { fontSize: 24, fontFamily: 'Inter_700Bold' },
-  profileCard: { flexDirection: 'row', alignItems: 'center', margin: 16, padding: 16, borderRadius: 14, borderWidth: 1, gap: 12 },
-  avatar: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontSize: 18, fontFamily: 'Inter_700Bold' },
+  header: { paddingHorizontal: 16, paddingBottom: 12 },
+  profileCard: { flexDirection: 'row', alignItems: 'center', margin: 16, gap: 12 },
   profileInfo: { flex: 1, gap: 3 },
   profileName: { fontSize: 16, fontFamily: 'Inter_600SemiBold' },
   profileEmail: { fontSize: 13, fontFamily: 'Inter_400Regular' },
-  roleBadge: { alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99 },
-  roleText: { fontSize: 11, fontFamily: 'Inter_700Bold', letterSpacing: 0.5 },
+  roleBadge: { alignSelf: 'flex-start' },
   section: { paddingHorizontal: 16, marginBottom: 8 },
   sectionTitle: { fontSize: 12, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.5, marginBottom: 8, marginTop: 16 },
-  sectionCard: { borderRadius: 14, borderWidth: 1, overflow: 'hidden' },
-  menuItem: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12 },
+  sectionCard: { padding: 0, overflow: 'hidden' },
+  menuItem: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12, minHeight: 60 },
   menuItemDisabled: { opacity: 0.8 },
   iconWrap: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   menuLabel: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium' },
   soonBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
   soonText: { fontSize: 11, fontFamily: 'Inter_600SemiBold' },
-  divider: { height: 1, marginLeft: 62 },
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, margin: 20, padding: 14, borderRadius: 12, borderWidth: 1 },
-  logoutText: { fontSize: 15, fontFamily: 'Inter_600SemiBold' },
+  divider: { marginLeft: 62 },
+  logoutBtn: { marginHorizontal: spacing.xl, marginTop: spacing.lg },
 });

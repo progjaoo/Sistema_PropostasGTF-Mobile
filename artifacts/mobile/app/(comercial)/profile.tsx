@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, Platform,
-  ActivityIndicator, ScrollView,
+  View, Text, StyleSheet, Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { FormInput } from '@/components/FormInput';
 import { ImagePickerField } from '@/components/ImagePickerField';
@@ -15,8 +15,9 @@ import { showConfirm } from '@/components/ConfirmDialog';
 import { useAuthStore } from '@/src/store/authStore';
 import { apiCall, ApiError, getRefreshToken } from '@/src/api/client';
 import { AuthUser } from '@/src/types';
-import { getInitials } from '@/src/utils/format';
 import { useColors } from '@/hooks/useColors';
+import { UIBadge, UICard, UIAvatar, UIButton, UIHeader } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 export default function ProfileScreen() {
   const colors = useColors();
@@ -82,7 +83,6 @@ export default function ProfileScreen() {
 
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom;
-  const initials = getInitials(user?.name);
 
   return (
     <KeyboardAwareScrollViewCompat
@@ -92,38 +92,33 @@ export default function ProfileScreen() {
       bottomOffset={20}
     >
       {/* Header */}
-      <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>Meu Perfil</Text>
-        {isDirty && (
-          <TouchableOpacity
-            style={[styles.saveBtn, { backgroundColor: colors.primary }, saveMutation.isPending && styles.disabled]}
-            onPress={() => saveMutation.mutate()}
-            disabled={saveMutation.isPending}
-          >
-            {saveMutation.isPending ? (
-              <ActivityIndicator size="small" color="#FFF" />
-            ) : (
-              <Text style={styles.saveBtnText}>Salvar</Text>
-            )}
-          </TouchableOpacity>
-        )}
+      <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.background }]}>
+        <UIHeader
+          title="Meu Perfil"
+          subtitle="Atualize seus dados comerciais usados nas propostas."
+          action={isDirty ? (
+            <UIButton
+              title={saveMutation.isPending ? undefined : 'Salvar'}
+              size="sm"
+              onPress={() => saveMutation.mutate()}
+              disabled={saveMutation.isPending}
+              accessibilityState={{ disabled: saveMutation.isPending, busy: saveMutation.isPending }}
+            >
+              {saveMutation.isPending ? <ActivityIndicator size="small" color={colors.primaryForeground} /> : undefined}
+            </UIButton>
+          ) : undefined}
+        />
       </View>
 
       {/* Avatar */}
-      <View style={[styles.avatarSection, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <View style={[styles.avatar, { backgroundColor: colors.accent }]}>
-          <Text style={[styles.avatarText, { color: colors.primary }]}>{initials}</Text>
-        </View>
+      <UICard variant="elevated" style={styles.avatarSection}>
+        <UIAvatar name={user?.name} imageBase64={avatarBase64} size={70} />
         <View style={styles.userInfo}>
           <Text style={[styles.userName, { color: colors.foreground }]}>{user?.name}</Text>
           <Text style={[styles.userEmail, { color: colors.mutedForeground }]}>{user?.email}</Text>
-          <View style={[styles.roleBadge, { backgroundColor: colors.primary + '15' }]}>
-            <Text style={[styles.roleText, { color: colors.primary }]}>
-              {user?.role === 'ADMIN' ? 'Administrador' : 'Comercial'}
-            </Text>
-          </View>
+          <UIBadge label={user?.role === 'ADMIN' ? 'Administrador' : 'Comercial'} variant="info" size="sm" style={styles.roleBadge} />
         </View>
-      </View>
+      </UICard>
 
       {/* Contact info warning */}
       {(!user?.jobTitle || !user?.contactPhone) && (
@@ -136,7 +131,7 @@ export default function ProfileScreen() {
       )}
 
       {/* Form */}
-      <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+      <UICard variant="elevated" style={styles.form}>
         <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>DADOS PESSOAIS</Text>
         <ImagePickerField
           label="Foto do perfil"
@@ -156,9 +151,9 @@ export default function ProfileScreen() {
           value={jobTitle} onChangeText={(t) => { setJobTitle(t); markDirty(); }}
           hint="Aparece no rodapé das propostas."
         />
-      </View>
+      </UICard>
 
-      <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+      <UICard variant="elevated" style={styles.form}>
         <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>CONTATO COMERCIAL</Text>
         <FormInput
           label="Telefone" leftIcon="phone" placeholder="(00) 00000-0000"
@@ -171,50 +166,41 @@ export default function ProfileScreen() {
           keyboardType="email-address" autoCapitalize="none"
           value={contactEmail} onChangeText={(t) => { setContactEmail(t); markDirty(); }}
         />
-      </View>
+      </UICard>
 
-      <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+      <UICard variant="elevated" style={styles.form}>
         <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>ACESSO</Text>
         <View style={styles.readOnlyRow}>
           <Feather name="mail" size={16} color={colors.mutedForeground} />
           <Text style={[styles.readOnlyLabel, { color: colors.mutedForeground }]}>E-mail de login</Text>
           <Text style={[styles.readOnlyValue, { color: colors.foreground }]} numberOfLines={1}>{user?.email}</Text>
         </View>
-      </View>
+      </UICard>
 
-      <TouchableOpacity
-        style={[styles.logoutBtn, { borderColor: colors.destructive + '40', backgroundColor: colors.destructive + '08' }]}
+      <UIButton
+        variant="destructive"
+        iconLeft="log-out"
+        title="Sair do aplicativo"
         onPress={handleLogout}
-        activeOpacity={0.7}
-      >
-        <Feather name="log-out" size={18} color={colors.destructive} />
-        <Text style={[styles.logoutText, { color: colors.destructive }]}>Sair do aplicativo</Text>
-      </TouchableOpacity>
+        style={styles.logoutBtn}
+      />
     </KeyboardAwareScrollViewCompat>
   );
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1 },
-  headerTitle: { fontSize: 24, fontFamily: 'Inter_700Bold' },
-  saveBtn: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 8 },
-  saveBtnText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#FFF' },
-  disabled: { opacity: 0.7 },
-  avatarSection: { flexDirection: 'row', alignItems: 'center', padding: 20, gap: 16, borderBottomWidth: 1 },
-  avatar: { width: 70, height: 70, borderRadius: 35, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontSize: 24, fontFamily: 'Inter_700Bold' },
+  header: { paddingHorizontal: 16, paddingBottom: 12 },
+  avatarSection: { flexDirection: 'row', alignItems: 'center', margin: 16, gap: 16 },
   userInfo: { flex: 1, gap: 4 },
   userName: { fontSize: 18, fontFamily: 'Inter_700Bold' },
   userEmail: { fontSize: 13, fontFamily: 'Inter_400Regular' },
-  roleBadge: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 99 },
-  roleText: { fontSize: 12, fontFamily: 'Inter_600SemiBold' },
+  roleBadge: { alignSelf: 'flex-start' },
   warningBanner: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, margin: 16, padding: 14, borderRadius: 10, borderWidth: 1 },
   warningText: { flex: 1, fontSize: 13, fontFamily: 'Inter_500Medium', lineHeight: 18 },
-  form: { padding: 20, gap: 16, borderTopWidth: 1, borderBottomWidth: 1, marginTop: 12 },
+  form: { marginHorizontal: 16, marginTop: 12, gap: 16 },
   sectionTitle: { fontSize: 12, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.5 },
   readOnlyRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   readOnlyLabel: { fontSize: 13, fontFamily: 'Inter_400Regular', width: 100 },
   readOnlyValue: { fontSize: 14, fontFamily: 'Inter_500Medium', flex: 1 },
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, margin: 20, padding: 14, borderRadius: 12, borderWidth: 1 },
-  logoutText: { fontSize: 15, fontFamily: 'Inter_600SemiBold' },
+  logoutBtn: { marginHorizontal: spacing.xl, marginTop: spacing.lg },
 });

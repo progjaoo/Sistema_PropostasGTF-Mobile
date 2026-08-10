@@ -1,6 +1,7 @@
-import { Link, Stack } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { Stack, router } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 import { useColors } from '@/hooks/useColors';
+import { UIEmptyState } from '@/src/ui';
 
 export default function NotFoundScreen() {
   const colors = useColors();
@@ -9,15 +10,13 @@ export default function NotFoundScreen() {
     <>
       <Stack.Screen options={{ title: 'Oops!' }} />
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Text style={[styles.title, { color: colors.foreground }]}>
-          This screen doesn&apos;t exist.
-        </Text>
-
-        <Link href="/" style={styles.link}>
-          <Text style={[styles.linkText, { color: colors.primary }]}>
-            Go to home screen!
-          </Text>
-        </Link>
+        <UIEmptyState
+          icon="compass"
+          title="Tela não encontrada"
+          description="O caminho solicitado não existe ou foi movido."
+          actionLabel="Voltar ao início"
+          onAction={() => router.replace('/')}
+        />
       </View>
     </>
   );
@@ -29,16 +28,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-  linkText: {
-    fontSize: 14,
   },
 });
