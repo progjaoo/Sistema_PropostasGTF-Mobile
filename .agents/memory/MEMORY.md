@@ -1,0 +1,6 @@
+- [API client deep imports](deep-imports.md) — never use deep paths like `@workspace/api-client-react/src/...`; always import from the package root.
+- [Seed script pattern](seed-script.md) — seed lives in `scripts/src/seed.ts`; uses `onConflictDoNothing()` for safe re-runs; bcryptjs salt=12.
+- [Auth architecture](auth-arch.md) — JWT 15min access token in Zustand sessionStorage; 7d refresh token in httpOnly cookie; cookie-based refresh does **not** work on React Native
+- [Mobile auth endpoints](mobile-auth.md) — /api/auth/mobile/{login,refresh,logout} added to api-server; return refreshToken in JSON body instead of cookie; stores in SecureStore on device.
+- [Mobile SecureStore platform split](mobile-secure-store.md) — expo-secure-store is native-only; use .native.ts/.ts platform split via `src/utils/secureStorage.ts` so Metro can bundle for web too.
+- [Prisma client regeneration](prisma-regen.md) — if API server fails with "does not provide an export named '...'" from @prisma/client, run `cd lib/db && pnpm prisma generate` to regenerate the client.

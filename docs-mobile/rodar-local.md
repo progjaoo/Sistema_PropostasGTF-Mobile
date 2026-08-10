@@ -1,0 +1,1 @@
+EXPO_PUBLIC_API_URL=https://propostasmosaico-one.vercel.app/api pnpm exec expo start

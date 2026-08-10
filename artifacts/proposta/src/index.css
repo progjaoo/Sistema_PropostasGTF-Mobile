@@ -1,0 +1,1335 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+.Toastify__toast {
+  border-radius: 10px;
+  font-family: var(--app-font-sans), system-ui, sans-serif;
+  font-weight: 600;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+}
+
+.Toastify__toast--success {
+  background: #059669;
+}
+
+.Toastify__toast--error {
+  background: #dc2626;
+}
+
+.Toastify__toast--warning {
+  background: #f59e0b;
+  color: #111827;
+}
+
+.Toastify__toast--info {
+  background: #2563eb;
+}
+
+.Toastify__progress-bar--success,
+.Toastify__progress-bar--error,
+.Toastify__progress-bar--warning,
+.Toastify__progress-bar--info {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-border: var(--primary-border);
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary-border: var(--secondary-border);
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted-border: var(--muted-border);
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-border: var(--accent-border);
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-border: var(--destructive-border);
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-primary-border: var(--sidebar-primary-border);
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-accent-border: var(--sidebar-accent-border);
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-mono: var(--app-font-mono);
+
+  --text-xs: 0.75rem;
+  --text-xs--line-height: calc(1 / 0.75);
+  --text-sm: 0.875rem;
+  --text-sm--line-height: calc(1.25 / 0.875);
+  --text-base: 1rem;
+  --text-base--line-height: calc(1.5 / 1);
+  --text-lg: 1.125rem;
+  --text-lg--line-height: calc(1.75 / 1.125);
+  --text-xl: 1.25rem;
+  --text-xl--line-height: calc(1.75 / 1.25);
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: calc(2 / 1.5);
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: calc(2.25 / 1.875);
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: calc(2.5 / 2.25);
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 1;
+  --text-6xl: 3.75rem;
+  --text-6xl--line-height: 1;
+  --text-7xl: 4.5rem;
+  --text-7xl--line-height: 1;
+  --text-8xl: 6rem;
+  --text-8xl--line-height: 1;
+  --text-9xl: 8rem;
+  --text-9xl--line-height: 1;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* LIGHT MODE */
+:root {
+  --button-outline: rgba(0,0,0, .10);
+  --badge-outline: rgba(0,0,0, .05);
+
+  /* Automatic computation of border around primary / danger buttons */
+  --opaque-button-border-intensity: -8; /* In terms of percentages */
+
+  /* Backgrounds applied on top of other backgrounds when hovered/active */
+  --elevate-1: rgba(0,0,0, .03);
+  --elevate-2: rgba(0,0,0, .08);
+
+  --background: 0 0% 98%; /* #FAFAFA */
+  --foreground: 0 0% 4%; /* #0A0A0A */
+  --border: 240 11% 92%; /* #E8E8EC */
+
+  --card: 0 0% 100%; /* #FFFFFF */
+  --card-foreground: 0 0% 4%; /* #0A0A0A */
+  --card-border: 240 11% 92%; /* #E8E8EC */
+
+  --sidebar: 0 0% 100%;
+  --sidebar-foreground: 0 0% 4%;
+  --sidebar-border: 240 11% 92%;
+  --sidebar-primary: 238 81% 67%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 0 0% 98%;
+  --sidebar-accent-foreground: 0 0% 4%;
+  --sidebar-ring: 238 81% 67%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 4%;
+  --popover-border: 240 11% 92%;
+
+  --primary: 238 81% 67%; /* #6366F1 */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 0 0% 98%;
+  --secondary-foreground: 0 0% 4%;
+
+  --muted: 240 11% 92%;
+  --muted-foreground: 0 0% 42%; /* #6B6B6B */
+
+  --accent: 0 0% 98%;
+  --accent-foreground: 0 0% 4%;
+
+  --destructive: 0 84% 60%; /* #EF4444 */
+  --destructive-foreground: 0 0% 100%;
+
+  --input: 240 11% 92%;
+  --ring: 238 81% 67%;
+  
+  --success: 160 84% 39%; /* #10B981 */
+  --warning: 38 92% 50%; /* #F59E0B */
+  --neutral: 0 0% 61%; /* #9C9C9C */
+
+  --chart-1: 238 81% 67%;
+  --chart-2: 160 84% 39%;
+  --chart-3: 38 92% 50%;
+  --chart-4: 0 84% 60%;
+  --chart-5: 0 0% 61%;
+
+  --app-font-sans: 'DM Sans', sans-serif;
+  --app-font-heading: 'General Sans', 'Inter', sans-serif;
+  --app-font-serif: Georgia, serif;
+  --app-font-mono: Menlo, monospace;
+  --radius: 12px; /* Cards = 12px */
+  --radius-button: 6px; /* Buttons/Inputs = 6px */
+  
+  --shadow-2xs: 0px 2px 0px 0px rgba(0, 0, 0, 0.02);
+  --shadow-xs: 0px 2px 0px 0px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0px 2px 0px 0px rgba(0, 0, 0, 0.04), 0px 1px 2px -1px rgba(0, 0, 0, 0.02);
+  --shadow: 0px 2px 0px 0px rgba(0, 0, 0, 0.04), 0px 1px 2px -1px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0px 2px 0px 0px rgba(0, 0, 0, 0.04), 0px 2px 4px -1px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0px 2px 0px 0px rgba(0, 0, 0, 0.04), 0px 4px 6px -1px rgba(0, 0, 0, 0.02);
+  --shadow-xl: 0px 2px 0px 0px rgba(0, 0, 0, 0.04), 0px 8px 10px -1px rgba(0, 0, 0, 0.02);
+  --shadow-2xl: 0px 2px 0px 0px rgba(0, 0, 0, 0.04);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+
+  /* Automatically computed borders - intensity can be controlled by the user by the --opaque-button-border-intensity setting */
+
+  /* Fallback for older browsers */
+  --sidebar-primary-border: hsl(var(--sidebar-primary));
+  --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --sidebar-accent-border: hsl(var(--sidebar-accent));
+  --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --primary-border: hsl(var(--primary));
+  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --secondary-border: hsl(var(--secondary));
+  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --muted-border: hsl(var(--muted));
+  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --accent-border: hsl(var(--accent));
+  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --destructive-border: hsl(var(--destructive));
+  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+}
+
+.dark {
+  --button-outline: rgba(255,255,255, .10);
+  --badge-outline: rgba(255,255,255, .05);
+
+  --opaque-button-border-intensity: 9;  /* In terms of percentages */
+
+  /* Backgrounds applied on top of other backgrounds when hovered/active */
+  --elevate-1: rgba(255,255,255, .04);
+  --elevate-2: rgba(255,255,255, .09);
+
+  --background: 0 0% 4%; /* #0A0A0A */
+  --foreground: 0 0% 98%; /* #FAFAFA */
+  --border: 0 0% 20%; 
+
+  --card: 0 0% 8%; 
+  --card-foreground: 0 0% 98%; 
+  --card-border: 0 0% 20%; 
+
+  --sidebar: 0 0% 8%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-border: 0 0% 20%;
+  --sidebar-primary: 238 81% 67%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 0 0% 15%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-ring: 238 81% 67%;
+
+  --popover: 0 0% 8%;
+  --popover-foreground: 0 0% 98%;
+  --popover-border: 0 0% 20%;
+
+  --primary: 238 81% 67%; 
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 0 0% 15%;
+  --secondary-foreground: 0 0% 98%;
+
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 61%; 
+
+  --accent: 0 0% 15%;
+  --accent-foreground: 0 0% 98%;
+
+  --destructive: 0 84% 60%; 
+  --destructive-foreground: 0 0% 100%;
+
+  --input: 0 0% 20%;
+  --ring: 238 81% 67%;
+  
+  --success: 160 84% 39%;
+  --warning: 38 92% 50%;
+  --neutral: 0 0% 61%;
+
+  --chart-1: 238 81% 67%;
+  --chart-2: 160 84% 39%;
+  --chart-3: 38 92% 50%;
+  --chart-4: 0 84% 60%;
+  --chart-5: 0 0% 61%;
+
+  --shadow-2xs: 0px 2px 0px 0px rgba(0,0,0,0.1);
+  --shadow-xs: 0px 2px 0px 0px rgba(0,0,0,0.1);
+  --shadow-sm: 0px 2px 0px 0px rgba(0,0,0,0.1), 0px 1px 2px -1px rgba(0,0,0,0.1);
+  --shadow: 0px 2px 0px 0px rgba(0,0,0,0.1), 0px 1px 2px -1px rgba(0,0,0,0.1);
+  --shadow-md: 0px 2px 0px 0px rgba(0,0,0,0.1), 0px 2px 4px -1px rgba(0,0,0,0.1);
+  --shadow-lg: 0px 2px 0px 0px rgba(0,0,0,0.1), 0px 4px 6px -1px rgba(0,0,0,0.1);
+  --shadow-xl: 0px 2px 0px 0px rgba(0,0,0,0.1), 0px 8px 10px -1px rgba(0,0,0,0.1);
+  --shadow-2xl: 0px 2px 0px 0px rgba(0,0,0,0.1);
+
+}
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+#proposal-print-root {
+  display: none;
+}
+
+#proposal-print-measure-root {
+  position: absolute;
+  top: 0;
+  left: -10000px;
+  width: 210mm;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+#proposal-print-measure-root .proposal-print-page,
+#proposal-print-root .proposal-print-page {
+  display: flex;
+  flex-direction: column;
+  width: 210mm;
+  height: 297mm;
+  min-height: 297mm;
+  max-height: 297mm;
+  padding: 10mm 14mm 8mm;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: #ffffff;
+  font-family: 'Montserrat', Arial, sans-serif;
+}
+
+#proposal-print-measure-root .proposal-print-page *,
+#proposal-print-root .proposal-print-page * {
+  font-family: 'Montserrat', Arial, sans-serif;
+}
+
+#proposal-print-measure-root .proposal-print-header,
+#proposal-print-root .proposal-print-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 14mm;
+  margin-bottom: 5mm;
+}
+
+#proposal-print-measure-root .proposal-print-logo,
+#proposal-print-root .proposal-print-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 13.5mm;
+  height: 13.5mm;
+  border-radius: 4mm;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 14pt;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+#proposal-print-measure-root .proposal-print-logo img,
+#proposal-print-root .proposal-print-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 2mm;
+}
+
+#proposal-print-measure-root .proposal-print-station-name,
+#proposal-print-root .proposal-print-station-name {
+  color: #111111;
+  font-size: 16pt;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+#proposal-print-measure-root .proposal-print-slogan,
+#proposal-print-root .proposal-print-slogan {
+  margin-top: 1.8mm;
+  color: #727272;
+  font-size: 8.5pt;
+  font-weight: 500;
+}
+
+#proposal-print-measure-root .proposal-print-hero,
+#proposal-print-root .proposal-print-hero {
+  min-height: 50mm;
+  margin-bottom: 5mm;
+  padding: 9mm 12mm;
+  border-radius: 16px;
+  color: #ffffff;
+  overflow: hidden;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+#proposal-print-measure-root .proposal-print-hero-type,
+#proposal-print-root .proposal-print-hero-type {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 8pt;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+}
+
+#proposal-print-measure-root .proposal-print-hero h1,
+#proposal-print-root .proposal-print-hero h1 {
+  max-width: 160mm;
+  max-height: 28mm;
+  margin: 4mm 0 0;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 34pt;
+  font-weight: 900;
+  line-height: 0.92;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+#proposal-print-measure-root .proposal-print-period-row,
+#proposal-print-root .proposal-print-period-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2.5mm;
+  margin-top: 6mm;
+}
+
+#proposal-print-measure-root .proposal-print-period-pill,
+#proposal-print-root .proposal-print-period-pill {
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  padding: 2mm 5mm;
+  color: #ffffff;
+  font-size: 8.5pt;
+  font-weight: 800;
+}
+
+#proposal-print-measure-root .proposal-print-period-note,
+#proposal-print-root .proposal-print-period-note {
+  max-width: 88mm;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 8pt;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+#proposal-print-measure-root .proposal-print-section-label,
+#proposal-print-root .proposal-print-section-label {
+  display: flex;
+  align-items: center;
+  gap: 2.5mm;
+  margin-bottom: 3mm;
+}
+
+#proposal-print-measure-root .proposal-print-section-label span,
+#proposal-print-root .proposal-print-section-label span {
+  display: block;
+  width: 1mm;
+  height: 3.5mm;
+  border-radius: 999px;
+}
+
+#proposal-print-measure-root .proposal-print-section-label strong,
+#proposal-print-root .proposal-print-section-label strong {
+  display: flex;
+  align-items: baseline;
+  gap: 2mm;
+  color: #111111;
+  font-size: 7.5pt;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+}
+
+#proposal-print-measure-root .proposal-print-section-label em,
+#proposal-print-root .proposal-print-section-label em {
+  color: #727272;
+  font-size: 6.5pt;
+  font-style: normal;
+  letter-spacing: 0.12em;
+}
+
+#proposal-print-measure-root .proposal-print-stats-section,
+#proposal-print-root .proposal-print-stats-section {
+  margin-bottom: 5mm;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+#proposal-print-measure-root .proposal-print-stats-grid,
+#proposal-print-root .proposal-print-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  overflow: hidden;
+  min-height: 20mm;
+  border: 1px solid #E1E7F0;
+  border-radius: 12px;
+}
+
+#proposal-print-measure-root .proposal-print-stat-card,
+#proposal-print-root .proposal-print-stat-card {
+  border-right: 1px solid #E1E7F0;
+}
+
+#proposal-print-measure-root .proposal-print-stat-card:last-child,
+#proposal-print-root .proposal-print-stat-card:last-child {
+  border-right: 0;
+}
+
+#proposal-print-measure-root .proposal-print-stat-bar,
+#proposal-print-root .proposal-print-stat-bar {
+  height: 1.5mm;
+}
+
+#proposal-print-measure-root .proposal-print-stat-body,
+#proposal-print-root .proposal-print-stat-body {
+  padding: 3.2mm 4mm;
+}
+
+#proposal-print-measure-root .proposal-print-stat-value,
+#proposal-print-root .proposal-print-stat-value {
+  font-size: 20pt;
+  font-weight: 900;
+  line-height: 1;
+}
+
+#proposal-print-measure-root .proposal-print-stat-description,
+#proposal-print-root .proposal-print-stat-description {
+  margin-top: 2mm;
+  color: #555555;
+  font-size: 6.8pt;
+  font-weight: 800;
+  line-height: 1.18;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: pre-line;
+}
+
+#proposal-print-measure-root .proposal-print-products-section,
+#proposal-print-root .proposal-print-products-section {
+  margin-bottom: 5mm;
+}
+
+#proposal-print-measure-root .proposal-print-products-grid,
+#proposal-print-root .proposal-print-products-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4mm;
+}
+
+#proposal-print-measure-root .proposal-print-product-card,
+#proposal-print-root .proposal-print-product-card {
+  min-height: 37mm;
+  max-height: 39mm;
+  padding: 4mm 4.5mm 3.5mm 6mm;
+  border: 1px solid #DCE7F6;
+  border-left: 10px solid var(--proposal-primary);
+  border-radius: 16px;
+  overflow: hidden;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+#proposal-print-measure-root .proposal-print-product-top,
+#proposal-print-root .proposal-print-product-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 2.5mm;
+  margin-bottom: 2.2mm;
+}
+
+#proposal-print-measure-root .proposal-print-product-qty,
+#proposal-print-root .proposal-print-product-qty {
+  font-size: 24pt;
+  font-weight: 900;
+  line-height: 1;
+}
+
+#proposal-print-measure-root .proposal-print-product-qty-label,
+#proposal-print-root .proposal-print-product-qty-label {
+  padding-top: 1mm;
+  color: #727272;
+  font-size: 6.7pt;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+#proposal-print-measure-root .proposal-print-product-title,
+#proposal-print-root .proposal-print-product-title {
+  color: #111111;
+  font-size: 9.5pt;
+  font-weight: 900;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+#proposal-print-measure-root .proposal-print-product-description,
+#proposal-print-root .proposal-print-product-description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  margin: 1.6mm 0 0;
+  overflow: hidden;
+  color: #565656;
+  font-size: 7.8pt;
+  line-height: 1.18;
+}
+
+#proposal-print-measure-root .proposal-print-product-tags,
+#proposal-print-root .proposal-print-product-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6mm;
+  margin-top: 2.5mm;
+}
+
+#proposal-print-measure-root .proposal-print-product-program,
+#proposal-print-root .proposal-print-product-program {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  background: #111111;
+  border-radius: 999px;
+  color: #ffffff;
+  padding: 1.2mm 3.2mm;
+  font-size: 6.3pt;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+#proposal-print-measure-root .proposal-print-product-meta,
+#proposal-print-root .proposal-print-product-meta {
+  margin-top: 1.3mm;
+  color: #565656;
+  font-size: 7.5pt;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+#proposal-print-measure-root .proposal-print-empty-products,
+#proposal-print-root .proposal-print-empty-products {
+  padding: 9mm 8mm;
+  border: 1px dashed #DCE7F6;
+  border-radius: 16px;
+  color: #727272;
+  font-size: 10pt;
+  font-weight: 600;
+  text-align: center;
+}
+
+#proposal-print-measure-root .proposal-print-spacer,
+#proposal-print-root .proposal-print-spacer {
+  min-height: 0;
+}
+
+#proposal-print-measure-root .proposal-print-investment,
+#proposal-print-root .proposal-print-investment {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 6mm;
+  min-height: 18mm;
+  margin-bottom: 5mm;
+  padding: 5mm 8mm;
+  border-radius: 16px;
+  color: #ffffff;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+#proposal-print-measure-root .proposal-print-investment-label,
+#proposal-print-root .proposal-print-investment-label {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 7.5pt;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+}
+
+#proposal-print-measure-root .proposal-print-investment-description,
+#proposal-print-root .proposal-print-investment-description {
+  max-width: 96mm;
+  margin-top: 2mm;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 8pt;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+#proposal-print-measure-root .proposal-print-investment-value,
+#proposal-print-root .proposal-print-investment-value {
+  color: #ffffff;
+  font-size: 27pt;
+  font-weight: 900;
+  line-height: 1;
+  text-align: right;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+#proposal-print-measure-root .proposal-print-footer,
+#proposal-print-root .proposal-print-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  min-height: 12mm;
+  padding-top: 4mm;
+  border-top: 1px solid #E1E7F0;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+#proposal-print-measure-root .proposal-print-footer-name,
+#proposal-print-root .proposal-print-footer-name {
+  color: #111111;
+  font-size: 14pt;
+  font-weight: 900;
+  line-height: 1;
+}
+
+#proposal-print-measure-root .proposal-print-footer-role,
+#proposal-print-root .proposal-print-footer-role {
+  margin-top: 1.8mm;
+  color: #727272;
+  font-size: 7.5pt;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+#proposal-print-measure-root .proposal-print-footer-contact,
+#proposal-print-root .proposal-print-footer-contact {
+  text-align: right;
+}
+
+#proposal-print-measure-root .proposal-print-footer-label,
+#proposal-print-root .proposal-print-footer-label {
+  color: #727272;
+  font-size: 6.8pt;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+#proposal-print-measure-root .proposal-print-footer-phone,
+#proposal-print-root .proposal-print-footer-phone {
+  margin-top: 1.8mm;
+  font-size: 11.5pt;
+  font-weight: 900;
+  line-height: 1;
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  html,
+  body {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  body > *:not(#proposal-print-root) {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  #proposal-print-root {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    width: 210mm !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 99999 !important;
+    background: #ffffff !important;
+  }
+
+  #proposal-print-root,
+  #proposal-print-root * {
+    visibility: visible !important;
+  }
+
+  .proposal-print-page {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+    padding: 10mm 14mm 8mm !important;
+    overflow: hidden !important;
+    box-shadow: none !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .proposal-print-page:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+
+  .proposal-print-page,
+  .proposal-print-page * {
+    font-family: 'Montserrat', Arial, sans-serif !important;
+  }
+
+  .proposal-print-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-height: 14mm !important;
+    margin-bottom: 5mm !important;
+  }
+
+  .proposal-print-logo {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 13.5mm !important;
+    height: 13.5mm !important;
+    border-radius: 4mm !important;
+    overflow: hidden !important;
+    color: #ffffff !important;
+    font-size: 14pt !important;
+    font-weight: 900 !important;
+    letter-spacing: 0 !important;
+  }
+
+  .proposal-print-logo img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    padding: 2mm !important;
+  }
+
+  .proposal-print-station-name {
+    color: #111111 !important;
+    font-size: 16pt !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.03em !important;
+  }
+
+  .proposal-print-slogan {
+    margin-top: 1.8mm !important;
+    color: #727272 !important;
+    font-size: 8.5pt !important;
+    font-weight: 500 !important;
+  }
+
+  .proposal-print-hero {
+    min-height: 50mm !important;
+    margin-bottom: 5mm !important;
+    padding: 9mm 12mm !important;
+    border-radius: 16px !important;
+    color: #ffffff !important;
+    overflow: hidden !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .proposal-print-hero-type {
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-size: 8pt !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.24em !important;
+  }
+
+  .proposal-print-hero h1 {
+    max-width: 160mm !important;
+    max-height: 28mm !important;
+    margin: 4mm 0 0 !important;
+    overflow: hidden !important;
+    color: #ffffff !important;
+    font-size: 34pt !important;
+    font-weight: 900 !important;
+    line-height: 0.92 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0 !important;
+  }
+
+  .proposal-print-period-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 2.5mm !important;
+    margin-top: 6mm !important;
+  }
+
+  .proposal-print-period-pill {
+    border: 1px solid rgba(255, 255, 255, 0.9) !important;
+    border-radius: 999px !important;
+    padding: 2mm 5mm !important;
+    color: #ffffff !important;
+    font-size: 8.5pt !important;
+    font-weight: 800 !important;
+  }
+
+  .proposal-print-period-note {
+    max-width: 88mm !important;
+    color: rgba(255, 255, 255, 0.82) !important;
+    font-size: 8pt !important;
+    font-weight: 500 !important;
+    line-height: 1.25 !important;
+  }
+
+  .proposal-print-section-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 2.5mm !important;
+    margin-bottom: 3mm !important;
+  }
+
+  .proposal-print-section-label span {
+    display: block !important;
+    width: 1mm !important;
+    height: 3.5mm !important;
+    border-radius: 999px !important;
+  }
+
+  .proposal-print-section-label strong {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 2mm !important;
+    color: #111111 !important;
+    font-size: 7.5pt !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.22em !important;
+  }
+
+  .proposal-print-section-label em {
+    color: #727272 !important;
+    font-size: 6.5pt !important;
+    font-style: normal !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .proposal-print-stats-section {
+    margin-bottom: 5mm !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .proposal-print-stats-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    overflow: hidden !important;
+    min-height: 20mm !important;
+    border: 1px solid #E1E7F0 !important;
+    border-radius: 12px !important;
+  }
+
+  .proposal-print-stat-card {
+    border-right: 1px solid #E1E7F0 !important;
+  }
+
+  .proposal-print-stat-card:last-child {
+    border-right: 0 !important;
+  }
+
+  .proposal-print-stat-bar {
+    height: 1.5mm !important;
+  }
+
+  .proposal-print-stat-body {
+    padding: 3.2mm 4mm !important;
+  }
+
+  .proposal-print-stat-value {
+    font-size: 20pt !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+  }
+
+  .proposal-print-stat-description {
+    margin-top: 2mm !important;
+    color: #555555 !important;
+    font-size: 6.8pt !important;
+    font-weight: 800 !important;
+    line-height: 1.18 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    white-space: pre-line !important;
+  }
+
+  .proposal-print-products-section {
+    margin-bottom: 5mm !important;
+  }
+
+  .proposal-print-products-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 4mm !important;
+  }
+
+  .proposal-print-product-card {
+    min-height: 37mm !important;
+    max-height: 39mm !important;
+    padding: 4mm 4.5mm 3.5mm 6mm !important;
+    border: 1px solid #DCE7F6 !important;
+    border-left: 10px solid var(--proposal-primary) !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .proposal-print-product-top {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 2.5mm !important;
+    margin-bottom: 2.2mm !important;
+  }
+
+  .proposal-print-product-qty {
+    font-size: 24pt !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+  }
+
+  .proposal-print-product-qty-label {
+    padding-top: 1mm !important;
+    color: #727272 !important;
+    font-size: 6.7pt !important;
+    font-weight: 900 !important;
+    line-height: 1.1 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .proposal-print-product-title {
+    color: #111111 !important;
+    font-size: 9.5pt !important;
+    font-weight: 900 !important;
+    line-height: 1.15 !important;
+    text-transform: uppercase !important;
+  }
+
+  .proposal-print-product-description {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 3 !important;
+    margin: 1.6mm 0 0 !important;
+    overflow: hidden !important;
+    color: #565656 !important;
+    font-size: 7.8pt !important;
+    line-height: 1.18 !important;
+  }
+
+  .proposal-print-product-tags {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 1.6mm !important;
+    margin-top: 2.5mm !important;
+  }
+
+  .proposal-print-product-program {
+    display: inline-flex !important;
+    max-width: 100% !important;
+    align-items: center !important;
+    background: #111111 !important;
+    border-radius: 999px !important;
+    color: #ffffff !important;
+    padding: 1.2mm 3.2mm !important;
+    font-size: 6.3pt !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .proposal-print-product-meta {
+    margin-top: 1.3mm !important;
+    color: #565656 !important;
+    font-size: 7.5pt !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  .proposal-print-empty-products {
+    padding: 9mm 8mm !important;
+    border: 1px dashed #DCE7F6 !important;
+    border-radius: 16px !important;
+    color: #727272 !important;
+    font-size: 10pt !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+  }
+
+  .proposal-print-spacer {
+    min-height: 0 !important;
+  }
+
+  .proposal-print-investment {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    align-items: end !important;
+    gap: 6mm !important;
+    min-height: 18mm !important;
+    margin-bottom: 5mm !important;
+    padding: 5mm 8mm !important;
+    border-radius: 16px !important;
+    color: #ffffff !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .proposal-print-investment-label {
+    color: rgba(255, 255, 255, 0.55) !important;
+    font-size: 7.5pt !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.24em !important;
+  }
+
+  .proposal-print-investment-description {
+    max-width: 96mm !important;
+    margin-top: 2mm !important;
+    color: rgba(255, 255, 255, 0.74) !important;
+    font-size: 8pt !important;
+    font-weight: 500 !important;
+    line-height: 1.25 !important;
+  }
+
+  .proposal-print-investment-value {
+    color: #ffffff !important;
+    font-size: 27pt !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    text-align: right !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .proposal-print-footer {
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: space-between !important;
+    min-height: 12mm !important;
+    padding-top: 4mm !important;
+    border-top: 1px solid #E1E7F0 !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .proposal-print-footer-name {
+    color: #111111 !important;
+    font-size: 14pt !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+  }
+
+  .proposal-print-footer-role {
+    margin-top: 1.8mm !important;
+    color: #727272 !important;
+    font-size: 7.5pt !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .proposal-print-footer-contact {
+    text-align: right !important;
+  }
+
+  .proposal-print-footer-label {
+    color: #727272 !important;
+    font-size: 6.8pt !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.18em !important;
+  }
+
+  .proposal-print-footer-phone {
+    margin-top: 1.8mm !important;
+    font-size: 11.5pt !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/**
+ * Using the elevate system.
+ * Automatic contrast adjustment.
+ *
+ * <element className="hover-elevate" />
+ * <element className="active-elevate-2" />
+ *
+ * // Using the tailwind utility when a data attribute is "on"
+ * <element className="toggle-elevate data-[state=on]:toggle-elevated" />
+ * // Or manually controlling the toggle state
+ * <element className="toggle-elevate toggle-elevated" />
+ *
+ * Elevation systems have to handle many states.
+ * - not-hovered, vs. hovered vs. active  (three mutually exclusive states)
+ * - toggled or not
+ * - focused or not (this is not handled with these utilities)
+ *
+ * Even without handling focused or not, this is six possible combinations that
+ * need to be distinguished from eachother visually.
+ */
+@layer utilities {
+
+  /* Hide ugly search cancel button in Chrome until we can style it properly */
+  input[type="search"]::-webkit-search-cancel-button {
+    @apply hidden;
+  }
+
+  /* Placeholder styling for contentEditable div */
+  [contenteditable][data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+  }
+
+  /* .no-default-hover-elevate/no-default-active-elevate is an escape hatch so consumers of
+   * buttons/badges can remove the automatic brightness adjustment on interactions
+   * and program their own. */
+  .no-default-hover-elevate {}
+
+  .no-default-active-elevate {}
+
+
+  /**
+   * Toggleable backgrounds go behind the content. Hoverable/active goes on top.
+   * This way they can stack/compound. Both will overlap the parent's borders!
+   * So borders will be automatically adjusted both on toggle, and hover/active,
+   * and they will be compounded.
+   */
+  .toggle-elevate::before,
+  .toggle-elevate-2::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0px;
+    /*border-radius: inherit;   match rounded corners */
+    border-radius: inherit;
+    z-index: -1;
+    /* sits behind content but above backdrop */
+  }
+
+  .toggle-elevate.toggle-elevated::before {
+    background-color: var(--elevate-2);
+  }
+
+  /* If there's a 1px border, adjust the inset so that it covers that parent's border */
+  .border.toggle-elevate::before {
+    inset: -1px;
+  }
+
+  /* Does not work on elements with overflow:hidden! */
+  .hover-elevate:not(.no-default-hover-elevate),
+  .active-elevate:not(.no-default-active-elevate),
+  .hover-elevate-2:not(.no-default-hover-elevate),
+  .active-elevate-2:not(.no-default-active-elevate) {
+    position: relative;
+    z-index: 0;
+  }
+
+  .hover-elevate:not(.no-default-hover-elevate)::after,
+  .active-elevate:not(.no-default-active-elevate)::after,
+  .hover-elevate-2:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:not(.no-default-active-elevate)::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0px;
+    /*border-radius: inherit;   match rounded corners */
+    border-radius: inherit;
+    z-index: 999;
+    /* sits in front of content */
+  }
+
+  .hover-elevate:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-1);
+  }
+
+  .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-2);
+  }
+
+  /* If there's a 1px border, adjust the inset so that it covers that parent's border */
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
+    inset: -1px;
+  }
+}
