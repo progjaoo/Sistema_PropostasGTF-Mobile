@@ -1,27 +1,31 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { ProposalSummary } from '@/src/types';
 import { StatusBadge } from './StatusBadge';
 import { formatRelativeDate, formatCurrency, formatMonthYear } from '@/src/utils/format';
 import { useColors } from '@/hooks/useColors';
+import { UICard, UISeparator } from '@/src/ui';
 
 interface Props {
   proposal: ProposalSummary;
   showOwner?: boolean;
+  style?: StyleProp<ViewStyle>;
+  testID?: string;
 }
 
-export function ProposalCard({ proposal, showOwner = false }: Props) {
+export function ProposalCard({ proposal, showOwner = false, style, testID }: Props) {
   const colors = useColors();
   const clientName = proposal.advertiserTradeName ?? proposal.advertiserName ?? proposal.clientLine1 ?? 'Sem cliente';
   const period = formatMonthYear(proposal.propMonth, proposal.propYear);
 
   return (
-    <TouchableOpacity
-      style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
+    <UICard
+      testID={testID}
+      variant="default"
+      style={[styles.card, style]}
       onPress={() => router.push(`/proposal/${proposal.id}`)}
-      activeOpacity={0.7}
     >
       <View style={styles.header}>
         <View style={styles.clientInfo}>
@@ -33,7 +37,7 @@ export function ProposalCard({ proposal, showOwner = false }: Props) {
         <StatusBadge status={proposal.status} size="sm" />
       </View>
 
-      <View style={[styles.divider, { backgroundColor: colors.border }]} />
+      <UISeparator />
 
       <View style={styles.meta}>
         {proposal.stationName && (
@@ -74,14 +78,12 @@ export function ProposalCard({ proposal, showOwner = false }: Props) {
           {formatRelativeDate(proposal.updatedAt)}
         </Text>
       </View>
-    </TouchableOpacity>
+    </UICard>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 10,
-    borderWidth: 1,
     padding: 14,
     marginHorizontal: 16,
     marginVertical: 5,
@@ -104,9 +106,6 @@ const styles = StyleSheet.create({
   period: {
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
-  },
-  divider: {
-    height: 1,
   },
   meta: {
     flexDirection: 'row',

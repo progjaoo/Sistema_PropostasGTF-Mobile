@@ -455,8 +455,8 @@ Preencher apenas ao terminar o sprint correspondente:
 
 | Sprint | Commit de checkpoint | Typecheck | Testes | iOS | Android | Validação do usuário |
 |---|---|---|---|---|---|---|
-| 1 | Não criado | `OK` | `OK` | `PENDENTE USUARIO` | `PENDENTE USUARIO` | `AGUARDANDO VALIDACAO VISUAL` |
-| 2 | — | — | — | — | — | `BLOQUEADO` |
+| 1 | `aa77e2e` | `OK` | `OK` | `OK USUARIO` | `OK USUARIO` | `APROVADO` |
+| 2 | Nao criado | `OK` | `OK` | `PENDENTE USUARIO` | `PENDENTE USUARIO` | `AGUARDANDO VALIDACAO VISUAL` |
 | 3 | — | — | — | — | — | `BLOQUEADO` |
 | 4 | — | — | — | — | — | `BLOQUEADO` |
 | 5 | — | — | — | — | — | `BLOQUEADO` |
@@ -483,9 +483,24 @@ Não marcar a coluna “Validação do usuário” como aprovada por inferência
 - [x] Criado teste de contrato em `src/theme/__tests__/tokens.test.ts`.
 - [x] Validado: `pnpm run typecheck`.
 - [x] Validado: `pnpm test`.
-- [ ] Commit de checkpoint: nao criado nesta execucao para manter a revisao visual antes do checkpoint final.
+- [x] Commit de checkpoint: `aa77e2e`.
+- [x] Validacao visual no Expo Go/simulador: aprovada pelo usuario.
+- [x] Liberacao do Sprint 2: aprovada pelo usuario.
+
+### Checklist de Execucao — Sprint 2
+
+- [x] Branch de teste `visual-teste-sprint-2` confirmada antes da implementacao.
+- [x] Criados componentes UI: `Card.tsx`, `Badge.tsx`, `Button.tsx`, `Input.tsx`, `Header.tsx`, `BottomSheet.tsx`, `Chip.tsx`, `EmptyState.tsx`, `Avatar.tsx`, `Separator.tsx` e `src/ui/index.ts`.
+- [x] Componentes novos usam `Pressable`, `StyleSheet.create`, `gap`, `borderCurve: 'continuous'`, areas minimas de toque e props de acessibilidade quando interativos.
+- [x] `showConfirm` mantido com `Alert` nativo, sem conversao para sheet.
+- [x] `StatusBadge`, `EmptyState` e `FormInput` convertidos para adaptadores sobre a nova UI.
+- [x] `ProposalCard` e `AdvertiserCard` preparados para composicao com a nova UI sem alterar navegacao ou callbacks.
+- [x] Criado teste de contrato em `src/ui/__tests__/legacyContracts.test.tsx`.
+- [x] Validado: `pnpm run typecheck`.
+- [x] Validado: `pnpm test`.
+- [ ] Commit de checkpoint: pendente ate validacao visual do usuario.
 - [ ] Validacao visual no Expo Go/simulador: pendente com o usuario.
-- [ ] Liberacao do Sprint 2: bloqueada ate aprovacao visual explicita.
+- [ ] Liberacao do Sprint 3: bloqueada ate aprovacao visual explicita.
 
 ---
 
