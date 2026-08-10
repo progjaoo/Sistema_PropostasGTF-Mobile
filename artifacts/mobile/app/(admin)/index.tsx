@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
+  View, Text, StyleSheet, ScrollView,
   RefreshControl, Platform,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -15,6 +15,8 @@ import { DashboardStats, ProposalSummary } from '@/src/types';
 import { PROPOSAL_STATUS_COLORS } from '@/src/utils/enums';
 import { useAuthStore } from '@/src/store/authStore';
 import { useColors } from '@/hooks/useColors';
+import { UIBadge, UIButton, UICard, UIHeader } from '@/src/ui';
+import { shadows, spacing, tokens } from '@/src/theme';
 
 const STAT_CARDS = [
   { key: 'draft', label: 'Rascunhos', icon: 'edit-3', status: 'DRAFT' },
@@ -47,13 +49,12 @@ export default function DashboardScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <View>
-          <Text style={[styles.greeting, { color: colors.mutedForeground }]}>Olá,</Text>
-          <Text style={[styles.userName, { color: colors.foreground }]}>{user?.name?.split(' ')[0] ?? 'Admin'}</Text>
-        </View>
-        <View style={[styles.adminBadge, { backgroundColor: colors.primary + '15' }]}>
-          <Text style={[styles.adminText, { color: colors.primary }]}>ADMIN</Text>
-        </View>
+        <UIHeader
+          eyebrow="Resumo geral"
+          title={`Olá, ${user?.name?.split(' ')[0] ?? 'Admin'}`}
+          subtitle="Acompanhe o desempenho comercial por status."
+          action={<UIBadge label="ADMIN" color={colors.primary} />}
+        />
       </View>
 
       <ScrollView
@@ -67,18 +68,18 @@ export default function DashboardScreen() {
         ) : stats ? (
           <View style={styles.statsGrid}>
             {STAT_CARDS.map(({ key, label, icon, status }) => (
-              <TouchableOpacity
+              <UICard
                 key={key}
-                style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border, borderTopColor: PROPOSAL_STATUS_COLORS[status as keyof typeof PROPOSAL_STATUS_COLORS] }]}
+                variant="elevated"
+                style={[styles.statCard, { borderTopColor: PROPOSAL_STATUS_COLORS[status as keyof typeof PROPOSAL_STATUS_COLORS] }]}
                 onPress={() => router.push(`/(admin)/proposals?status=${status}`)}
-                activeOpacity={0.7}
               >
                 <Feather name={icon as any} size={20} color={PROPOSAL_STATUS_COLORS[status as keyof typeof PROPOSAL_STATUS_COLORS]} />
                 <Text style={[styles.statValue, { color: colors.foreground }]}>
                   {(stats as any)[key] ?? 0}
                 </Text>
                 <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{label}</Text>
-              </TouchableOpacity>
+              </UICard>
             ))}
           </View>
         ) : null}
@@ -86,9 +87,7 @@ export default function DashboardScreen() {
         {/* Recent */}
         <View style={styles.recentHeader}>
           <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>RECENTES</Text>
-          <TouchableOpacity onPress={() => router.push('/(admin)/proposals')}>
-            <Text style={[styles.seeAll, { color: colors.primary }]}>Ver todas</Text>
-          </TouchableOpacity>
+          <UIButton title="Ver todas" variant="ghost" size="sm" iconRight="arrow-right" onPress={() => router.push('/(admin)/proposals')} />
         </View>
 
         {recentLoading ? (
@@ -105,17 +104,12 @@ export default function DashboardScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 14, borderBottomWidth: 1 },
-  greeting: { fontSize: 13, fontFamily: 'Inter_400Regular' },
-  userName: { fontSize: 22, fontFamily: 'Inter_700Bold' },
-  adminBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 99 },
-  adminText: { fontSize: 12, fontFamily: 'Inter_700Bold', letterSpacing: 1 },
+  header: { paddingHorizontal: spacing.lg, paddingBottom: spacing.md, borderBottomWidth: 1 },
   scrollContent: { paddingBottom: 120 },
-  sectionTitle: { fontSize: 12, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.5, paddingHorizontal: 16, paddingTop: 20, paddingBottom: 8 },
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, gap: 8 },
-  statCard: { flex: 1, minWidth: '45%', borderRadius: 12, borderWidth: 1, borderTopWidth: 3, padding: 16, gap: 4, alignItems: 'center' },
+  sectionTitle: { fontSize: 12, fontFamily: 'Inter_700Bold', letterSpacing: 0.8, paddingHorizontal: spacing.lg, paddingTop: spacing.xl, paddingBottom: spacing.sm },
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.md, gap: spacing.sm },
+  statCard: { flex: 1, minWidth: '45%', borderTopWidth: 3, padding: spacing.lg, gap: spacing.xs, alignItems: 'center', borderRadius: tokens.radius.xl, ...shadows.sm },
   statValue: { fontSize: 28, fontFamily: 'Inter_700Bold' },
   statLabel: { fontSize: 12, fontFamily: 'Inter_500Medium' },
-  recentHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 16 },
-  seeAll: { fontSize: 13, fontFamily: 'Inter_500Medium' },
+  recentHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: spacing.md },
 });
