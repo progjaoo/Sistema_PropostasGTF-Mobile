@@ -1,40 +1,10 @@
+import { legacyDarkColors, legacyLightColors, tokens } from '@/src/theme/tokens';
+
 const colors = {
-  light: {
-    text: '#0F172A',
-    tint: '#1B4A8A',
-    background: '#F8F9FC',
-    foreground: '#0F172A',
-    card: '#FFFFFF',
-    cardForeground: '#0F172A',
-    primary: '#1B4A8A',
-    primaryLight: '#2563EB',
-    primaryForeground: '#FFFFFF',
-    secondary: '#E2E8F0',
-    secondaryForeground: '#334155',
-    muted: '#F1F5F9',
-    mutedForeground: '#64748B',
-    accent: '#EFF6FF',
-    accentForeground: '#1B4A8A',
-    destructive: '#DC2626',
-    destructiveForeground: '#FFFFFF',
-    danger: '#DC2626',
-    dangerForeground: '#FFFFFF',
-    success: '#16A34A',
-    successForeground: '#FFFFFF',
-    warning: '#D97706',
-    warningForeground: '#FFFFFF',
-    info: '#0284C7',
-    infoForeground: '#FFFFFF',
-    border: '#E2E8F0',
-    input: '#E2E8F0',
-    // Status
-    draft: '#64748B',
-    sent: '#0284C7',
-    approved: '#16A34A',
-    rejected: '#DC2626',
-    archived: '#94A3B8',
-  },
+  light: legacyLightColors,
+  dark: legacyDarkColors,
   radius: 8,
+  semantic: tokens.colors,
 };
 
 export default colors;
