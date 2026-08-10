@@ -1,16 +1,18 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import type { AdvertiserLinkedProposal } from '@/src/api/contracts';
 import { PROPOSAL_STATUS_LABELS } from '@/src/utils/enums';
 import { useColors } from '@/hooks/useColors';
+import { UIBadge, UICard, UIEmptyState } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 export function AdvertiserProposalList({ proposals }: { proposals: AdvertiserLinkedProposal[] }) {
   const colors = useColors();
 
   if (!proposals.length) {
-    return <Text style={[styles.empty, { color: colors.mutedForeground }]}>Nenhuma proposta vinculada.</Text>;
+    return <UIEmptyState icon="file-text" title="Sem propostas" description="Nenhuma proposta vinculada." style={styles.emptyState} />;
   }
 
   return (
@@ -22,9 +24,7 @@ export function AdvertiserProposalList({ proposals }: { proposals: AdvertiserLin
               <Text style={[styles.title, { color: colors.foreground }]} numberOfLines={1}>
                 {proposal.viewerCanEdit ? proposal.propType : proposal.programName}
               </Text>
-              <Text style={[styles.status, { color: colors.primary }]}>
-                {PROPOSAL_STATUS_LABELS[proposal.status]}
-              </Text>
+              <UIBadge label={PROPOSAL_STATUS_LABELS[proposal.status]} variant={proposal.status.toLowerCase() as any} size="sm" />
             </View>
             {proposal.viewerCanEdit ? (
               <>
@@ -47,17 +47,17 @@ export function AdvertiserProposalList({ proposals }: { proposals: AdvertiserLin
         );
 
         if (!proposal.viewerCanEdit) {
-          return <View key={proposal.id} style={[styles.card, { borderColor: colors.border, backgroundColor: colors.muted }]}>{content}</View>;
+          return <UICard key={proposal.id} variant="muted" style={styles.card}>{content}</UICard>;
         }
         return (
-          <TouchableOpacity
+          <UICard
             key={proposal.id}
             accessibilityRole="button"
-            style={[styles.card, { borderColor: colors.border, backgroundColor: colors.card }]}
+            style={styles.card}
             onPress={() => router.push(`/proposal/${proposal.id}`)}
           >
             {content}
-          </TouchableOpacity>
+          </UICard>
         );
       })}
     </View>
@@ -65,14 +65,12 @@ export function AdvertiserProposalList({ proposals }: { proposals: AdvertiserLin
 }
 
 const styles = StyleSheet.create({
-  list: { gap: 10 },
-  card: { borderWidth: 1, borderRadius: 12, padding: 14, gap: 6 },
+  list: { gap: spacing.sm },
+  card: { gap: spacing.sm },
   top: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   title: { flex: 1, fontFamily: 'Inter_600SemiBold', fontSize: 15 },
-  status: { fontFamily: 'Inter_600SemiBold', fontSize: 12 },
   meta: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 13, lineHeight: 18 },
   value: { fontFamily: 'Inter_700Bold', fontSize: 15 },
   restricted: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
-  empty: { fontFamily: 'Inter_400Regular', textAlign: 'center', paddingVertical: 18 },
+  emptyState: { flex: 0, paddingVertical: spacing.lg },
 });
-

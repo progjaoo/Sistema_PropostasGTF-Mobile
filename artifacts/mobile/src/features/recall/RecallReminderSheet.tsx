@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { apiCall } from '@/src/api/client';
 import { useAuthStore } from '@/src/store/authStore';
 import { getRecallAdvertiserName, getRecallReminderList, RecallReminderPayload } from '@/src/utils/recallReminders';
 import { useColors } from '@/hooks/useColors';
+import { UIBottomSheet, UIButton, UICard } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 let displayedForUser: string | null = null;
 
@@ -28,17 +30,16 @@ export function RecallReminderSheet() {
   }, [userId, reminders.length]);
 
   return (
-    <Modal transparent visible={visible} animationType="fade" onRequestClose={() => setVisible(false)}>
-      <Pressable style={styles.backdrop} onPress={() => setVisible(false)}>
-        <Pressable style={[styles.sheet, { backgroundColor: colors.card }]} onPress={(event) => event.stopPropagation()}>
+    <UIBottomSheet visible={visible} onClose={() => setVisible(false)} style={styles.sheet}>
           <Text style={[styles.title, { color: colors.foreground }]}>Oportunidades de recaptura</Text>
           <Text style={[styles.description, { color: colors.mutedForeground }]}>
             Estes contatos ja podem receber uma nova abordagem comercial.
           </Text>
           {reminders.map((reminder) => (
-            <TouchableOpacity
+            <UICard
               key={reminder.id}
-              style={[styles.item, { borderColor: colors.border }]}
+              variant="muted"
+              style={styles.item}
               onPress={() => {
                 setVisible(false);
                 router.push(`/proposal/${reminder.proposalId}`);
@@ -46,26 +47,18 @@ export function RecallReminderSheet() {
             >
               <Text style={[styles.itemTitle, { color: colors.foreground }]}>{getRecallAdvertiserName(reminder)}</Text>
               <Text style={[styles.itemMeta, { color: colors.mutedForeground }]}>{reminder.milestoneMonths} meses</Text>
-            </TouchableOpacity>
+            </UICard>
           ))}
-          <TouchableOpacity style={[styles.close, { backgroundColor: colors.primary }]} onPress={() => setVisible(false)}>
-            <Text style={styles.closeText}>Continuar</Text>
-          </TouchableOpacity>
-        </Pressable>
-      </Pressable>
-    </Modal>
+          <UIButton title="Continuar" size="lg" onPress={() => setVisible(false)} />
+    </UIBottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,.5)', justifyContent: 'center', padding: 20 },
-  sheet: { borderRadius: 16, padding: 20, gap: 10 },
+  sheet: { gap: spacing.sm },
   title: { fontFamily: 'Inter_700Bold', fontSize: 20 },
   description: { fontFamily: 'Inter_400Regular', fontSize: 14, lineHeight: 20, marginBottom: 4 },
-  item: { minHeight: 56, borderWidth: 1, borderRadius: 10, padding: 12 },
+  item: { minHeight: 56 },
   itemTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 14 },
   itemMeta: { fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 3 },
-  close: { minHeight: 48, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginTop: 4 },
-  closeText: { color: '#FFF', fontFamily: 'Inter_600SemiBold' },
 });
-

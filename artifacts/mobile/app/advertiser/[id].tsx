@@ -20,6 +20,8 @@ import { AdvertiserProposalList } from '@/src/features/advertisers/AdvertiserPro
 import { LeadSourcePicker } from '@/src/features/advertisers/LeadSourcePicker';
 import { getAdvertiser, listLeadSources, saveAdvertiser } from '@/src/features/advertisers/api';
 import { queryKeys } from '@/src/api/queryKeys';
+import { UIButton, UICard, UIChip, UIHeader } from '@/src/ui';
+import { shadows, spacing, tokens } from '@/src/theme';
 
 export default function AdvertiserDetailScreen() {
   const { id, status: requestedStatus, selectOnReturn } = useLocalSearchParams<{ id: string; status?: AdvertiserStatus; selectOnReturn?: string }>();
@@ -110,52 +112,47 @@ export default function AdvertiserDetailScreen() {
       keyboardShouldPersistTaps="handled"
       bottomOffset={20}
     >
-      <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
+      <View style={[styles.header, { paddingTop: topPad + spacing.md, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
           <Feather name="arrow-left" size={24} color={colors.foreground} />
         </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Text style={[styles.headerTitle, { color: colors.foreground }]} numberOfLines={1}>{title}</Text>
-          {!isNew && (
-            <View style={[styles.statusTag, { backgroundColor: isLead ? colors.warning + '20' : colors.success + '20' }]}>
-              <Text style={[styles.statusTagText, { color: isLead ? colors.warning : colors.success }]}>
-                {isLead ? 'Lead' : 'Cliente'}
-              </Text>
-            </View>
-          )}
-        </View>
+        <UIHeader
+          title={title}
+          subtitle={isNew ? 'Cadastre um novo contato comercial.' : 'Dados comerciais e propostas vinculadas.'}
+          style={styles.headerCenter}
+          action={!isNew ? <UIChip label={isLead ? 'Lead' : 'Cliente'} active /> : undefined}
+        />
         {isDirty && (
-          <TouchableOpacity
-            style={[styles.saveBtn, { backgroundColor: colors.primary }, saveMutation.isPending && styles.disabled]}
+          <UIButton
+            title="Salvar"
+            size="sm"
+            style={saveMutation.isPending && styles.disabled}
             onPress={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
           >
-            {saveMutation.isPending ? <ActivityIndicator size="small" color="#FFF" /> : <Text style={styles.saveBtnText}>Salvar</Text>}
-          </TouchableOpacity>
+            {saveMutation.isPending ? <ActivityIndicator size="small" color={colors.primaryForeground} /> : <Text style={styles.saveBtnText}>Salvar</Text>}
+          </UIButton>
         )}
       </View>
 
       {isNew && role === 'ADMIN' && (
-        <View style={styles.statusSection}>
+        <UICard variant="elevated" style={styles.statusSection}>
           <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>TIPO</Text>
           <View style={styles.statusToggle}>
             {(['LEAD', 'CLIENT'] as AdvertiserStatus[]).map((s) => (
-              <TouchableOpacity
+              <UIChip
                 key={s}
-                style={[styles.statusBtn, { borderColor: colors.border }, status === s && { backgroundColor: colors.primary, borderColor: colors.primary }]}
+                label={s === 'LEAD' ? 'Lead' : 'Cliente'}
+                active={status === s}
                 onPress={() => setStatus(s)}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.statusBtnText, { color: status === s ? '#FFF' : colors.mutedForeground }]}>
-                  {s === 'LEAD' ? 'Lead' : 'Cliente'}
-                </Text>
-              </TouchableOpacity>
+                style={styles.statusBtn}
+              />
             ))}
           </View>
-        </View>
+        </UICard>
       )}
 
-      <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+      <UICard variant="elevated" style={styles.form}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>DADOS PRINCIPAIS</Text>
         <FormInput label="Nome / Razão Social" required leftIcon="briefcase" placeholder="Nome do anunciante" value={tradeName} onChangeText={(t) => { setTradeName(t); setIsDirty(true); }} />
         <FormInput label="Nome do Contato" leftIcon="user" placeholder="Responsável" value={contactName} onChangeText={(t) => { setContactName(t); setIsDirty(true); }} />
@@ -171,30 +168,33 @@ export default function AdvertiserDetailScreen() {
             }}
           />
         )}
-      </View>
+      </UICard>
 
       {!isNew && (
-        <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+        <UICard variant="elevated" style={styles.form}>
           <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>PROPOSTAS VINCULADAS</Text>
           <AdvertiserProposalList proposals={advertiser?.proposals ?? []} />
-        </View>
+        </UICard>
       )}
 
-      <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+      <UICard variant="elevated" style={styles.form}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>CONTATO</Text>
         <FormInput label="Telefone" leftIcon="phone" placeholder="(00) 00000-0000" keyboardType="phone-pad" value={contactPhone} onChangeText={(t) => { setContactPhone(t); setIsDirty(true); }} />
         <FormInput label="E-mail" leftIcon="mail" placeholder="contato@empresa.com" keyboardType="email-address" autoCapitalize="none" value={contactEmail} onChangeText={(t) => { setContactEmail(t); setIsDirty(true); }} />
-      </View>
+      </UICard>
 
-      <View style={[styles.form, { backgroundColor: colors.card, borderTopColor: colors.border, borderBottomColor: colors.border }]}>
+      <UICard variant="elevated" style={styles.form}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>OBSERVAÇÕES</Text>
         <FormInput label="Informação interna" leftIcon="file-text" placeholder="Anotações sobre o anunciante..." multiline numberOfLines={3} value={notes} onChangeText={(t) => { setNotes(t); setIsDirty(true); }} />
-      </View>
+      </UICard>
 
       {isNew && (
         <View style={{ padding: 20 }}>
-          <TouchableOpacity
-            style={[styles.createBtn, { backgroundColor: tradeName.trim() ? colors.primary : colors.muted }, saveMutation.isPending && styles.disabled]}
+          <UIButton
+            title="Criar cadastro"
+            size="lg"
+            variant={tradeName.trim() ? 'primary' : 'secondary'}
+            style={[styles.createBtn, saveMutation.isPending && styles.disabled]}
             onPress={() => {
               if (status === 'LEAD' && !leadSourceId) {
                 setSourceError('A origem e obrigatoria.');
@@ -203,10 +203,9 @@ export default function AdvertiserDetailScreen() {
               if (tradeName.trim()) saveMutation.mutate();
             }}
             disabled={!tradeName.trim() || saveMutation.isPending}
-            activeOpacity={0.8}
           >
-            {saveMutation.isPending ? <ActivityIndicator color="#FFF" /> : <Text style={styles.createBtnText}>Criar cadastro</Text>}
-          </TouchableOpacity>
+            {saveMutation.isPending ? <ActivityIndicator color={colors.primaryForeground} /> : <Text style={styles.createBtnText}>Criar cadastro</Text>}
+          </UIButton>
         </View>
       )}
     </KeyboardAwareScrollViewCompat>
@@ -214,20 +213,16 @@ export default function AdvertiserDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1, gap: 10 },
-  headerCenter: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
-  headerTitle: { fontSize: 17, fontFamily: 'Inter_600SemiBold', flex: 1 },
-  statusTag: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99 },
-  statusTagText: { fontSize: 11, fontFamily: 'Inter_600SemiBold' },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.lg, paddingBottom: spacing.md, borderBottomWidth: 1, gap: spacing.sm },
+  headerCenter: { flex: 1 },
   saveBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 8 },
   saveBtnText: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: '#FFF' },
   disabled: { opacity: 0.7 },
-  statusSection: { padding: 16, gap: 8 },
-  statusToggle: { flexDirection: 'row', gap: 10 },
-  statusBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, borderWidth: 1.5, alignItems: 'center' },
-  statusBtnText: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
+  statusSection: { margin: spacing.lg, gap: spacing.sm },
+  statusToggle: { flexDirection: 'row', gap: spacing.sm },
+  statusBtn: { flex: 1 },
   sectionLabel: { fontSize: 12, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.5 },
-  form: { padding: 20, gap: 16, borderTopWidth: 1, borderBottomWidth: 1, marginTop: 12 },
-  createBtn: { height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  form: { marginHorizontal: spacing.lg, marginTop: spacing.md, gap: spacing.lg, borderRadius: tokens.radius.xl, ...shadows.sm },
+  createBtn: { minHeight: 52 },
   createBtnText: { fontSize: 16, fontFamily: 'Inter_600SemiBold', color: '#FFF' },
 });

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import type { LeadSource } from '@/src/api/contracts';
 import { useColors } from '@/hooks/useColors';
+import { UIBottomSheet, UICard } from '@/src/ui';
+import { spacing } from '@/src/theme';
 
 interface Props {
   sources: LeadSource[];
@@ -19,7 +21,7 @@ export function LeadSourcePicker({ sources, value, onChange, error }: Props) {
   return (
     <View style={styles.field}>
       <Text style={[styles.label, { color: colors.foreground }]}>Origem do Lead *</Text>
-      <TouchableOpacity
+      <Pressable
         accessibilityRole="button"
         accessibilityLabel="Selecionar origem do Lead"
         style={[styles.trigger, { borderColor: error ? colors.destructive : colors.border, backgroundColor: colors.card }]}
@@ -29,16 +31,15 @@ export function LeadSourcePicker({ sources, value, onChange, error }: Props) {
           {selected?.name ?? 'Selecione a origem'}
         </Text>
         <Feather name="chevron-down" size={18} color={colors.mutedForeground} />
-      </TouchableOpacity>
+      </Pressable>
       {!!error && <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text>}
-      <Modal transparent visible={open} animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
-          <Pressable style={[styles.sheet, { backgroundColor: colors.card }]} onPress={(event) => event.stopPropagation()}>
+      <UIBottomSheet visible={open} onClose={() => setOpen(false)}>
             <Text style={[styles.title, { color: colors.foreground }]}>Origem do Lead</Text>
             {sources.map((source) => (
-              <TouchableOpacity
+              <UICard
                 key={source.id}
-                style={[styles.option, { borderBottomColor: colors.border }]}
+                variant={source.id === value ? 'muted' : 'default'}
+                style={styles.option}
                 onPress={() => {
                   onChange(source.id);
                   setOpen(false);
@@ -46,11 +47,9 @@ export function LeadSourcePicker({ sources, value, onChange, error }: Props) {
               >
                 <Text style={[styles.optionText, { color: colors.foreground }]}>{source.name}</Text>
                 {source.id === value && <Feather name="check" size={20} color={colors.primary} />}
-              </TouchableOpacity>
+              </UICard>
             ))}
-          </Pressable>
-        </Pressable>
-      </Modal>
+      </UIBottomSheet>
     </View>
   );
 }
@@ -68,9 +67,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   error: { fontFamily: 'Inter_400Regular', fontSize: 12 },
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
-  sheet: { padding: 20, paddingBottom: 36, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
-  title: { fontFamily: 'Inter_700Bold', fontSize: 18, marginBottom: 12 },
-  option: { minHeight: 52, borderBottomWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  title: { fontFamily: 'Inter_700Bold', fontSize: 18, marginBottom: spacing.sm },
+  option: { minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.sm },
   optionText: { fontFamily: 'Inter_500Medium', fontSize: 16 },
 });
