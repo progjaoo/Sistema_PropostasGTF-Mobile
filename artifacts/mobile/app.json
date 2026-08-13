@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "GTF Propostas Mobile",
+    "name": "Mosaico Propostas",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/mosaico-icon.png",
     "scheme": "gtfpropostas",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/icon.png",
+      "image": "./assets/images/mosaico-splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#F25017"
     },
     "ios": {
       "bundleIdentifier": "br.com.grupogtf.propostas",
@@ -21,7 +21,7 @@
       "package": "br.com.grupogtf.propostas"
     },
     "web": {
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/mosaico-icon.png"
     },
     "plugins": [
       "expo-router",

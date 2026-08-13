@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Platform,
   ActivityIndicator,
+  Pressable,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,7 +18,8 @@ import { apiCall, ApiError, getRefreshToken } from '@/src/api/client';
 import { AuthUser } from '@/src/types';
 import { useColors } from '@/hooks/useColors';
 import { UIBadge, UICard, UIAvatar, UIButton, UIHeader } from '@/src/ui';
-import { spacing } from '@/src/theme';
+import { shadows, spacing, tokens } from '@/src/theme';
+import { getProfileFallbackRoute } from '@/src/features/auth/profileNavigation';
 
 export default function ProfileScreen() {
   const colors = useColors();
@@ -81,6 +83,14 @@ export default function ProfileScreen() {
     });
   };
 
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace(getProfileFallbackRoute(user?.role));
+  };
+
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom;
 
@@ -93,21 +103,36 @@ export default function ProfileScreen() {
     >
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.background }]}>
-        <UIHeader
-          title="Meu Perfil"
-          subtitle="Atualize seus dados comerciais usados nas propostas."
-          action={isDirty ? (
-            <UIButton
-              title={saveMutation.isPending ? undefined : 'Salvar'}
-              size="sm"
-              onPress={() => saveMutation.mutate()}
-              disabled={saveMutation.isPending}
-              accessibilityState={{ disabled: saveMutation.isPending, busy: saveMutation.isPending }}
-            >
-              {saveMutation.isPending ? <ActivityIndicator size="small" color={colors.primaryForeground} /> : undefined}
-            </UIButton>
-          ) : undefined}
-        />
+        <View style={styles.headerRow}>
+          <Pressable
+            onPress={handleBack}
+            accessibilityRole="button"
+            accessibilityLabel="Voltar"
+            hitSlop={10}
+            style={({ pressed }) => [
+              styles.backButton,
+              { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.72 : 1 },
+            ]}
+          >
+            <Feather name="arrow-left" size={20} color={colors.foreground} />
+          </Pressable>
+          <UIHeader
+            title="Meu Perfil"
+            subtitle="Atualize seus dados comerciais usados nas propostas."
+            style={styles.profileHeader}
+            action={isDirty ? (
+              <UIButton
+                title={saveMutation.isPending ? undefined : 'Salvar'}
+                size="sm"
+                onPress={() => saveMutation.mutate()}
+                disabled={saveMutation.isPending}
+                accessibilityState={{ disabled: saveMutation.isPending, busy: saveMutation.isPending }}
+              >
+                {saveMutation.isPending ? <ActivityIndicator size="small" color={colors.primaryForeground} /> : undefined}
+              </UIButton>
+            ) : undefined}
+          />
+        </View>
       </View>
 
       {/* Avatar */}
@@ -190,6 +215,17 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   header: { paddingHorizontal: 16, paddingBottom: 12 },
+  headerRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
+  profileHeader: { flex: 1 },
+  backButton: {
+    width: 42,
+    height: 42,
+    borderWidth: 1,
+    borderRadius: tokens.radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.sm,
+  },
   avatarSection: { flexDirection: 'row', alignItems: 'center', margin: 16, gap: 16 },
   userInfo: { flex: 1, gap: 4 },
   userName: { fontSize: 18, fontFamily: 'Inter_700Bold' },

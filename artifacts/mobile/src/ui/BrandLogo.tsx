@@ -1,9 +1,11 @@
 import { Image, type ImageContentFit } from 'expo-image';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
-type BrandLogoVariant = 'complete' | 'horizontal';
+import { BRAND } from '@/src/config/brand';
 
-type BrandLogoProps = {
+export type BrandLogoVariant = 'complete' | 'horizontal' | 'logo' | 'icon';
+
+export type BrandLogoProps = {
   variant?: BrandLogoVariant;
   size?: number;
   width?: number;
@@ -12,9 +14,6 @@ type BrandLogoProps = {
   style?: StyleProp<ViewStyle>;
   testID?: string;
 };
-
-const logoComplete = require('../../assets/brand/gtf-logo-completa.png');
-const logoHorizontal = require('../../assets/brand/gtf-logo-horizontal.png');
 
 export function BrandLogo({
   variant = 'complete',
@@ -25,19 +24,19 @@ export function BrandLogo({
   style,
   testID,
 }: BrandLogoProps) {
-  const isHorizontal = variant === 'horizontal';
-  const resolvedWidth = width ?? size ?? (isHorizontal ? 148 : 88);
-  const resolvedHeight = height ?? size ?? (isHorizontal ? 34 : 88);
+  const isIcon = variant === 'icon';
+  const resolvedWidth = width ?? size ?? (isIcon ? 68 : 120);
+  const resolvedHeight = height ?? size ?? (isIcon ? 68 : 22);
 
   return (
     <View
       testID={testID}
       accessibilityRole="image"
-      accessibilityLabel="GTF Propostas"
+      accessibilityLabel={BRAND.accessibilityLabel}
       style={[styles.container, { width: resolvedWidth, height: resolvedHeight }, style]}
     >
       <Image
-        source={isHorizontal ? logoHorizontal : logoComplete}
+        source={isIcon ? BRAND.assets.icon : BRAND.assets.logo}
         contentFit={contentFit}
         style={StyleSheet.absoluteFill}
       />

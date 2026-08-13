@@ -70,4 +70,29 @@ describe('mobile design tokens', () => {
     expect(result.background).toBe(colors.dark.background);
     expect(result.radius).toBe(colors.radius);
   });
+
+  it('uses the Mosaico institutional palette without changing status semantics', () => {
+    expect(colors.light.tint).toBe('#F25017');
+    expect(colors.light.primary).toBe('#F25017');
+    expect(colors.light.primaryLight).toBe('#FF6B2B');
+    expect(colors.light.primaryForeground).toBe('#FFFFFF');
+    expect(colors.light.accent).toBe('#FFF1EB');
+    expect(colors.light.accentForeground).toBe('#D6440F');
+    expect(tokens.colors.light.brand.primaryStrong).toBe('#D6440F');
+
+    expect(colors.dark.tint).toBe('#FF6B2B');
+    expect(colors.dark.primary).toBe('#FF6B2B');
+    expect(colors.dark.primaryLight).toBe('#FF8A5C');
+    expect(colors.dark.primaryForeground).toBe('#FFFFFF');
+    expect(colors.dark.accent).toBe('#35170D');
+    expect(colors.dark.accentForeground).toBe('#FFB394');
+    expect(tokens.colors.dark.brand.primaryStrong).toBe('#FF8A5C');
+
+    expect(colors.light.success).toBe('#16A34A');
+    expect(colors.light.warning).toBe('#D97706');
+    expect(colors.light.destructive).toBe('#DC2626');
+    expect(colors.light.approved).toBe('#16A34A');
+    expect(colors.light.rejected).toBe('#DC2626');
+    expect(colors.light.info).toBe('#0284C7');
+  });
 });

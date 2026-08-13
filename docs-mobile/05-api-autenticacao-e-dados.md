@@ -30,6 +30,19 @@ Fluxo:
 6. A chamada original é repetida apenas uma vez.
 7. Logout revoga o refresh token e limpa o dispositivo.
 
+## Recuperação de Senha
+
+O aplicativo usa os endpoints públicos da mesma API compartilhada:
+
+```text
+POST /api/auth/forgot-password
+POST /api/auth/reset-password
+```
+
+O cliente normaliza o e-mail e envia `X-Client-Platform: mobile`, fazendo a API produzir `gtfpropostas://reset-password?token=...`. O Expo Router extrai um token plausível, valida a senha entre 8 e 128 caracteres e envia o token uma única vez à API.
+
+O envio via Resend é responsabilidade exclusiva do backend em `Sistema-Propostas`. `RESEND_API_KEY` e `RESEND_FROM_EMAIL` não podem existir no `.env` do Expo nem em variáveis `EXPO_PUBLIC_*`. Conta existente, inexistente ou inativa recebe a mesma resposta pública para impedir enumeração.
+
 No build web do Expo, há fallback para `sessionStorage`. Esse fallback não deve ser tratado como equivalente ao armazenamento seguro nativo.
 
 ## Restauração e Offline

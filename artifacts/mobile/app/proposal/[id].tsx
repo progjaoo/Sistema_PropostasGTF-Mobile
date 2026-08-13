@@ -34,6 +34,7 @@ import {
   restoreProposalFromSnapshot,
 } from '@/src/features/proposals/api';
 import { useProposalPdf } from '@/src/features/proposals/print/useProposalPdf';
+import { ProposalPdfLayoutError } from '@/src/features/proposals/print/generateProposalPdfFile';
 import { ProposalVersionSheet } from '@/src/features/proposals/versions/ProposalVersionSheet';
 import { ProductCatalogSheet } from '@/src/features/proposals/products/ProductCatalogSheet';
 import { ProposalProductForm } from '@/src/features/proposals/products/ProposalProductForm';
@@ -847,7 +848,14 @@ export default function ProposalDetailScreen() {
             title={isGenerating ? 'Gerando PDF...' : 'Gerar e compartilhar PDF'}
             style={styles.actionBtn}
             disabled={isGenerating}
-            onPress={() => shareProposalPdf(proposal).catch(() => showToast('Erro ao gerar PDF.', 'error'))}
+            onPress={() => shareProposalPdf(proposal).catch((error) => {
+              showToast(
+                error instanceof ProposalPdfLayoutError
+                  ? 'Nao foi possivel montar o PDF em A4. Tente novamente.'
+                  : 'Erro ao gerar PDF.',
+                'error',
+              );
+            })}
           />
           {canEdit && (
             <UIButton

@@ -87,6 +87,7 @@ export interface ProposalProduct {
   description?: string | null;
   detail?: string | null;
   program?: string | null;
+  programName?: string | null;
   tags?: string[];
   color: string;
   productTemplateId?: string | null;
@@ -201,6 +202,8 @@ export interface Proposal {
   createdBy?: Partial<AuthUser & { jobTitle?: string | null; contactPhone?: string | null; contactEmail?: string | null }>;
   status: ProposalStatus;
   propType: string;
+  proposalTypeName?: string | null;
+  periodicity?: string | null;
   propMonth: string;
   propYear: string;
   campTag?: string | null;

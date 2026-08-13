@@ -42,7 +42,7 @@ O `docker-compose.yml` de `Sistema-Propostas` contém:
 | Serviço | Rede Docker | Acesso pelo host |
 |---|---|---|
 | PostgreSQL | `postgres:5432` | `localhost:5433` |
-| API | `api:8080` | `localhost:8081` por padrão |
+| API | `api:8080` | `localhost:8081` no Compose completo; `localhost:8091` nos scripts mobile |
 | Frontend web | `frontend:21709` | `localhost:21709` |
 
 O frontend web chama caminhos relativos `/api`. O Vite encaminha essas chamadas internamente para `http://api:8080`.
@@ -51,32 +51,28 @@ O aplicativo mobile está fora da rede interna do Compose. Portanto, ele deve ch
 
 | Execução do mobile | Base URL esperada |
 |---|---|
-| Simulador no mesmo Mac | `http://localhost:8081/api` |
-| Aparelho físico na rede local | `http://<IP-DO-MAC>:8081/api` |
+| Simulador no mesmo Mac | `http://localhost:8091/api` |
+| Aparelho físico na rede local | `http://<IP-DO-MAC>:8091/api` |
 | Homologação | `https://<dominio-homologacao>/api` |
 | Produção | `https://<dominio-oficial>/api` |
 
-## Estado Atual que Exige Ajuste
+## Resolucao da URL da API
 
-O cliente mobile usa atualmente:
+O cliente mobile resolve atualmente:
 
 ```text
-EXPO_PUBLIC_DOMAIN definido -> https://<dominio>/api
-sem variável                -> http://localhost:8080/api
+EXPO_PUBLIC_API_URL definido -> usa a URL explicita
+EXPO_PUBLIC_DOMAIN definido  -> https://<dominio>/api
+sem variavel                 -> API publicada configurada como fallback
 ```
 
-O fallback `localhost:8080` não corresponde à porta padrão exposta pelo Compose (`8081`). Até o cliente ser corrigido:
-
-- configure `EXPO_PUBLIC_DOMAIN` para um domínio HTTPS acessível; ou
-- ajuste o ambiente local para alcançar a API pela porta publicada correta.
-
-A evolução recomendada é aceitar uma variável explícita:
+Para desenvolvimento local, os launchers `start:api:docker` e `start:api:host` definem automaticamente a URL explicita usando a porta reservada `8091`:
 
 ```env
-EXPO_PUBLIC_API_URL=http://localhost:8081/api
+EXPO_PUBLIC_API_URL=http://localhost:8091/api
 ```
 
-Essa variável contém somente endereço público, nunca segredo.
+Em aparelho fisico, o launcher substitui `localhost` pelo IP local do Mac. Essa variavel contem somente endereco publico, nunca segredo.
 
 ## Migrations
 
@@ -125,4 +121,3 @@ Uma mudança de API só está concluída quando:
 4. sistema web continuou funcional;
 5. aplicativo mobile foi adaptado;
 6. os dois clientes foram validados contra a mesma API e o mesmo banco do ambiente.
-

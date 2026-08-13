@@ -1,57 +1,72 @@
-import type { Proposal, ProposalProduct } from '@/src/types';
-import { proposalPrintHtml } from '../proposalPrintHtml';
+import { makePrintProduct, makePrintProposal } from '@/src/test/fixtures/proposalPrint';
+import { mapProposalToPrintData } from '../proposalPrintModel';
+import { paginateProposalPrintProducts } from '../proposalPrintPagination';
+import { renderProposalPrintHtml } from '../proposalPrintHtml';
 
-function product(index: number): ProposalProduct {
-  return {
-    id: `product-${index}`,
-    order: index,
-    qty: '01',
-    title: `Produto ${index}`,
-    color: 'BLUE',
-  };
-}
+describe('renderProposalPrintHtml', () => {
+  it('renders the web parity fixture as one explicit A4 page', () => {
+    const data = mapProposalToPrintData(makePrintProposal());
+    const pages = paginateProposalPrintProducts(data);
+    const html = renderProposalPrintHtml({ data, pages, fontFaceCss: '@font-face { font-family: Montserrat; }' });
 
-function proposal(products: ProposalProduct[]): Proposal {
-  return {
-    id: 'proposal-1',
-    stationId: 'station-1',
-    createdById: 'user-1',
-    status: 'DRAFT',
-    propType: 'Comercial',
-    propMonth: 'Julho',
-    propYear: '2026',
-    showPeriod: false,
-    overlayOpacity: 0,
-    stats: [],
-    products,
-    createdAt: '2026-07-27T00:00:00.000Z',
-    updatedAt: '2026-07-27T00:00:00.000Z',
-  };
-}
-
-describe('proposalPrintHtml', () => {
-  it('paginates five products and keeps financial data on the last page', () => {
-    const html = proposalPrintHtml(proposal(Array.from({ length: 5 }, (_, index) => product(index + 1))));
-
-    expect(html.match(/<main class="page/g)).toHaveLength(2);
-    expect(html.match(/class="investment"/g)).toHaveLength(1);
-    expect(html.match(/<footer>/g)).toHaveLength(1);
-    expect(html).toContain('Plano de Ações - continuacao');
-    expect(html).toContain('break-inside: avoid');
-    expect(html).toContain('font-family: Montserrat');
-    expect(html).toContain('border-left-color:#427EFF');
+    expect(html.match(/<main class="proposal-print-page/g)).toHaveLength(1);
+    expect(html).toContain('width: 210mm');
+    expect(html).toContain('height: 297mm');
+    expect(html).toContain('background-color:#427EFF');
+    expect(html).toContain('<img src="data:image/png;base64,aGVsbG8="');
+    expect(html).toContain('Leonardo Salles');
+    expect(html).not.toContain('Contato legado');
+    expect(html.match(/proposal-print-investment/g)?.length).toBeGreaterThan(0);
+    expect(html.match(/<footer class="proposal-print-footer"/g)).toHaveLength(1);
   });
 
-  it('prints period note when period is visible', () => {
-    const base = proposal([product(1)]);
-    const html = proposalPrintHtml({
-      ...base,
-      showPeriod: true,
-      dateStart: '2026-08-01',
-      periodDesc: 'Veiculacao de segunda a sexta.',
+  it('does not depend on remote fonts and escapes proposal content', () => {
+    const data = mapProposalToPrintData(makePrintProposal({
+      advertiser: { ...makePrintProposal().advertiser!, tradeName: '<Cliente & Parceiro>' },
+    }));
+    const html = renderProposalPrintHtml({
+      data,
+      pages: paginateProposalPrintProducts(data),
+      fontFaceCss: '@font-face { font-family: Montserrat; src: url(data:font/ttf;base64,Zm9udA==); }',
     });
 
-    expect(html).toContain('Veiculacao de segunda a sexta.');
-    expect(html).toContain('period-note');
+    expect(html).not.toContain('fonts.googleapis.com');
+    expect(html).toContain('&lt;CLIENTE &amp; PARCEIRO&gt;');
+    expect(html).not.toContain('<CLIENTE & PARCEIRO>');
+  });
+
+  it('keeps a short proposal without presentation and its final blocks on one page', () => {
+    const data = mapProposalToPrintData(makePrintProposal({
+      stats: [],
+      products: [makePrintProduct(1)],
+    }));
+    const html = renderProposalPrintHtml({
+      data,
+      pages: paginateProposalPrintProducts(data),
+      fontFaceCss: '',
+    });
+
+    expect(html.match(/<main class="proposal-print-page/g)).toHaveLength(1);
+    expect(html).not.toContain('APRESENTACAO');
+    expect(html.match(/proposal-print-investment/g)?.length).toBeGreaterThan(0);
+    expect(html.match(/<footer class="proposal-print-footer"/g)).toHaveLength(1);
+  });
+
+  it('keeps long product content inside the deterministic four-card first page', () => {
+    const longTitle = 'Produto especial com titulo comercial propositalmente extenso';
+    const longDescription = 'Descricao extensa para validar o limite visual do card sem alterar a decisao de paginacao baseada em linhas fisicas. '.repeat(4);
+    const data = mapProposalToPrintData(makePrintProposal({
+      products: Array.from({ length: 4 }, (_, index) => makePrintProduct(index + 1, {
+        title: longTitle,
+        description: longDescription,
+      })),
+    }));
+    const pages = paginateProposalPrintProducts(data);
+    const html = renderProposalPrintHtml({ data, pages, fontFaceCss: '' });
+
+    expect(pages).toHaveLength(1);
+    expect(html.match(/class="proposal-print-product-card"/g)).toHaveLength(4);
+    expect(html).toContain(longTitle);
+    expect(html).toContain('text-transform: uppercase');
   });
 });

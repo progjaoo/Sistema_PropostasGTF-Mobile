@@ -40,35 +40,74 @@ Depois, escolher:
 
 ## API Local Compartilhada
 
-Suba API e PostgreSQL pelo Compose do projeto principal:
+A API oficial pode rodar no Docker ou como processo Node.js no host. Os comandos completos e o fluxo para Expo Go estao em [rodar-local.md](rodar-local.md).
+
+Para subir API e PostgreSQL pelo Compose do projeto principal:
 
 ```bash
 cd ../Sistema-Propostas
-docker compose up -d --build
+pnpm run api:docker
 ```
 
 Por padrão:
 
 - sistema web: `http://localhost:21709`;
-- API para processos no host: `http://localhost:8081/api`;
+- API para o fluxo mobile local: `http://localhost:8091/api`;
 - PostgreSQL para processos no host: `localhost:5433`;
 - API dentro da rede Docker: `http://api:8080`.
 
-O cliente mobile usa `http://localhost:8081/api` como fallback local. Em aparelho físico, configurar `EXPO_PUBLIC_API_URL` com um domínio acessível ou o IP local do computador com a porta `8081`. Em produção, usar sempre o mesmo domínio HTTPS da API oficial.
-
-Exemplo para desenvolvimento local:
+Para rodar a API fora do Docker, mantenha apenas o PostgreSQL no Compose:
 
 ```bash
-EXPO_PUBLIC_API_URL=http://localhost:8081/api pnpm --filter @workspace/mobile run dev
+cd ../Sistema-Propostas
+pnpm run db:local:up
+pnpm run db:local:prepare
+pnpm run api:local
 ```
+
+O fallback do cliente e a API publicada. Em desenvolvimento local, use os scripts explicitos; eles detectam o IP do Mac e validam a API antes de iniciar o Expo:
+
+```bash
+cd artifacts/mobile
+pnpm run start:api:docker
+# ou
+pnpm run start:api:host
+```
+
+Em aparelho fisico, `localhost` aponta para o celular, nao para o Mac. A URL deve usar o IP da rede local do computador. Em producao, usar sempre o dominio HTTPS oficial da API.
 
 ## Validação
 
 ```bash
 pnpm --filter @workspace/mobile run typecheck
+pnpm --filter @workspace/mobile test -- src/features/proposals/print --runInBand
 ```
 
 Verificar a saúde da API oficial no projeto principal. O aplicativo não deve subir uma segunda API.
+
+### Validar PDF no iOS e Android
+
+Durante QA, use a API local e gere a mesma proposta no web e no aplicativo. Cubra 0, 1, 2, 4, 5, 12 e 20 produtos, com e sem Apresentação, período e logo.
+
+Após compartilhar o arquivo para o Mac, valide dimensões e renderização:
+
+```bash
+mkdir -p tmp/pdfs
+pdfinfo tmp/pdfs/proposta-mobile.pdf
+pdftoppm -png tmp/pdfs/proposta-mobile.pdf tmp/pdfs/proposta-mobile
+```
+
+O `pdfinfo` deve indicar aproximadamente `595 x 842 pts`. Inspecione todas as imagens e confirme:
+
+- nenhum card cortado ou sobreposto;
+- nenhuma folha vazia;
+- fundo da Empresa atrás do logo;
+- Hero e indicadores somente na primeira folha;
+- investimento e contato juntos na última folha;
+- cor da Empresa preservada, sem herdar o laranja Mosaico;
+- mesma empresa, cliente, produtos, vendedor e valores do PDF web.
+
+Arquivos de QA permanecem em `tmp/pdfs/` e não devem ser versionados.
 
 ## Ambientes Recomendados
 
@@ -94,6 +133,17 @@ Antes da primeira publicação:
 8. configurar secrets no EAS;
 9. validar build em dispositivos reais;
 10. preparar metadados das lojas.
+
+## Deep Link de Recuperação
+
+O `app.json` declara o scheme `gtfpropostas`. Mudanças nesse campo exigem novo build nativo. O aceite final não deve usar o Expo Go, pois sua URI é dinâmica; use development build ou build de homologação.
+
+```bash
+pnpm exec uri-scheme open 'gtfpropostas://reset-password?token=token-de-teste-com-mais-de-vinte-caracteres' --ios
+pnpm exec uri-scheme open 'gtfpropostas://reset-password?token=token-de-teste-com-mais-de-vinte-caracteres' --android
+```
+
+Teste com o app fechado e em segundo plano. Confirme que a rota de redefinição abre, que token inválido oferece `Solicitar novo link` e que nenhuma URL ou token aparece em logs. O app precisa somente de `EXPO_PUBLIC_API_URL`; todas as variáveis Resend permanecem no backend/Vercel.
 
 ## Observação sobre Docker
 

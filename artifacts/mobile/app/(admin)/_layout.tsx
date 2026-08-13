@@ -11,10 +11,13 @@ import { useColors } from '@/hooks/useColors';
 import { useAuthStore } from '@/src/store/authStore';
 import { shadows, spacing, tokens } from '@/src/theme';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { createNativeTabTheme, createTabScreenOptions } from '@/src/navigation/tabTheme';
 
 function NativeTabLayout() {
+  const colors = useColors();
+  const nativeTabTheme = createNativeTabTheme(colors);
   return (
-    <NativeTabs>
+    <NativeTabs {...nativeTabTheme}>
       <NativeTabs.Trigger name="index">
         <Icon sf={{ default: 'chart.bar', selected: 'chart.bar.fill' }} />
         <Label>Dashboard</Label>
@@ -51,8 +54,7 @@ function ClassicTabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.mutedForeground,
+        ...createTabScreenOptions(colors),
         tabBarStyle: {
           position: 'absolute',
           backgroundColor: isIOS ? 'transparent' : colors.background,

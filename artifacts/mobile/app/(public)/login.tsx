@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { FormInput } from '@/components/FormInput';
 import { useToast } from '@/components/ToastProvider';
@@ -8,7 +8,7 @@ import { apiCall, ApiError } from '@/src/api/client';
 import { MobileAuthResponse } from '@/src/types';
 import { useColors } from '@/hooks/useColors';
 import { AuthScaffold } from '@/src/features/auth/AuthScaffold';
-import { UICard, UIButton } from '@/src/ui';
+import { UIButton } from '@/src/ui';
 
 export default function LoginScreen() {
   const colors = useColors();
@@ -68,12 +68,14 @@ export default function LoginScreen() {
   return (
     <AuthScaffold
       showBrand
+      title="ENTRAR"
+      subtitle="Acesse suas propostas, clientes e avisos comerciais."
       footer={
         <Pressable
           onPress={() => router.push('/(public)/register')}
           accessibilityRole="button"
           accessibilityLabel="Criar acesso comercial"
-          style={({ pressed }) => [styles.registerLink, { opacity: pressed ? 0.7 : 1 }]}
+          style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
         >
           <Text style={[styles.registerText, { color: colors.mutedForeground }]}>
             Não tem acesso?{' '}
@@ -84,12 +86,7 @@ export default function LoginScreen() {
         </Pressable>
       }
     >
-      <UICard variant="elevated" style={styles.card}>
-        <Text style={[styles.title, { color: colors.foreground }]}>Entrar no sistema</Text>
-        <Text style={[styles.cardSubtitle, { color: colors.mutedForeground }]}>
-          Acesse suas propostas, clientes e avisos comerciais.
-        </Text>
-
+      <View style={styles.formContent}>
         <FormInput
           label="E-mail"
           leftIcon="mail"
@@ -104,7 +101,6 @@ export default function LoginScreen() {
           textContentType="username"
           autoComplete="email"
           accessibilityLabel="E-mail de login"
-          accessibilityHint="Informe o e-mail cadastrado no sistema"
         />
 
         <FormInput
@@ -120,7 +116,6 @@ export default function LoginScreen() {
           textContentType="password"
           autoComplete="password"
           accessibilityLabel="Senha"
-          accessibilityHint="Informe sua senha de acesso"
         />
 
         <Pressable
@@ -137,50 +132,44 @@ export default function LoginScreen() {
           size="lg"
           onPress={handleLogin}
           disabled={loading}
+          style={styles.actionBtn}
           accessibilityRole="button"
           accessibilityLabel="Entrar no sistema"
           accessibilityState={{ disabled: loading, busy: loading }}
         >
           {loading ? (
-            <ActivityIndicator color={colors.primaryForeground} />
+            <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={[styles.loginBtnText, { color: colors.primaryForeground }]}>Entrar</Text>
+            <Text style={styles.loginBtnText}>ENTRAR</Text>
           )}
         </UIButton>
-      </UICard>
+      </View>
     </AuthScaffold>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
+  formContent: {
     gap: 16,
-  },
-  title: {
-    fontSize: 24,
-    lineHeight: 30,
-    fontFamily: 'Inter_800ExtraBold',
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontFamily: 'Inter_400Regular',
-    marginTop: -8,
   },
   forgotBtn: {
     alignSelf: 'flex-end',
-    marginTop: -6,
+    marginTop: -4,
   },
   forgotText: {
     fontSize: 13,
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
+  },
+  actionBtn: {
+    marginTop: 8,
+    borderRadius: 99,
+    height: 54,
   },
   loginBtnText: {
     fontSize: 16,
-    fontFamily: 'Inter_700Bold',
-  },
-  registerLink: {
-    alignItems: 'center',
+    fontFamily: 'Inter_800ExtraBold',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
   registerText: {
     fontSize: 14,
@@ -188,3 +177,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+

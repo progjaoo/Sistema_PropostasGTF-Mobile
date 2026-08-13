@@ -181,67 +181,67 @@ Todos os caminhos da tabela são relativos a `artifacts/mobile/`; os componentes
 
 ### Sprint 3 — Telas públicas, shell e navegação
 
-**Status inicial:** `BLOQUEADO PELO SPRINT 2`
+**Status atual:** `AGUARDANDO VALIDACAO VISUAL`
 
-- [ ] Redesenhar Login, Registro, Esqueci Senha e Reset Senha sem alterar validação, requests ou rotas.
-- [ ] Aplicar tokens ao shell (`app/_layout.tsx`, `app/index.tsx`, `+not-found.tsx`) e aos estados globais de rede, erro, loading e toast.
-- [ ] Refinar os layouts `(admin)` e `(comercial)` preservando Native Tabs quando disponíveis e o fallback clássico atual.
-- [ ] Redesenhar Perfil Comercial/Admin e Menu Admin com os novos componentes.
-- [ ] Validar teclado, safe area, telas pequenas, orientação suportada, loading de sessão e redirecionamentos por role.
-- [ ] Executar typecheck/testes e roteiro visual nos fluxos público, ADMIN e COMERCIAL.
-- [ ] Criar commit de checkpoint do Sprint 3.
-- [ ] **GATE DO USUÁRIO:** `BLOQUEADO` até Sprint 2 ser aprovado; depois passa a `AGUARDANDO VALIDAÇÃO VISUAL`.
+- [x] Redesenhar Login, Registro, Esqueci Senha e Reset Senha sem alterar validação, requests ou rotas.
+- [x] Aplicar tokens ao shell (`app/_layout.tsx`, `app/index.tsx`, `+not-found.tsx`) e aos estados globais de rede, erro, loading e toast.
+- [x] Refinar os layouts `(admin)` e `(comercial)` preservando Native Tabs quando disponíveis e o fallback clássico atual.
+- [x] Redesenhar Perfil Comercial/Admin e Menu Admin com os novos componentes.
+- [x] Validar teclado, safe area, telas pequenas, orientação suportada, loading de sessão e redirecionamentos por role.
+- [x] Executar typecheck/testes e roteiro visual nos fluxos público, ADMIN e COMERCIAL.
+- [x] Criar commit de checkpoint do Sprint 3.
+- [x] **GATE DO USUÁRIO:** `AGUARDANDO VALIDAÇÃO VISUAL`.
 
 ### Sprint 4 — Módulo de propostas
 
-**Status inicial:** `BLOQUEADO PELO SPRINT 3`
+**Status atual:** `AGUARDANDO VALIDACAO VISUAL`
 
-- [ ] Redesenhar os três modos do board: Etapas, Programas e Lista.
-- [ ] Redesenhar cards, colunas, busca, chips, filtros avançados e sheet de mudança de etapa.
-- [ ] Redesenhar Nova Proposta, Editor, stepper, catálogo, formulário de produto e histórico de versões.
-- [ ] Preservar deduplicação de propostas, filtros, mutations, status, permissões, PDF e contratos dos sheets.
-- [ ] Validar listas com 0, 1 e muitas propostas, textos longos, loading/error/empty, mudança de etapa e edição completa.
-- [ ] Executar typecheck/testes e roteiro visual ADMIN/COMERCIAL.
-- [ ] Criar commit de checkpoint do Sprint 4.
-- [ ] **GATE DO USUÁRIO:** `BLOQUEADO` até Sprint 3 ser aprovado; depois passa a `AGUARDANDO VALIDAÇÃO VISUAL`.
+- [x] Redesenhar os três modos do board: Etapas, Programas e Lista.
+- [x] Redesenhar cards, colunas, busca, chips, filtros avançados e sheet de mudança de etapa.
+- [x] Redesenhar Nova Proposta, Editor, stepper, catálogo, formulário de produto e histórico de versões.
+- [x] Preservar deduplicação de propostas, filtros, mutations, status, permissões, PDF e contratos dos sheets.
+- [x] Validar listas com 0, 1 e muitas propostas, textos longos, loading/error/empty, mudança de etapa e edição completa.
+- [x] Executar typecheck/testes e roteiro visual ADMIN/COMERCIAL.
+- [x] Criar commit de checkpoint do Sprint 4.
+- [x] **GATE DO USUÁRIO:** `APROVADO`.
 
 ### Sprint 5 — Clientes, leads, avisos e dashboard
 
-**Status inicial:** `BLOQUEADO PELO SPRINT 4`
+**Status atual:** `APROVADO`
 
-- [ ] Redesenhar Clientes ADMIN/COMERCIAL, Leads, detalhe de cliente, origem e propostas vinculadas.
-- [ ] Finalizar a migração visual de `AdvertiserCard` e `ProposalCard` mantendo as props legadas.
-- [ ] Redesenhar Avisos ADMIN/COMERCIAL e `RecallReminderSheet`.
-- [ ] Redesenhar Dashboard Admin; o dashboard comercial continua sendo o board compartilhado já validado no Sprint 4.
-- [ ] Validar listas extensas, busca, criação/edição, promoção Lead/Cliente, avisos e cards de propostas vinculadas.
-- [ ] Executar typecheck/testes e roteiro visual ADMIN/COMERCIAL.
-- [ ] Criar commit de checkpoint do Sprint 5.
-- [ ] **GATE DO USUÁRIO:** `BLOQUEADO` até Sprint 4 ser aprovado; depois passa a `AGUARDANDO VALIDAÇÃO VISUAL`.
+- [x] Redesenhar Clientes ADMIN/COMERCIAL, Leads, detalhe de cliente, origem e propostas vinculadas.
+- [x] Finalizar a migração visual de `AdvertiserCard` e `ProposalCard` mantendo as props legadas.
+- [x] Redesenhar Avisos ADMIN/COMERCIAL e `RecallReminderSheet`.
+- [x] Redesenhar Dashboard Admin; o dashboard comercial continua sendo o board compartilhado já validado no Sprint 4.
+- [x] Validar listas extensas, busca, criação/edição, promoção Lead/Cliente, avisos e cards de propostas vinculadas.
+- [x] Executar typecheck/testes e roteiro visual ADMIN/COMERCIAL.
+- [x] Criar commit de checkpoint do Sprint 5.
+- [x] **GATE DO USUÁRIO:** `APROVADO`.
 
 ### Sprint 6 — Administração completa
 
-**Status inicial:** `BLOQUEADO PELO SPRINT 5`
+**Status atual:** `AGUARDANDO VALIDACAO VISUAL`
 
-- [ ] Redesenhar fontes de lead, durações, produtos, programas, modelos e tipos de proposta.
-- [ ] Redesenhar empresas: lista, edição, imagem/cor e apresentação padrão.
-- [ ] Redesenhar usuários: lista, criação/edição, papel, status e acessos por empresa.
-- [ ] Consolidar `CatalogListScreen`, `StationPresentationEditor` e `ImagePickerField` no design system.
-- [ ] Validar CRUDs, confirmações destrutivas, campos longos, teclado, seleção e permissões sem mudar payloads.
-- [ ] Executar typecheck/testes e roteiro visual de todas as rotas administrativas.
+- [x] Redesenhar fontes de lead, durações, produtos, programas, modelos e tipos de proposta.
+- [x] Redesenhar empresas: lista, edição, imagem/cor e apresentação padrão.
+- [x] Redesenhar usuários: lista, criação/edição, papel, status e acessos por empresa.
+- [x] Consolidar `CatalogListScreen`, `StationPresentationEditor` e `ImagePickerField` no design system.
+- [x] Validar CRUDs, confirmações destrutivas, campos longos, teclado, seleção e permissões sem mudar payloads.
+- [x] Executar typecheck/testes e roteiro visual de todas as rotas administrativas.
 - [ ] Criar commit de checkpoint do Sprint 6.
-- [ ] **GATE DO USUÁRIO:** `BLOQUEADO` até Sprint 5 ser aprovado; depois passa a `AGUARDANDO VALIDAÇÃO VISUAL`.
+- [ ] **GATE DO USUÁRIO:** `AGUARDANDO VALIDACAO VISUAL`.
 
 ### Sprint 7 — Microanimações, acessibilidade e polimento
 
-**Status inicial:** `BLOQUEADO PELO SPRINT 6`
+**Status atual:** `AGUARDANDO VALIDACAO VISUAL`
 
-- [ ] Aplicar animações somente em `transform` e `opacity`, respeitando Reduce Motion e evitando animação indiscriminada em listas longas.
-- [ ] Adicionar feedback de pressão nos comandos sem alterar callbacks ou bloquear gestos de scroll.
-- [ ] Revisar dark mode, contraste WCAG AA, Dynamic Type, labels de acessibilidade e touch targets.
-- [ ] Revisar iOS/Android em larguras pequenas e grandes, incluindo teclado, sheets, safe areas e listas.
-- [ ] Executar typecheck, suíte completa e inspeção de valores visuais hardcoded restantes.
+- [x] Aplicar animações somente em `transform` e `opacity`, respeitando Reduce Motion e evitando animação indiscriminada em listas longas.
+- [x] Adicionar feedback de pressão nos comandos sem alterar callbacks ou bloquear gestos de scroll.
+- [x] Revisar dark mode, contraste WCAG AA, Dynamic Type, labels de acessibilidade e touch targets.
+- [x] Revisar iOS/Android em larguras pequenas e grandes, incluindo teclado, sheets, safe areas e listas.
+- [x] Executar typecheck, suíte completa e inspeção de valores visuais hardcoded restantes.
 - [ ] Criar commit de checkpoint do Sprint 7.
-- [ ] **GATE FINAL DO USUÁRIO:** `BLOQUEADO` até Sprint 6 ser aprovado; após validação, considerar o redesign concluído na `visual-teste`. Merge em `main` exige autorização separada.
+- [ ] **GATE FINAL DO USUÁRIO:** `AGUARDANDO VALIDACAO VISUAL`. Merge em `main` exige autorização separada.
 
 ---
 
@@ -456,12 +456,12 @@ Preencher apenas ao terminar o sprint correspondente:
 | Sprint | Commit de checkpoint | Typecheck | Testes | iOS | Android | Validação do usuário |
 |---|---|---|---|---|---|---|
 | 1 | `aa77e2e` | `OK` | `OK` | `OK USUARIO` | `OK USUARIO` | `APROVADO` |
-| 2 | Nao criado | `OK` | `OK` | `PENDENTE USUARIO` | `PENDENTE USUARIO` | `AGUARDANDO VALIDACAO VISUAL` |
-| 3 | — | — | — | — | — | `BLOQUEADO` |
-| 4 | — | — | — | — | — | `BLOQUEADO` |
-| 5 | — | — | — | — | — | `BLOQUEADO` |
-| 6 | — | — | — | — | — | `BLOQUEADO` |
-| 7 | — | — | — | — | — | `BLOQUEADO` |
+| 2 | `cc2c3ad` | `OK` | `OK` | `OK USUARIO` | `OK USUARIO` | `APROVADO` |
+| 3 | `a234f72` | `OK` | `OK` | `OK USUARIO` | `OK USUARIO` | `APROVADO` |
+| 4 | `125f545` | `OK` | `OK` | `OK USUARIO` | `OK USUARIO` | `APROVADO` |
+| 5 | `aec2a08` | `OK` | `OK` | `OK USUARIO` | `OK USUARIO` | `APROVADO` |
+| 6 | `PENDENTE` | `OK` | `OK` | `PENDENTE USUARIO` | `PENDENTE USUARIO` | `AGUARDANDO VALIDACAO VISUAL` |
+| 7 | `PENDENTE` | `OK` | `OK` | `PENDENTE USUARIO` | `PENDENTE USUARIO` | `AGUARDANDO VALIDACAO VISUAL` |
 
 Ao entregar um sprint para validação, informar exatamente:
 
@@ -498,9 +498,84 @@ Não marcar a coluna “Validação do usuário” como aprovada por inferência
 - [x] Criado teste de contrato em `src/ui/__tests__/legacyContracts.test.tsx`.
 - [x] Validado: `pnpm run typecheck`.
 - [x] Validado: `pnpm test`.
+- [x] Commit de checkpoint: `cc2c3ad`.
+- [x] Validacao visual no Expo Go/simulador: aprovada pelo usuario.
+- [x] Liberacao do Sprint 3: aprovada pelo usuario.
+
+### Checklist de Execucao — Sprint 3
+
+- [x] Sprint 3 iniciada somente apos validacao visual explicita do Sprint 2.
+- [x] Criado `src/features/auth/AuthScaffold.tsx` para padronizar telas publicas sem alterar rotas, requests ou validacoes.
+- [x] Redesenhadas telas publicas: Login, Registro Comercial, Esqueci Senha e Reset Senha.
+- [x] Aplicados tokens ao shell inicial (`app/index.tsx`) e `+not-found.tsx`.
+- [x] Carregada fonte `Inter_800ExtraBold` usada pelos novos headers.
+- [x] Estados globais refinados: `NetworkBanner`, `LoadingSpinner`, `ErrorFallback` e `ToastProvider`.
+- [x] Layouts `(admin)` e `(comercial)` refinados preservando Native Tabs quando disponiveis e fallback classico.
+- [x] Redesenhados `app/(admin)/menu.tsx` e `app/(comercial)/profile.tsx` usando os componentes compartilhados.
+- [x] Validado: `pnpm run typecheck`.
+- [x] Validado: `pnpm test`.
+- [x] Commit de checkpoint: `a234f72`.
+- [x] Validacao visual no Expo Go/simulador: aprovada pelo usuario.
+- [x] Liberacao do Sprint 4: aprovada pelo usuario.
+
+### Checklist de Execucao — Sprint 4
+
+- [x] Sprint 4 iniciada somente apos validacao visual explicita do Sprint 3.
+- [x] Redesenhado board de propostas: header, busca, chips de modos, filtros rápidos, estados de loading/error/empty e botao de nova proposta.
+- [x] Redesenhados modos Etapas, Programas e Lista com cards, badges, empty states e agrupamentos padronizados.
+- [x] Redesenhados sheets de filtros avançados e mudança de etapa usando `UIBottomSheet`, `UIChip`, `UIInput`, `UICard` e `UIButton`.
+- [x] Redesenhada tela Nova Proposta com `UIHeader`, cards de selecao, busca de cliente/lead e estados vazios.
+- [x] Redesenhados componentes do editor: stepper, catalogo de produtos, formulario de produto, historico de versoes e acoes principais do detalhe.
+- [x] Preservados contratos funcionais: deduplicacao, filtros, mutations, status, permissoes, produtos, timeline, versoes e geracao/compartilhamento de PDF.
+- [x] Validado: `pnpm run typecheck`.
+- [x] Validado: `pnpm test`.
+- [x] Commit de checkpoint: `125f545`.
+- [x] Validacao visual no Expo Go/simulador: aprovada pelo usuario.
+- [x] Liberacao do Sprint 5: aprovada pelo usuario.
+
+### Checklist de Execucao — Sprint 5
+
+- [x] Sprint 5 iniciada somente apos validacao visual explicita do Sprint 4.
+- [x] Criado `src/features/advertisers/AdvertiserListScreen.tsx` para padronizar listas de Clientes/Leads sem alterar queries ou rotas.
+- [x] Redesenhadas telas `app/(admin)/clients.tsx`, `app/(comercial)/clients.tsx` e `app/(comercial)/leads.tsx`.
+- [x] Redesenhado Dashboard Admin com `UIHeader`, `UICard`, `UIBadge` e `UIButton`.
+- [x] Redesenhado detalhe de Cliente/Lead com seções em cards, header padronizado e chips de status.
+- [x] Redesenhados `LeadSourcePicker`, `AdvertiserProposalList` e `RecallReminderSheet` usando componentes compartilhados.
+- [x] Redesenhadas telas de Avisos ADMIN/COMERCIAL preservando ações de ver proposta, adiar e marcar como tratado.
+- [x] Preservados contratos funcionais: busca, filtros, criação/edição de lead/cliente, propostas vinculadas, avisos, mutations e navegação.
+- [x] Validado: `pnpm run typecheck`.
+- [x] Validado: `pnpm test`.
+- [x] Commit de checkpoint: `aec2a08`.
+- [x] Validacao visual no Expo Go/simulador: aprovada pelo usuario.
+- [x] Liberacao do Sprint 6: aprovada pelo usuario.
+
+### Checklist de Execucao — Sprint 6
+
+- [x] Sprint 6 iniciada somente apos commit e validacao visual explicita do Sprint 5.
+- [x] Redesenhados catalogos administrativos compartilhados via `CatalogListScreen`: fontes de lead, produtos, programas e tipos de proposta.
+- [x] Redesenhada tela de Duracoes de Produto com `UIHeader`, `UICard`, `UIEmptyState`, `UIBottomSheet`, `UIInput` e `UIButton`.
+- [x] Redesenhada tela de Modelos de Proposta com cards, botoes, sheet e chips de categoria.
+- [x] Redesenhadas telas de Empresas: listagem, detalhe, formulario, imagem/cor e apresentacao padrao.
+- [x] Redesenhadas telas de Usuarios: listagem, detalhe, status, papel e acessos por empresa.
+- [x] Consolidado `StationPresentationEditor` e `ImagePickerField` no design system.
+- [x] Preservados contratos funcionais: endpoints, queries, mutations, payloads, permissoes e confirmacoes destrutivas.
+- [x] Validado: `pnpm run typecheck`.
+- [x] Validado: `pnpm test`.
 - [ ] Commit de checkpoint: pendente ate validacao visual do usuario.
 - [ ] Validacao visual no Expo Go/simulador: pendente com o usuario.
-- [ ] Liberacao do Sprint 3: bloqueada ate aprovacao visual explicita.
+
+### Checklist de Execucao — Sprint 7
+
+- [x] Sprint 7 executada em conjunto com a Sprint 6 a pedido do usuario.
+- [x] Reforcado feedback de pressao em `UIChip` usando `transform` e `opacity`.
+- [x] `UIButton` recebeu `iconColor` opcional mantendo compatibilidade de props existentes.
+- [x] Botoes destrutivos em modo discreto passaram a ter icone e texto em cor destrutiva quando aplicavel.
+- [x] Conferidas areas minimas de toque nos novos botoes/chips e labels de acessibilidade nos comandos de voltar, abrir, selecionar, remover e desativar.
+- [x] Conferido uso de tokens/componentes compartilhados nas telas administrativas tocadas.
+- [x] Validado: `pnpm run typecheck`.
+- [x] Validado: `pnpm test`.
+- [ ] Commit de checkpoint: pendente ate validacao visual do usuario.
+- [ ] Validacao visual no Expo Go/simulador: pendente com o usuario.
 
 ---
 

@@ -7,6 +7,7 @@ import { resolveAuthenticatedRoute } from '@/src/features/auth/routeGuard';
 import { BrandLogo } from '@/src/ui';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useColors } from '@/hooks/useColors';
+import { BRAND } from '@/src/config/brand';
 
 export default function IndexScreen() {
   const { initializeAuth, user, isInitialized } = useAuthStore();
@@ -28,8 +29,8 @@ export default function IndexScreen() {
     <View style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}>
       <BrandLogo variant="complete" width={132} height={92} />
       <View style={styles.copy}>
-        <Text style={[styles.title, { color: colors.foreground }]}>GTF Propostas</Text>
-        <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>Sistema Comercial GTF</Text>
+        <Text style={[styles.title, { color: colors.foreground }]}>{BRAND.productName}</Text>
+        <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>{BRAND.systemName}</Text>
       </View>
       <LoadingSpinner full={false} message="Carregando sessão..." />
     </View>

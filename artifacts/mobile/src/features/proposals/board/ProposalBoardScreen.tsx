@@ -18,6 +18,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useToast } from '@/components/ToastProvider';
 import { UIButton, UIChip, UIHeader, UIInput } from '@/src/ui';
 import { shadows, spacing, tokens } from '@/src/theme';
+import { getNewProposalActionStyle } from './proposalBoardUi';
 
 export function ProposalBoardScreen() {
   const colors = useColors();
@@ -73,9 +74,10 @@ export function ProposalBoardScreen() {
           subtitle="Acompanhe o andamento por etapa"
           action={
             <UIButton
+              title="Nova"
               accessibilityLabel="Criar nova proposta"
               iconLeft="plus"
-              iconSize={26}
+              iconSize={18}
               size="md"
               style={styles.newButton}
               onPress={() => router.push('/proposal/new')}
@@ -196,7 +198,7 @@ export function ProposalBoardScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { paddingHorizontal: spacing.lg, paddingBottom: spacing.md },
-  newButton: { width: 52, height: 52, minHeight: 52, paddingHorizontal: 0, borderRadius: 18 },
+  newButton: getNewProposalActionStyle(),
   filters: { marginHorizontal: spacing.lg, padding: spacing.md, gap: spacing.md, borderWidth: 1, borderRadius: tokens.radius.xl, ...shadows.sm },
   filterTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   filterButton: { width: 38, minHeight: 38, paddingHorizontal: 0, borderRadius: 999 },

@@ -54,6 +54,19 @@
 
 O fluxo seleciona Empresa, Tipo e Cliente/Lead antes de criar o rascunho. O detalhe usa etapas horizontais de Contexto, Período, Produtos, Investimento e Revisão. Produtos podem vir do catálogo ou existir apenas na proposta; duração, horário e sazonalidade são editáveis. A revisão concentra andamento, duplicação, status terminal e geração/compartilhamento de PDF.
 
+### PDF da proposta
+
+O botão **Gerar e compartilhar PDF** monta o documento localmente, sem abrir o diálogo de impressão. O aplicativo:
+
+1. normaliza os dados da proposta com as mesmas prioridades do sistema web;
+2. distribui os produtos em folhas A4 explícitas;
+3. embute Montserrat localmente;
+4. gera o arquivo com `expo-print` em `595 x 842 pt`;
+5. valida a quantidade produzida de folhas;
+6. abre o compartilhamento nativo somente quando o arquivo está consistente.
+
+O Hero, o logo e as bordas usam a cor cadastrada na Empresa. A identidade Mosaico da interface não substitui `Station.primaryColor` no documento comercial. Investimento e contato aparecem juntos apenas na última folha.
+
 ## Regra de Navegação
 
 Links só devem ser exibidos se a tela existir e se o usuário tiver permissão. Rotas administrativas também devem validar o perfil ao montar a tela, sem depender apenas da visibilidade do menu.

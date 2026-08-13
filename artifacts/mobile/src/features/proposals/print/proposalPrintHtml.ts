@@ -1,6 +1,14 @@
 import type { Proposal } from '@/src/types';
+import { mapProposalToPrintData, type ProposalPrintData, type ProposalPrintProduct } from './proposalPrintModel';
+import { paginateProposalPrintProducts, type ProposalPrintPage } from './proposalPrintPagination';
 
-function escape(value: unknown): string {
+type RenderProposalPrintHtmlInput = {
+  data: ProposalPrintData;
+  pages: ProposalPrintPage[];
+  fontFaceCss: string;
+};
+
+function escapeHtml(value: unknown): string {
   return String(value ?? '')
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
@@ -9,146 +17,176 @@ function escape(value: unknown): string {
     .replaceAll("'", '&#039;');
 }
 
-export function proposalPrintHtml(proposal: Proposal): string {
-  const primary = proposal.station?.primaryColor || '#427EFF';
-  const client = proposal.advertiser?.tradeName || proposal.clientLine1 || 'Sem cliente';
-  const visibleStats = (proposal.stats ?? []).filter((stat) => stat.num || stat.desc);
-  const productPages = paginateProducts(proposal.products ?? [], visibleStats.length > 0);
-  const pages = productPages.length ? productPages : [[]];
-  const stats = visibleStats
-    .map((stat) => `<div class="stat"><strong>${escape(stat.num)}${escape(stat.suf)}</strong><small>${escape(stat.desc)}</small></div>`)
-    .join('');
-  const heroStyle = proposal.bannerBase64
-    ? `background-color:${escape(primary)};background-image:linear-gradient(rgba(0,0,0,${Math.max(0, Math.min(90, proposal.overlayOpacity ?? 30)) / 100}),rgba(0,0,0,${Math.max(0, Math.min(90, proposal.overlayOpacity ?? 30)) / 100})),url('${escape(proposal.bannerBase64)}');`
-    : `background-color:${escape(primary)};`;
+function stationMonogram(name: string): string {
+  const digits = name.match(/\d+/)?.[0];
+  if (digits) return digits.slice(0, 3);
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'E';
+}
 
-  const pageMarkup = pages
-    .map((pageProducts, pageIndex) => {
-      const isFirst = pageIndex === 0;
-      const isLast = pageIndex === pages.length - 1;
-      const products = pageProducts
-        .map(
-          (product) => {
-            const metadata = [product.durationLabel, product.airTime, seasonalityLabel(product.seasonality)].filter(Boolean).map(escape).join(' - ');
-            return `<article class="product" style="border-left-color:${escape(primary)}">
-        <div class="product-top"><strong class="qty">${escape(product.qty || '01')}</strong><span>QUANTIDADE<br>DE INSERÇÕES</span></div>
-        <div>
-          <h3>${escape(product.title)}</h3>
-          ${metadata ? `<p class="metadata">${metadata}</p>` : ''}
-          ${product.detail ? `<p class="detail">${escape(product.detail)}</p>` : ''}
-          ${product.description ? `<p>${escape(product.description)}</p>` : ''}
-          ${product.program ? `<span class="program-pill">${escape(product.program)}</span>` : ''}
-        </div>
-      </article>`;
-          },
-        )
-        .join('');
+function renderHeader(data: ProposalPrintData, continuation: boolean): string {
+  const logo = data.stationLogoDataUrl
+    ? `<img src="${escapeHtml(data.stationLogoDataUrl)}" alt="Logo da empresa">`
+    : escapeHtml(stationMonogram(data.stationName));
+  return `<header class="proposal-print-header">
+    <div class="proposal-print-logo" style="background-color:${escapeHtml(data.primaryColor)}">${logo}</div>
+    <div>
+      <div class="proposal-print-station-name">${escapeHtml(data.stationName)}</div>
+      <div class="proposal-print-slogan">${escapeHtml(data.stationSlogan)}${continuation ? ' <span>- CONTINUACAO</span>' : ''}</div>
+    </div>
+  </header>`;
+}
 
-      return `<main class="page${isLast ? ' last-page' : ''}">
-        <header>
-          ${proposal.station?.logoBase64 ? `<img class="logo" src="${escape(proposal.station.logoBase64)}">` : `<div class="logo-mark" style="background-color:${escape(primary)}">${escape((proposal.station?.name || 'GTF').slice(0, 2).toUpperCase())}</div>`}
-          <div>
-            <strong>${escape(proposal.station?.name)}</strong><br>
-            <small>${escape(isFirst ? proposal.station?.slogan : `${client} - continuacao`)}</small>
-          </div>
-        </header>
-        ${isFirst ? `<section class="hero" style="${heroStyle}"><small>${escape(proposal.propType)}</small><h1>${escape(client).toUpperCase()}</h1>${proposal.showPeriod ? `<div class="period-pill">Periodo: ${escape(formatPeriod(proposal))}</div>${proposal.periodDesc ? `<p class="period-note">${escape(proposal.periodDesc)}</p>` : ''}` : ''}</section>` : ''}
-        ${isFirst && stats ? `<div class="section">Apresentacao</div><section class="stats">${stats}</section>` : ''}
-        <div class="section">Plano de Ações${isFirst ? '' : ' - continuacao'}</div>
-        <section class="products">${products || '<p>Nenhum produto adicionado.</p>'}</section>
-        ${isLast ? `<div class="last-page-spacer"></div>
-          <section class="investment"><div><span>INVESTIMENTO</span>${proposal.investDesc ? `<small>${escape(proposal.investDesc)}</small>` : ''}</div><strong>${escape(formatInvestment(proposal.investValue))}</strong></section>
-          <footer><div><strong>${escape(proposal.contactName || proposal.createdBy?.name)}</strong><br><small>${escape([proposal.contactRole || proposal.createdBy?.jobTitle, proposal.station?.name].filter(Boolean).join(' + '))}</small></div><div><small>CONTATO DIRETO</small><br><strong style="color:${escape(primary)}">${escape(proposal.contactPhone || proposal.createdBy?.contactPhone)}</strong></div></footer>` : ''}
-      </main>`;
-    })
-    .join('');
+function renderHero(data: ProposalPrintData): string {
+  return `<section class="proposal-print-hero" style="background-color:${escapeHtml(data.primaryColor)}">
+    <div class="proposal-print-hero-type">${escapeHtml(data.proposalTypeName)}</div>
+    <h1>${escapeHtml(data.clientName.toUpperCase())}</h1>
+    ${data.showPeriod && data.periodLabel ? `<div class="proposal-print-period-row"><div class="proposal-print-period-pill">Periodo: ${escapeHtml(data.periodLabel)}</div></div>` : ''}
+  </section>`;
+}
 
-  return `<!doctype html><html><head><meta charset="utf-8"><style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
-    @page { size: A4; margin: 0; } * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    body { margin: 0; font-family: Montserrat, Arial, sans-serif; color: #111; background: #fff; }
-    .page { width: 210mm; height: 297mm; padding: 10mm 14mm 11mm; display: flex; flex-direction: column; gap: 4.2mm; overflow: hidden; break-after: page; page-break-after: always; background: #fff; }
-    .page:last-child { break-after: auto; page-break-after: auto; }
-    header { display: flex; align-items: center; gap: 14px; min-height: 17mm; }
-    header strong { font-size: 22px; line-height: 1; font-weight: 900; text-transform: uppercase; letter-spacing: .3px; }
-    header small { color: #727272; font-size: 12px; font-weight: 500; }
-    .logo, .logo-mark { width: 48px; height: 48px; border-radius: 12px; object-fit: contain; }
-    .logo-mark { display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; }
-    .hero { min-height: 48mm; padding: 12mm 11mm 9mm; border-radius: 20px; color: white; background-size: cover; background-position: center; overflow: hidden; }
-    .hero small, .section { text-transform: uppercase; letter-spacing: 3px; font-weight: 900; }
-    .hero small { display: block; color: rgba(255,255,255,.72); font-size: 11px; margin-bottom: 8px; }
-    h1 { font-size: 41px; line-height: .96; margin: 0 0 10mm; max-width: 150mm; font-weight: 900; letter-spacing: 0; }
-    .period-pill { display: inline-block; border: 1.5px solid rgba(255,255,255,.86); border-radius: 999px; padding: 8px 16px; font-size: 12px; font-weight: 800; }
-    .period-note { color: rgba(255,255,255,.86); max-width: 430px; margin: 7px 0 0; font-size: 10px; }
-    .section { display: flex; align-items: center; gap: 8px; font-size: 10px; }
-    .section:before { content: ""; display: inline-block; width: 4px; height: 14px; border-radius: 99px; background: ${escape(primary)}; }
-    .stats, .products { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
-    .stat { min-height: 24mm; padding: 12px 14px; background: #f8fbff; border: 1px solid #dce7f6; border-radius: 14px; break-inside: avoid; box-shadow: inset 96px 5px 0 -92px ${escape(primary)}; }
-    .stat strong { display: block; color: ${escape(primary)}; font-size: 25px; line-height: 1; font-weight: 900; } .stat small { display: block; margin-top: 7px; color: #727272; font-size: 9px; font-weight: 800; text-transform: uppercase; }
-    .product { border-left: 10px solid ${escape(primary)}; display: block; min-height: 88px; max-height: 126px; padding: 12px 13px 11px 16px; background: #f8fbff; border-top: 1px solid #dce7f6; border-right: 1px solid #dce7f6; border-bottom: 1px solid #dce7f6; break-inside: avoid; overflow: hidden; border-radius: 15px; }
-    .product-top { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
-    .product-top span { color: #727272; font-size: 8.5px; line-height: .94; font-weight: 900; letter-spacing: 1.1px; }
-    .qty { color: ${escape(primary)}; font-size: 29px; line-height: .9; font-weight: 900; } h3 { margin: 0 0 5px; font-size: 13px; line-height: 1.12; font-weight: 900; text-transform: uppercase; }
-    p { color: #666; margin: 4px 0; font-size: 10.5px; line-height: 1.24; } .metadata { color: #555; text-transform: uppercase; font-weight: 700; letter-spacing: .2px; } .detail { color: #444; font-weight: 600; }
-    .program-pill { display: inline-block; margin-top: 5px; padding: 5px 10px; border-radius: 99px; background: #111; color: white; font-size: 8px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
-    .last-page-spacer { flex: 1; min-height: 2mm; }
-    .investment { background: #000; color: white; border-radius: 19px; padding: 15px 22px; display: flex; justify-content: space-between; align-items: center; break-inside: avoid; min-height: 21mm; }
-    .investment span { display:block; letter-spacing: 3px; color: #9a9a9a; font-weight: 900; font-size: 10px; text-transform: uppercase; } .investment small { display:block; margin-top: 4px; max-width: 320px; color: #ddd; font-size: 9px; }
-    .investment strong { font-size: 33px; font-weight: 900; } footer { border-top: 1px solid #e1e7f0; padding-top: 10px; display: flex; justify-content: space-between; break-inside: avoid; }
-    footer strong { font-size: 18px; font-weight: 900; } footer small { color: #727272; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-    footer div:last-child { text-align: right; } footer div:last-child strong { font-size: 14px; }
+function renderSectionLabel(data: ProposalPrintData, label: string, continuation = false): string {
+  return `<div class="proposal-print-section-label">
+    <span style="background-color:${escapeHtml(data.primaryColor)}"></span>
+    <strong>${escapeHtml(label)}${continuation ? '<em>Continuacao</em>' : ''}</strong>
+  </div>`;
+}
+
+function renderStats(data: ProposalPrintData): string {
+  if (data.stats.length === 0) return '';
+  const cards = data.stats.map((stat, index) => {
+    const accent = index % 2 === 0 ? data.primaryColor : '#727272';
+    return `<div class="proposal-print-stat-card">
+      <div class="proposal-print-stat-bar" style="background-color:${escapeHtml(accent)}"></div>
+      <div class="proposal-print-stat-body">
+        <div class="proposal-print-stat-value" style="color:${escapeHtml(accent)}">${escapeHtml(stat.value || '00')}</div>
+        <div class="proposal-print-stat-description">${escapeHtml(stat.description || 'Indicador')}</div>
+      </div>
+    </div>`;
+  }).join('');
+  return `<section class="proposal-print-stats-section">
+    ${renderSectionLabel(data, 'Apresentacao')}
+    <div class="proposal-print-stats-grid">${cards}</div>
+  </section>`;
+}
+
+function renderProduct(data: ProposalPrintData, product: ProposalPrintProduct): string {
+  return `<article class="proposal-print-product-card" style="border-left-color:${escapeHtml(data.primaryColor)}">
+    <div class="proposal-print-product-top">
+      <div class="proposal-print-product-qty" style="color:${escapeHtml(data.primaryColor)}">${escapeHtml(product.quantity)}</div>
+      <div class="proposal-print-product-qty-label">Quantidade<br>de insercoes</div>
+    </div>
+    <div class="proposal-print-product-title">${escapeHtml(product.title)}</div>
+    ${product.metadata ? `<div class="proposal-print-product-meta">${escapeHtml(product.metadata)}</div>` : ''}
+    ${product.description ? `<p class="proposal-print-product-description">${escapeHtml(product.description)}</p>` : ''}
+    ${product.programName ? `<div class="proposal-print-product-tags"><span class="proposal-print-product-program">${escapeHtml(product.programName)}</span></div>` : ''}
+  </article>`;
+}
+
+function renderProducts(data: ProposalPrintData, page: ProposalPrintPage, continuation: boolean): string {
+  const content = page.products.length
+    ? `<div class="proposal-print-products-grid">${page.products.map((product) => renderProduct(data, product)).join('')}</div>`
+    : '<div class="proposal-print-empty-products">Nenhum produto adicionado.</div>';
+  return `<section class="proposal-print-products-section">
+    ${renderSectionLabel(data, 'Plano de Acoes', continuation)}
+    ${content}
+  </section>`;
+}
+
+function renderInvestment(data: ProposalPrintData): string {
+  return `<section class="proposal-print-investment">
+    <div>
+      <div class="proposal-print-investment-label">Investimento</div>
+      ${data.investmentDescription ? `<div class="proposal-print-investment-description">${escapeHtml(data.investmentDescription)}</div>` : ''}
+    </div>
+    <div class="proposal-print-investment-value">${escapeHtml(data.investmentValue)}</div>
+  </section>`;
+}
+
+function renderFooter(data: ProposalPrintData): string {
+  return `<footer class="proposal-print-footer">
+    <div>
+      <div class="proposal-print-footer-name">${escapeHtml(data.sellerName)}</div>
+      <div class="proposal-print-footer-role">${escapeHtml(data.sellerRole)} - ${escapeHtml(data.stationName)}</div>
+    </div>
+    <div class="proposal-print-footer-contact">
+      <div class="proposal-print-footer-label">Contato Direto</div>
+      <div class="proposal-print-footer-phone" style="color:${escapeHtml(data.primaryColor)}">${escapeHtml(data.sellerPhone)}</div>
+    </div>
+  </footer>`;
+}
+
+function renderPage(data: ProposalPrintData, page: ProposalPrintPage, pageIndex: number, pageCount: number): string {
+  const continuation = page.kind === 'continuation' || page.kind === 'last';
+  return `<main class="proposal-print-page proposal-print-page--${page.kind}" data-page="${pageIndex + 1}" data-page-count="${pageCount}">
+    ${renderHeader(data, continuation)}
+    ${page.showHero ? renderHero(data) : ''}
+    ${page.showStats ? renderStats(data) : ''}
+    ${renderProducts(data, page, continuation)}
+    ${page.showInvestment ? '<div class="proposal-print-spacer"></div>' : ''}
+    ${page.showInvestment ? renderInvestment(data) : ''}
+    ${page.showFooter ? renderFooter(data) : ''}
+  </main>`;
+}
+
+export function renderProposalPrintHtml({ data, pages, fontFaceCss }: RenderProposalPrintHtmlInput): string {
+  const pageMarkup = pages.map((page, index) => renderPage(data, page, index, pages.length)).join('');
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>
+    ${fontFaceCss}
+    @page { size: A4 portrait; margin: 0; }
+    html, body { width: 210mm; margin: 0; padding: 0; background: #fff; }
+    * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { color: #111; font-family: 'Montserrat', Arial, sans-serif; }
+    .proposal-print-page { display: flex; flex-direction: column; width: 210mm; height: 297mm; min-height: 297mm; max-height: 297mm; padding: 10mm 14mm 8mm; overflow: hidden; background: #fff; break-after: page; page-break-after: always; page-break-inside: avoid; break-inside: avoid; }
+    .proposal-print-page:last-child { break-after: auto; page-break-after: auto; }
+    .proposal-print-header { display: flex; align-items: center; gap: 10px; min-height: 14mm; margin-bottom: 5mm; }
+    .proposal-print-logo { display: flex; align-items: center; justify-content: center; width: 13.5mm; height: 13.5mm; border-radius: 4mm; overflow: hidden; color: #fff; font-size: 14pt; font-weight: 900; }
+    .proposal-print-logo img { width: 100%; height: 100%; object-fit: contain; padding: 2mm; }
+    .proposal-print-station-name { color: #111; font-size: 16pt; font-weight: 900; line-height: 1; text-transform: uppercase; letter-spacing: .03em; }
+    .proposal-print-slogan { margin-top: 1.8mm; color: #727272; font-size: 8.5pt; font-weight: 500; }
+    .proposal-print-hero { min-height: 50mm; margin-bottom: 5mm; padding: 9mm 12mm; border-radius: 16px; color: #fff; overflow: hidden; break-inside: avoid; page-break-inside: avoid; }
+    .proposal-print-hero-type { color: rgba(255,255,255,.75); font-size: 8pt; font-weight: 900; text-transform: uppercase; letter-spacing: .24em; }
+    .proposal-print-hero h1 { max-width: 160mm; max-height: 28mm; margin: 4mm 0 0; overflow: hidden; color: #fff; font-size: 34pt; font-weight: 900; line-height: .92; text-transform: uppercase; letter-spacing: 0; }
+    .proposal-print-period-row { display: flex; align-items: center; margin-top: 6mm; }
+    .proposal-print-period-pill { border: 1px solid rgba(255,255,255,.9); border-radius: 999px; padding: 2mm 5mm; color: #fff; font-size: 8.5pt; font-weight: 800; }
+    .proposal-print-section-label { display: flex; align-items: center; gap: 2.5mm; margin-bottom: 3mm; }
+    .proposal-print-section-label > span { display: block; width: 1mm; height: 3.5mm; border-radius: 999px; }
+    .proposal-print-section-label strong { display: flex; align-items: baseline; gap: 2mm; color: #111; font-size: 7.5pt; font-weight: 900; text-transform: uppercase; letter-spacing: .22em; }
+    .proposal-print-section-label em { color: #727272; font-size: 6.5pt; font-style: normal; letter-spacing: .12em; }
+    .proposal-print-stats-section { margin-bottom: 5mm; break-inside: avoid; page-break-inside: avoid; }
+    .proposal-print-stats-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); overflow: hidden; min-height: 20mm; background: #f8fbff; border: 1px solid #e1e7f0; border-radius: 12px; }
+    .proposal-print-stat-card { border-right: 1px solid #e1e7f0; }
+    .proposal-print-stat-card:last-child { border-right: 0; }
+    .proposal-print-stat-bar { height: 1.5mm; }
+    .proposal-print-stat-body { padding: 3.2mm 4mm; }
+    .proposal-print-stat-value { font-size: 20pt; font-weight: 900; line-height: 1; }
+    .proposal-print-stat-description { margin-top: 2mm; color: #555; font-size: 6.8pt; font-weight: 800; line-height: 1.18; text-transform: uppercase; letter-spacing: .08em; white-space: pre-line; }
+    .proposal-print-products-section { margin-bottom: 5mm; }
+    .proposal-print-products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+    .proposal-print-product-card { min-height: 37mm; max-height: 39mm; padding: 4mm 4.5mm 3.5mm 6mm; overflow: hidden; background: #f8fbff; border: 1px solid #dce7f6; border-left: 10px solid; border-radius: 16px; break-inside: avoid; page-break-inside: avoid; }
+    .proposal-print-product-top { display: flex; align-items: flex-start; gap: 2.5mm; margin-bottom: 2.2mm; }
+    .proposal-print-product-qty { font-size: 24pt; font-weight: 900; line-height: 1; }
+    .proposal-print-product-qty-label { padding-top: 1mm; color: #727272; font-size: 6.7pt; font-weight: 900; line-height: 1.1; text-transform: uppercase; letter-spacing: .12em; }
+    .proposal-print-product-title { color: #111; font-size: 9.5pt; font-weight: 900; line-height: 1.15; text-transform: uppercase; }
+    .proposal-print-product-meta { margin-top: 1.3mm; color: #565656; font-size: 7.5pt; font-weight: 700; line-height: 1.2; text-transform: uppercase; letter-spacing: .02em; }
+    .proposal-print-product-description { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; margin: 1.6mm 0 0; overflow: hidden; color: #565656; font-size: 7.8pt; line-height: 1.18; }
+    .proposal-print-product-tags { display: flex; margin-top: 2.5mm; }
+    .proposal-print-product-program { display: inline-flex; max-width: 100%; align-items: center; padding: 1.2mm 3.2mm; overflow: hidden; background: #111; border-radius: 999px; color: #fff; font-size: 6.3pt; font-weight: 900; line-height: 1; text-transform: uppercase; letter-spacing: .12em; white-space: nowrap; text-overflow: ellipsis; }
+    .proposal-print-empty-products { padding: 9mm 8mm; background: #f8fbff; border: 1px dashed #dce7f6; border-radius: 16px; color: #727272; font-size: 10pt; font-weight: 600; text-align: center; }
+    .proposal-print-spacer { flex: 1; min-height: 0; }
+    .proposal-print-investment { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 6mm; min-height: 18mm; margin-bottom: 5mm; padding: 5mm 8mm; background: #000; border-radius: 16px; color: #fff; break-inside: avoid; page-break-inside: avoid; }
+    .proposal-print-investment-label { color: rgba(255,255,255,.55); font-size: 7.5pt; font-weight: 900; text-transform: uppercase; letter-spacing: .24em; }
+    .proposal-print-investment-description { max-width: 96mm; margin-top: 2mm; color: rgba(255,255,255,.74); font-size: 8pt; font-weight: 500; line-height: 1.25; }
+    .proposal-print-investment-value { color: #fff; font-size: 27pt; font-weight: 900; line-height: 1; text-align: right; white-space: nowrap; }
+    .proposal-print-footer { display: flex; align-items: flex-end; justify-content: space-between; min-height: 12mm; padding-top: 4mm; border-top: 1px solid #e1e7f0; break-inside: avoid; page-break-inside: avoid; }
+    .proposal-print-footer-name { color: #111; font-size: 14pt; font-weight: 900; line-height: 1; }
+    .proposal-print-footer-role { margin-top: 1.8mm; color: #727272; font-size: 7.5pt; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+    .proposal-print-footer-contact { text-align: right; }
+    .proposal-print-footer-label { color: #727272; font-size: 6.8pt; font-weight: 900; text-transform: uppercase; letter-spacing: .18em; }
+    .proposal-print-footer-phone { margin-top: 1.8mm; font-size: 11pt; font-weight: 900; }
   </style></head><body>${pageMarkup}</body></html>`;
 }
 
-function paginateProducts(products: Proposal['products'], hasStats: boolean): Proposal['products'][] {
-  const pages: Proposal['products'][] = [];
-  const firstBudget = hasStats ? 250 : 252;
-  const nextBudget = 540;
-  let index = 0;
-
-  while (index < products.length) {
-    const budget = pages.length === 0 ? firstBudget : nextBudget;
-    const page: Proposal['products'] = [];
-    let used = 0;
-
-    while (index < products.length) {
-      const rowItems = products.slice(index, index + 2);
-      const rowHeight = Math.max(...rowItems.map(estimateProductHeight));
-      const nextUsed = used + rowHeight + (page.length ? 10 : 0);
-      if (page.length > 0 && nextUsed > budget) break;
-      page.push(...rowItems);
-      used = nextUsed;
-      index += rowItems.length;
-    }
-
-    pages.push(page);
-  }
-
-  return pages;
-}
-
-function estimateProductHeight(product: Proposal['products'][number]): number {
-  const descriptionLength = (product.description ?? '').length;
-  const detailLength = (product.detail ?? '').length;
-  const metadataCount = [product.durationLabel, product.airTime, product.seasonality].filter(Boolean).length;
-  return 108 + Math.ceil(descriptionLength / 55) * 12 + Math.ceil(detailLength / 60) * 10 + (metadataCount ? 10 : 0);
-}
-
-function seasonalityLabel(value: Proposal['products'][number]['seasonality']): string {
-  if (value === 'MONTHLY') return 'Mensal';
-  if (value === 'SEMIANNUAL') return 'Semestral';
-  if (value === 'ANNUAL') return 'Anual';
-  return '';
-}
-
-function formatPeriod(proposal: Proposal): string {
-  if (proposal.dateStart || proposal.dateEnd) {
-    return [proposal.dateStart, proposal.dateEnd].filter(Boolean).join(' a ');
-  }
-  return proposal.propMonth || 'Mensal';
-}
-
-function formatInvestment(value: string | null | undefined): string {
-  const normalized = String(value || '0,00').trim();
-  return normalized.startsWith('R$') ? normalized : `R$ ${normalized}`;
+export function proposalPrintHtml(proposal: Proposal, fontFaceCss = ''): string {
+  const data = mapProposalToPrintData(proposal);
+  return renderProposalPrintHtml({ data, pages: paginateProposalPrintProducts(data), fontFaceCss });
 }

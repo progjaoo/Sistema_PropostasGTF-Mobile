@@ -35,20 +35,22 @@ Comportamento atual:
 
 1. Se `EXPO_PUBLIC_API_URL` estiver definido, usa esse valor como URL completa da API.
 2. Se `EXPO_PUBLIC_DOMAIN` estiver definido, usa `https://<domínio>/api`.
-3. Caso contrário, usa `http://localhost:8081/api`, alinhado ao Compose oficial do projeto principal.
+3. Caso contrario, usa a API publicada configurada como fallback no cliente.
 
 Exemplos:
 
 ```env
 # Simulador iOS/Android rodando no mesmo Mac
-EXPO_PUBLIC_API_URL=http://localhost:8081/api
+EXPO_PUBLIC_API_URL=http://localhost:8091/api
 
 # Aparelho físico na mesma rede do Mac
-EXPO_PUBLIC_API_URL=http://192.168.0.10:8081/api
+EXPO_PUBLIC_API_URL=http://192.168.0.10:8091/api
 
 # Produção
 EXPO_PUBLIC_API_URL=https://propostas.grupogtf.com.br/api
 ```
+
+Para Expo Go com API local, prefira `pnpm run start:api:docker` ou `pnpm run start:api:host`. Esses scripts detectam o IP local e evitam o uso incorreto de `localhost` em aparelho fisico. Consulte [rodar-local.md](rodar-local.md).
 
 Em aparelho físico, `localhost` aponta para o próprio aparelho. Use o IP local do computador ou um domínio/túnel HTTPS.
 

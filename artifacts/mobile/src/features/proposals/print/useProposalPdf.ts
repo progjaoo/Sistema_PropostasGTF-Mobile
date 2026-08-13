@@ -1,16 +1,18 @@
-import { useState } from 'react';
-import * as Print from 'expo-print';
+import { useRef, useState } from 'react';
 import * as Sharing from 'expo-sharing';
 import type { Proposal } from '@/src/types';
-import { proposalPrintHtml } from './proposalPrintHtml';
+import { generateProposalPdfFile } from './generateProposalPdfFile';
 
 export function useProposalPdf() {
   const [isGenerating, setIsGenerating] = useState(false);
+  const generationInProgress = useRef(false);
 
   async function shareProposalPdf(proposal: Proposal) {
+    if (generationInProgress.current) return null;
+    generationInProgress.current = true;
     setIsGenerating(true);
     try {
-      const { uri } = await Print.printToFileAsync({ html: proposalPrintHtml(proposal) });
+      const { uri } = await generateProposalPdfFile(proposal);
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, {
           mimeType: 'application/pdf',
@@ -20,6 +22,7 @@ export function useProposalPdf() {
       }
       return uri;
     } finally {
+      generationInProgress.current = false;
       setIsGenerating(false);
     }
   }

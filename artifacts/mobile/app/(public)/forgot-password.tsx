@@ -3,9 +3,10 @@ import { ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { router } from 'expo-router';
 import { FormInput } from '@/components/FormInput';
 import { useToast } from '@/components/ToastProvider';
-import { apiCall } from '@/src/api/client';
+import { ApiError } from '@/src/api/client';
 import { useColors } from '@/hooks/useColors';
 import { AuthScaffold } from '@/src/features/auth/AuthScaffold';
+import { requestPasswordReset } from '@/src/features/auth/passwordReset';
 import { UICard, UIButton, UIEmptyState } from '@/src/ui';
 
 export default function ForgotPasswordScreen() {
@@ -18,17 +19,19 @@ export default function ForgotPasswordScreen() {
   const [error, setError] = useState('');
 
   const handleSend = async () => {
-    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
-      setError('Informe um e-mail válido');
-      return;
-    }
     setError('');
     setLoading(true);
     try {
-      await apiCall('POST', '/auth/forgot-password', { email: email.trim().toLowerCase() });
+      await requestPasswordReset(email);
       setSent(true);
-    } catch {
-      showToast('Erro ao enviar. Tente novamente.', 'error');
+    } catch (requestError) {
+      const message = requestError instanceof ApiError && requestError.status === 429
+        ? 'Muitas tentativas. Aguarde alguns minutos e tente novamente.'
+        : requestError instanceof Error
+          ? requestError.message
+          : 'Erro de conexão. Tente novamente.';
+      setError(message);
+      showToast(message, requestError instanceof ApiError && requestError.status === 429 ? 'warning' : 'error');
     } finally {
       setLoading(false);
     }
@@ -55,6 +58,7 @@ export default function ForgotPasswordScreen() {
           <FormInput
             label="E-mail" required leftIcon="mail" placeholder="seu@email.com"
             keyboardType="email-address" autoCapitalize="none"
+            autoCorrect={false}
             value={email} onChangeText={(t) => { setEmail(t); setError(''); }}
             error={error} returnKeyType="done" onSubmitEditing={handleSend}
           />

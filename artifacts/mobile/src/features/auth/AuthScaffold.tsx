@@ -7,7 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { useColors } from '@/hooks/useColors';
 import { BrandLogo } from '@/src/ui';
-import { spacing, tokens } from '@/src/theme';
+import { spacing } from '@/src/theme';
+import { BRAND } from '@/src/config/brand';
 
 type AuthScaffoldProps = {
   title?: string;
@@ -36,107 +37,123 @@ export function AuthScaffold({
   const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom;
 
   return (
-    <KeyboardAwareScrollViewCompat
-      style={{ flex: 1, backgroundColor: colors.background }}
-      contentContainerStyle={[
-        styles.content,
-        { paddingTop: topPad + (showBrand ? 32 : 16), paddingBottom: bottomPad + 24 },
-        contentStyle,
-      ]}
-      keyboardShouldPersistTaps="handled"
-      bottomOffset={20}
-    >
-      {showBrand ? (
-        <View style={styles.brand}>
-          <BrandLogo variant="complete" width={124} height={86} />
-          <View style={styles.brandCopy}>
-            <Text style={[styles.brandTitle, { color: colors.foreground }]}>GTF Propostas</Text>
-            <Text style={[styles.brandSubtitle, { color: colors.mutedForeground }]}>Sistema Comercial GTF</Text>
-          </View>
-        </View>
-      ) : null}
-
-      {(title || subtitle || showBack) ? (
-        <View style={styles.header}>
+    <View style={styles.screen}>
+      <KeyboardAwareScrollViewCompat
+        style={{ flex: 1, backgroundColor: colors.primary }}
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={20}
+      >
+        {/* Header Superior em Laranja com M maiúsculo */}
+        <View style={[styles.headerBg, { paddingTop: topPad + 24, backgroundColor: colors.primary }]}>
           {showBack ? (
             <Pressable
               onPress={onBack ?? (() => router.back())}
               hitSlop={10}
-              accessibilityRole="button"
-              accessibilityLabel="Voltar"
-              style={({ pressed }) => [
-                styles.backButton,
-                { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
-              ]}
+              style={({ pressed }) => [styles.backButton, { opacity: pressed ? 0.7 : 1 }]}
             >
-              <Feather name="arrow-left" size={20} color={colors.foreground} />
+              <Feather name="arrow-left" size={22} color="#FFF" />
             </Pressable>
           ) : null}
-          <View style={styles.headerCopy}>
-            {title ? <Text style={[styles.title, { color: colors.foreground }]}>{title}</Text> : null}
-            {subtitle ? <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>{subtitle}</Text> : null}
-          </View>
-        </View>
-      ) : null}
 
-      {children}
-      {footer ? <View style={styles.footer}>{footer}</View> : null}
-    </KeyboardAwareScrollViewCompat>
+          {showBrand ? (
+            <View style={styles.brandContainer}>
+              <BrandLogo variant="icon" size={68} />
+              <BrandLogo variant="logo" width={118} height={20} style={{ marginTop: 8 }} />
+              <View style={styles.srOnly}>
+                <Text>{BRAND.productName}</Text>
+                <Text>{BRAND.systemName}</Text>
+              </View>
+            </View>
+          ) : null}
+        </View>
+
+        {/* Card Branco Estilo Sheet Solta */}
+        <View
+          style={[
+            styles.sheetCard,
+            { backgroundColor: colors.card, paddingBottom: bottomPad + 24 },
+            contentStyle,
+          ]}
+        >
+          {(title || subtitle) ? (
+            <View style={styles.copyContainer}>
+              {title ? <Text style={[styles.sheetTitle, { color: colors.foreground }]}>{title}</Text> : null}
+              {subtitle ? <Text style={[styles.sheetSubtitle, { color: colors.mutedForeground }]}>{subtitle}</Text> : null}
+            </View>
+          ) : null}
+
+          {children}
+
+          {footer ? <View style={styles.footerContainer}>{footer}</View> : null}
+        </View>
+      </KeyboardAwareScrollViewCompat>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
+  screen: {
+    flex: 1,
+  },
+  headerBg: {
     paddingHorizontal: spacing.xl,
-    gap: spacing.lg,
-  },
-  brand: {
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.md,
-  },
-  brandCopy: {
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  brandTitle: {
-    fontSize: 24,
-    lineHeight: 30,
-    fontFamily: 'Inter_800ExtraBold',
-  },
-  brandSubtitle: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontFamily: 'Inter_500Medium',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.md,
-  },
-  backButton: {
-    width: 42,
-    height: 42,
-    borderRadius: tokens.radius.full,
-    borderWidth: 1,
+    paddingBottom: 54,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  headerCopy: {
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  brandContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  srOnly: {
+    position: 'absolute',
+    width: 1,
+    height: 1,
+    opacity: 0,
+    overflow: 'hidden',
+  },
+  sheetCard: {
     flex: 1,
-    gap: spacing.xs,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    marginTop: -32,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    gap: 20,
   },
-  title: {
-    fontSize: 28,
-    lineHeight: 34,
+  copyContainer: {
+    gap: 6,
+    marginBottom: 4,
+  },
+  sheetTitle: {
+    fontSize: 26,
+    lineHeight: 32,
     fontFamily: 'Inter_800ExtraBold',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
-  subtitle: {
+  sheetSubtitle: {
     fontSize: 14,
-    lineHeight: 21,
+    lineHeight: 20,
     fontFamily: 'Inter_400Regular',
   },
-  footer: {
+  footerContainer: {
+    marginTop: 'auto',
+    paddingTop: 16,
     alignItems: 'center',
   },
 });
+

@@ -81,6 +81,22 @@ Também validar:
 - textos grandes;
 - ausência de warning relevante no console.
 
+## Contrato de PDF A4
+
+- folha física: A4 retrato, `595 x 842 pt` no SDK e `210 x 297 mm` no HTML;
+- margens do SDK: zero; as margens visuais pertencem ao container da folha;
+- páginas são criadas pelo paginador antes da renderização, nunca por quebra automática do navegador;
+- Hero e Apresentação aparecem somente na primeira folha;
+- páginas intermediárias repetem cabeçalho compacto e identificam continuação;
+- investimento e contato aparecem juntos, uma vez, na última folha;
+- cards, investimento e contato usam `break-inside: avoid` e altura controlada;
+- Montserrat é embutida a partir de assets locais do bundle;
+- logo transparente permanece dentro de um wrapper com `Station.primaryColor`;
+- o compartilhamento é bloqueado se `expo-print` produzir quantidade diferente das folhas planejadas;
+- logs de erro podem conter contagens de páginas, mas nunca dados pessoais da proposta.
+
+Os testes do pipeline ficam em `src/features/proposals/print/__tests__`. Mudanças visuais no PDF web devem atualizar também as fixtures de paridade mobile.
+
 ## Definition of Done
 
 - Critérios do plano atendidos.
@@ -91,4 +107,3 @@ Também validar:
 - Documentação atualizada.
 - Checklist final registrado no plano.
 - Nenhum segredo versionado.
-

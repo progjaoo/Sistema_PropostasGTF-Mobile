@@ -1,6 +1,7 @@
 import React from 'react';
 import { Alert } from 'react-native';
 import { fireEvent, render } from '@testing-library/react-native';
+import { Image } from 'expo-image';
 
 import { AdvertiserCard } from '@/components/AdvertiserCard';
 import { showConfirm } from '@/components/ConfirmDialog';
@@ -8,6 +9,8 @@ import { EmptyState } from '@/components/EmptyState';
 import { FormInput } from '@/components/FormInput';
 import { ProposalCard } from '@/components/ProposalCard';
 import { StatusBadge } from '@/components/StatusBadge';
+import { BRAND } from '@/src/config/brand';
+import { BrandLogo } from '@/src/ui/BrandLogo';
 import type { Advertiser, ProposalSummary } from '@/src/types';
 
 const mockPush = jest.fn();
@@ -151,5 +154,45 @@ describe('legacy visual component contracts', () => {
     );
 
     alertSpy.mockRestore();
+  });
+
+  it.each(['complete', 'horizontal', 'logo'] as const)(
+    'keeps the %s BrandLogo variant mapped to the Mosaico logo',
+    (variant) => {
+      const { getByTestId, UNSAFE_getByType } = render(
+        <BrandLogo
+          variant={variant as never}
+          width={120}
+          height={48}
+          contentFit="contain"
+          style={{ opacity: 0.9 }}
+          testID={`brand-logo-${variant}`}
+        />,
+      );
+
+      const container = getByTestId(`brand-logo-${variant}`);
+      const image = UNSAFE_getByType(Image);
+
+      expect(container.props.accessibilityLabel).toBe(BRAND.accessibilityLabel);
+      expect(container.props.style).toEqual(
+        expect.arrayContaining([expect.objectContaining({ width: 120, height: 48 }), { opacity: 0.9 }]),
+      );
+      expect(image.props.source).toBe(BRAND.assets.logo);
+      expect(image.props.contentFit).toBe('contain');
+    },
+  );
+
+  it('renders the Mosaico icon while preserving size and testID props', () => {
+    const { getByTestId, UNSAFE_getByType } = render(
+      <BrandLogo variant={'icon' as never} size={64} testID="brand-logo-icon" />,
+    );
+
+    const container = getByTestId('brand-logo-icon');
+    const image = UNSAFE_getByType(Image);
+
+    expect(container.props.style).toEqual(
+      expect.arrayContaining([expect.objectContaining({ width: 64, height: 64 })]),
+    );
+    expect(image.props.source).toBe(BRAND.assets.icon);
   });
 });

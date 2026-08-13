@@ -1,19 +1,26 @@
 import * as storage from '@/src/utils/secureStorage';
 import NetInfo from '@react-native-community/netinfo';
+import { buildClientHeaders } from '@/src/api/clientHeaders';
 
 export const KEYS = {
   ACCESS_TOKEN: 'gtf_access_token',
   REFRESH_TOKEN: 'gtf_refresh_token',
 };
 
-function getBaseUrl(): string {
-  const explicitUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
+const DEFAULT_PUBLIC_API_URL = 'https://propostasmosaico-one.vercel.app/api';
+
+export function getApiBaseUrl(env: { [key: string]: string | undefined }): string {
+  const explicitUrl = env.EXPO_PUBLIC_API_URL?.trim();
   if (explicitUrl) return explicitUrl.replace(/\/+$/, '');
 
-  const domain = process.env.EXPO_PUBLIC_DOMAIN;
+  const domain = env.EXPO_PUBLIC_DOMAIN;
   if (domain) return `https://${domain.replace(/\/+$/, '')}/api`;
 
-  return 'http://localhost:8081/api';
+  return DEFAULT_PUBLIC_API_URL;
+}
+
+function getBaseUrl(): string {
+  return getApiBaseUrl(process.env);
 }
 
 export async function getAccessToken(): Promise<string | null> {
@@ -111,12 +118,7 @@ async function doFetch(
   body: unknown,
   token: string | null,
 ): Promise<Response> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'X-Client-Platform': 'mobile',
-    'X-Client-Version': '1.0.0',
-  };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const headers = buildClientHeaders(token);
 
   return fetch(`${getBaseUrl()}${path}`, {
     method,

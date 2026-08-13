@@ -20,6 +20,8 @@ plan-mobile-001-ajuste-tela-login.md
 |---|---|---|---|
 | 001 | Ajuste da Tela de Login e Correções Críticas Iniciais | Implementado parcialmente; QA de dispositivo pendente | [plan-mobile-001-correcoes-iniciais-telas.md](plan-mobile-001-correcoes-iniciais-telas.md) |
 | 002 | Paridade Funcional e Adaptação Nativa do GTF Propostas | Implementado em código; homologação de dispositivos pendente | [plan-mobile-002-paridade-funcional-adaptacao-nativa.md](plan-mobile-002-paridade-funcional-adaptacao-nativa.md) |
+| 008 | Rebrand Mosaico no Aplicativo Mobile | Planejado | [plan-mobile-008-rebrand-mosaico-identidade-visual.md](plan-mobile-008-rebrand-mosaico-identidade-visual.md) |
+| 009 | PDF A4 Mobile com Paridade ao Sistema Web | Implementado em código; homologação visual iOS/Android pendente | [plan-mobile-009-pdf-a4-paridade-web.md](plan-mobile-009-pdf-a4-paridade-web.md) |
 
 ## Três Correções Priorizadas
 
