@@ -41,6 +41,7 @@ O código de API e banco copiado para `Sistema-PropostasGTF_App` pelo Replit é 
 8. [Execução local, ambientes e publicação](07-execucao-ambientes-publicacao.md)
 9. [Roadmap, lacunas e riscos](08-roadmap-lacunas-riscos.md)
 10. [Paridade funcional entregue no plano mobile 002](09-paridade-funcional-plano-002.md)
+11. [Desenho de paridade integral dos planos 033 e 034](10-paridade-integral-planos-033-034-design.md)
 
 ## Hierarquia de Referências
 

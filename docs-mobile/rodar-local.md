@@ -11,7 +11,7 @@ Nos dois modos, os comandos mobile reservam a porta `8091` para a API. Em um apa
 
 Durante desenvolvimento e validacao no Expo Go, **nao use a API de producao** (`https://propostasmosaico-one.vercel.app/api`). O web ja esta publicado e usa a API/banco de producao; testes do aplicativo devem apontar para a API local para evitar consumo indevido, dados de teste no ambiente real e erros causados por limite/plano de hospedagem.
 
-Fluxo recomendado:
+Fluxo recom'endado:
 
 ```bash
 # Terminal 1: subir API local + Postgres local pelo Docker
@@ -163,7 +163,7 @@ LOCAL_API_PORT=8092 pnpm run start:api:host
 Para ignorar a deteccao automatica, defina a URL completa:
 
 ```bash
-EXPO_PUBLIC_API_URL=https://seu-dominio-de-api.com/api pnpm exec expo start -c
+EXPO_PUBLIC_API_URL=http://propostasmosaico-one.vercel.app pnpm exec expo start -c
 ```
 
 O app possui um fallback para a API publicada quando `EXPO_PUBLIC_API_URL` nao e definida. Em desenvolvimento, prefira sempre os scripts acima: eles deixam claro qual ambiente esta sendo usado e falham cedo quando a API esta indisponivel.

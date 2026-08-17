@@ -22,6 +22,9 @@ plan-mobile-001-ajuste-tela-login.md
 | 002 | Paridade Funcional e Adaptação Nativa do GTF Propostas | Implementado em código; homologação de dispositivos pendente | [plan-mobile-002-paridade-funcional-adaptacao-nativa.md](plan-mobile-002-paridade-funcional-adaptacao-nativa.md) |
 | 008 | Rebrand Mosaico no Aplicativo Mobile | Planejado | [plan-mobile-008-rebrand-mosaico-identidade-visual.md](plan-mobile-008-rebrand-mosaico-identidade-visual.md) |
 | 009 | PDF A4 Mobile com Paridade ao Sistema Web | Implementado em código; homologação visual iOS/Android pendente | [plan-mobile-009-pdf-a4-paridade-web.md](plan-mobile-009-pdf-a4-paridade-web.md) |
+| 010 | Navegação Nativa iOS e Compatibilidade UIScene | Planejado; UIScene condicionado a auditoria de toolchain | [plan-mobile-010-navegacao-nativa-ios-uiscene.md](plan-mobile-010-navegacao-nativa-ios-uiscene.md) |
+| 011 | Paridade Integral do ADMIN — Planos 033 e 034 | Planejado; executar antes da Entrega COMERCIAL | [plan-mobile-011-paridade-integral-admin-planos-033-034.md](plan-mobile-011-paridade-integral-admin-planos-033-034.md) |
+| 012 | Paridade Integral do COMERCIAL — Planos 033 e 034 | Planejado; depende da aprovação do plano 011 | [plan-mobile-012-paridade-integral-comercial-planos-033-034.md](plan-mobile-012-paridade-integral-comercial-planos-033-034.md) |
 
 ## Três Correções Priorizadas
 
