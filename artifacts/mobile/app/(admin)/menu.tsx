@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -7,7 +8,7 @@ import { showConfirm } from '@/components/ConfirmDialog';
 import { useAuthStore } from '@/src/store/authStore';
 import { apiCall, getRefreshToken } from '@/src/api/client';
 import { useColors } from '@/hooks/useColors';
-import { UIBadge, UICard, UIAvatar, UIButton, UIHeader, UISeparator } from '@/src/ui';
+import { BrandLogo, UIBadge, UICard, UIAvatar, UIButton, UIHeader, UISeparator } from '@/src/ui';
 import { spacing } from '@/src/theme';
 
 const MENU_SECTIONS = [
@@ -26,7 +27,12 @@ const MENU_SECTIONS = [
       { label: 'Produtos', icon: 'package' as const, route: '/admin/products', enabled: true },
       { label: 'Durações de Produto', icon: 'clock' as const, route: '/admin/product-durations', enabled: true },
       { label: 'Tipos de Proposta', icon: 'tag' as const, route: '/admin/proposal-types', enabled: true },
-      { label: 'Modelos de Proposta', icon: 'copy' as const, route: '/admin/proposal-templates', enabled: true },
+    ],
+  },
+  {
+    title: 'Comercial',
+    items: [
+      { label: 'Contratos', icon: 'file-text' as const, route: '/admin/contracts', enabled: true },
     ],
   },
 ];
@@ -56,11 +62,16 @@ export default function AdminMenuScreen() {
   };
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background }}
-      contentContainerStyle={{ paddingBottom: bottomPad + 120 }}
-    >
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: colors.background }}
+        contentContainerStyle={{ paddingBottom: bottomPad + 120 }}
+        contentInsetAdjustmentBehavior="never"
+      >
       <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.background }]}>
+        <TouchableOpacity onPress={() => router.replace('/(admin)')} accessibilityRole="button" accessibilityLabel="Ir para o Dashboard">
+          <BrandLogo variant="complete" width={138} height={28} />
+        </TouchableOpacity>
         <UIHeader
           title="Menu"
           subtitle="Configurações administrativas e dados da sua conta."
@@ -124,7 +135,14 @@ export default function AdminMenuScreen() {
         onPress={handleLogout}
         style={styles.logoutBtn}
       />
-    </ScrollView>
+      </ScrollView>
+      <BlurView
+        pointerEvents="none"
+        intensity={80}
+        tint={colors.background === '#0F172A' ? 'dark' : 'light'}
+        style={[styles.statusBarScrim, { height: Math.max(topPad, 24) + 8, backgroundColor: `${colors.background}D9` }]}
+      />
+    </View>
   );
 }
 
@@ -146,4 +164,5 @@ const styles = StyleSheet.create({
   soonText: { fontSize: 11, fontFamily: 'Inter_600SemiBold' },
   divider: { marginLeft: 62 },
   logoutBtn: { marginHorizontal: spacing.xl, marginTop: spacing.lg },
+  statusBarScrim: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20 },
 });

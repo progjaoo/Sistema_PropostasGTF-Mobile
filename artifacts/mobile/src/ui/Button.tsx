@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, type PressableProps, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, type PressableProps, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { SymbolView } from 'expo-symbols';
 
 import { useColors } from '@/hooks/useColors';
 import { spacing, tokens } from '@/src/theme';
@@ -48,21 +49,29 @@ export function UIButton({
       style={({ pressed }) => [
         styles.button,
         styles[size],
+        iconLeft === 'arrow-left' && styles.backButton,
         variantStyle.container,
         pressed && !disabled && styles.pressed,
         disabled && styles.disabled,
         style,
       ]}
     >
-      {iconLeft ? <Feather name={iconLeft} size={resolvedIconSize} color={iconColor ?? contentColor} /> : null}
+      {iconLeft ? renderButtonIcon(iconLeft, resolvedIconSize, iconColor ?? contentColor) : null}
       {children ?? (
         <Text style={[styles.text, styles[`${size}Text`], { color: contentColor }, textStyle]} numberOfLines={1}>
           {title}
         </Text>
       )}
-      {iconRight ? <Feather name={iconRight} size={resolvedIconSize} color={iconColor ?? contentColor} /> : null}
+      {iconRight ? renderButtonIcon(iconRight, resolvedIconSize, iconColor ?? contentColor) : null}
     </Pressable>
   );
+}
+
+function renderButtonIcon(name: keyof typeof Feather.glyphMap, size: number, color: string) {
+  if (name === 'arrow-left' && Platform.OS === 'ios') {
+    return <SymbolView name="chevron.left" tintColor={color} size={Math.max(22, size)} />;
+  }
+  return <Feather name={name} size={size} color={color} />;
 }
 
 function getVariantStyle(variant: ButtonVariant, colors: ReturnType<typeof useColors>) {
@@ -134,5 +143,10 @@ const styles = StyleSheet.create({
   },
   disabled: {
     opacity: 0.5,
+  },
+  backButton: {
+    minWidth: 44,
+    minHeight: 44,
+    paddingHorizontal: 0,
   },
 });

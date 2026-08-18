@@ -42,6 +42,9 @@ O código de API e banco copiado para `Sistema-PropostasGTF_App` pelo Replit é 
 9. [Roadmap, lacunas e riscos](08-roadmap-lacunas-riscos.md)
 10. [Paridade funcional entregue no plano mobile 002](09-paridade-funcional-plano-002.md)
 11. [Desenho de paridade integral dos planos 033 e 034](10-paridade-integral-planos-033-034-design.md)
+12. [Design do board contextual de Propostas](11-board-propostas-kanban-contextual-design.md)
+
+O progresso consolidado das entregas mobile está em `../plans-mobile/PROGRESS.md`.
 
 ## Hierarquia de Referências
 

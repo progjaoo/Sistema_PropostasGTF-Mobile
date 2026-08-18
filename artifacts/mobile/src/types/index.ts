@@ -42,6 +42,7 @@ export interface Station {
   address?: string | null;
   city?: string | null;
   active: boolean;
+  usesPrograms?: boolean;
   viewerCanCreateProposals?: boolean;
   viewerCanViewCatalog?: boolean;
   presentationItems?: StationPresentationItem[];
@@ -69,6 +70,9 @@ export interface Advertiser {
   notes?: string | null;
   active: boolean;
   status?: AdvertiserStatus;
+  ownerId?: string | null;
+  owner?: Pick<AuthUser, 'id' | 'name' | 'email'> | null;
+  viewerCanEdit?: boolean;
   leadSourceId?: string | null;
   createdAt: string;
 }
@@ -83,6 +87,7 @@ export interface ProposalProduct {
   id: string;
   order: number;
   qty: string;
+  unitValue?: string | null;
   title: string;
   description?: string | null;
   detail?: string | null;

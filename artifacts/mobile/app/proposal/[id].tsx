@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   TextInput, Platform, ActivityIndicator,
@@ -28,9 +28,9 @@ import { formatDate, formatDateTime, formatCurrency, formatMonthYear } from '@/s
 import { useAuthStore } from '@/src/store/authStore';
 import { useColors } from '@/hooks/useColors';
 import {
-  deleteProposal,
   duplicateProposal,
   getProposalVersionDetail,
+  permanentlyDeleteProposal,
   restoreProposalFromSnapshot,
 } from '@/src/features/proposals/api';
 import { useProposalPdf } from '@/src/features/proposals/print/useProposalPdf';
@@ -39,14 +39,18 @@ import { ProposalVersionSheet } from '@/src/features/proposals/versions/Proposal
 import { ProductCatalogSheet } from '@/src/features/proposals/products/ProductCatalogSheet';
 import { ProposalProductForm } from '@/src/features/proposals/products/ProposalProductForm';
 import { calculateInvestmentSuggestion } from '@/src/features/proposals/products/investmentSuggestion';
+import { formatCentsBRL, parseMoneyCents, proposalProductTotals } from '@/src/features/proposals/products/proposalProductMoney';
 import {
   ProposalEditorStepper,
   type ProposalEditorStep,
 } from '@/src/features/proposals/editor/ProposalEditorStepper';
-import { UIButton, UIInput } from '@/src/ui';
+import { useProposalAutosave } from '@/src/features/proposals/editor/useProposalAutosave';
+import { runAfterProposalFlush } from '@/src/features/proposals/editor/criticalActions';
+import { canPermanentlyDeleteProposal } from '@/src/features/proposals/permissions';
+import { NativeBackButton } from '@/src/navigation/NativeBackButton';
+import { TypedConfirmDialog, UIButton, UIInput } from '@/src/ui';
 import { shadows, spacing, tokens } from '@/src/theme';
 
-type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 const PRODUCT_COLORS = ['BLUE', 'YELLOW', 'RED', 'GREEN', 'DARK'] as const;
 
 function isProposalProductColor(value: string): value is (typeof PRODUCT_COLORS)[number] {
@@ -85,7 +89,6 @@ export default function ProposalDetailScreen() {
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom;
 
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [showTimeline, setShowTimeline] = useState(false);
   const [showVersions, setShowVersions] = useState(false);
   const [timelineNote, setTimelineNote] = useState('');
@@ -105,11 +108,22 @@ export default function ProposalDetailScreen() {
   const [editingProduct, setEditingProduct] = useState<ProposalProduct | null>(null);
   const [editorStep, setEditorStep] = useState<ProposalEditorStep>('context');
   const [isDirty, setIsDirty] = useState(false);
-  const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingSave = useRef<Partial<Proposal>>({});
-  const saveQueue = useRef<Promise<void>>(Promise.resolve());
-  const saveGeneration = useRef(0);
+  const [typedDeleteVisible, setTypedDeleteVisible] = useState(false);
   const { isGenerating, shareProposalPdf } = useProposalPdf();
+
+  const autosave = useProposalAutosave({
+    proposalId: id,
+    save: async (patch) => {
+      await queryClient.cancelQueries({ queryKey: ['proposal', id] });
+      const updated = await apiCall<Proposal>('PATCH', `/proposals/${id}`, patch);
+      queryClient.setQueryData(['proposal', id], updated);
+      queryClient.invalidateQueries({ queryKey: ['proposals'] });
+      return updated;
+    },
+    onSaved: () => setIsDirty(false),
+    onError: () => showToast('Falha ao salvar.', 'error'),
+  });
+  const saveStatus = autosave.status === 'dirty' ? 'saving' : autosave.status;
 
   const { data: proposal, isLoading, isError, refetch } = useQuery({
     queryKey: ['proposal', id],
@@ -169,8 +183,10 @@ export default function ProposalDetailScreen() {
   }, [proposal?.id]);
 
   const statusMutation = useMutation({
-    mutationFn: (status: ProposalStatus) =>
-      apiCall<Proposal>('PATCH', `/proposals/${id}/status`, { status }),
+    mutationFn: async (status: ProposalStatus) => {
+      await autosave.flush();
+      return apiCall<Proposal>('PATCH', `/proposals/${id}/status`, { status });
+    },
     onSuccess: (updated) => {
       queryClient.setQueryData(['proposal', id], updated);
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
@@ -192,7 +208,7 @@ export default function ProposalDetailScreen() {
     onError: () => showToast('Erro ao registrar andamento.', 'error'),
   });
   const duplicateMutation = useMutation({
-    mutationFn: () => duplicateProposal(id),
+    mutationFn: async () => { await autosave.flush(); return duplicateProposal(id); },
     onSuccess: (copy) => {
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
       showToast('Proposta duplicada.', 'success');
@@ -201,18 +217,18 @@ export default function ProposalDetailScreen() {
     onError: () => showToast('Nao foi possivel duplicar a proposta.', 'error'),
   });
   const deleteMutation = useMutation({
-    mutationFn: () => deleteProposal(id),
+    mutationFn: async () => { await autosave.flush(); return permanentlyDeleteProposal(id); },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
       queryClient.invalidateQueries({ queryKey: ['recall-reminders'] });
-      showToast('Rascunho excluido.', 'success');
+      showToast('Proposta excluída permanentemente.', 'success');
       router.back();
     },
     onError: (error) =>
       showToast(error instanceof ApiError ? error.message : 'Nao foi possivel excluir o rascunho.', 'error'),
   });
   const restoreVersionMutation = useMutation({
-    mutationFn: () => restoreProposalFromSnapshot(id, selectedVersion?.snapshot),
+    mutationFn: async () => { await autosave.flush(); return restoreProposalFromSnapshot(id, selectedVersion?.snapshot); },
     onSuccess: (updated) => {
       queryClient.setQueryData(['proposal', id], updated);
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
@@ -232,6 +248,7 @@ export default function ProposalDetailScreen() {
           productTemplateId: product.productTemplateId ?? null,
           order,
           qty: product.qty || '01',
+          unitValue: product.unitValue ?? null,
           title: product.title,
           description: product.description ?? null,
           detail: product.detail ?? null,
@@ -253,44 +270,18 @@ export default function ProposalDetailScreen() {
       showToast(error instanceof ApiError ? error.message : 'Erro ao atualizar produtos.', 'error'),
   });
 
-  const scheduleAutosave = useCallback((data: Partial<Proposal>) => {
-    pendingSave.current = { ...pendingSave.current, ...data };
-    if (saveTimeout.current) clearTimeout(saveTimeout.current);
-    setSaveStatus('saving');
-    saveTimeout.current = setTimeout(() => {
-      const payload = pendingSave.current;
-      pendingSave.current = {};
-      const generation = ++saveGeneration.current;
-      saveQueue.current = saveQueue.current.then(async () => {
-        try {
-          await queryClient.cancelQueries({ queryKey: ['proposal', id] });
-          const updated = await apiCall<Proposal>('PATCH', `/proposals/${id}`, payload);
-          if (generation === saveGeneration.current) {
-            queryClient.setQueryData(['proposal', id], updated);
-          }
-          if (Object.keys(pendingSave.current).length === 0) {
-            setSaveStatus('saved');
-            setIsDirty(false);
-            setTimeout(() => setSaveStatus('idle'), 2000);
-          }
-        } catch {
-          pendingSave.current = { ...payload, ...pendingSave.current };
-          setSaveStatus('error');
-          showToast('Falha ao salvar.', 'error');
-        }
-      });
-    }, 800);
-  }, [id, queryClient, showToast]);
+  const scheduleAutosave = (data: Partial<Proposal>) => {
+    setIsDirty(true);
+    autosave.schedule(data);
+  };
 
   const handleInvestChange = (val: string) => {
     setInvestValue(val);
-    setIsDirty(true);
     scheduleAutosave({ investValue: val });
   };
 
   const handleClientLine1Change = (val: string) => {
     setClientLine1(val);
-    setIsDirty(true);
     scheduleAutosave({ clientLine1: val });
   };
 
@@ -298,7 +289,6 @@ export default function ProposalDetailScreen() {
     const masked = maskBrDate(value);
     if (field === 'dateStart') setDateStart(masked);
     if (field === 'dateEnd') setDateEnd(masked);
-    setIsDirty(true);
     if (!masked) scheduleAutosave({ [field]: null });
     const iso = brDateToIso(masked);
     if (iso) scheduleAutosave({ [field]: iso });
@@ -352,6 +342,7 @@ export default function ProposalDetailScreen() {
   };
 
   const canEdit = proposal?.viewerCanEdit !== false || user?.role === 'ADMIN' || proposal?.createdById === user?.id;
+  const isCommercial = user?.role === 'COMERCIAL';
 
   if (isLoading) return <LoadingSpinner message="Carregando proposta..." />;
   if (isError || !proposal) return <EmptyState icon="alert-circle" title="Proposta não encontrada" description="Esta proposta não existe ou foi removida." actionLabel="Voltar" onAction={() => router.back()} />;
@@ -378,6 +369,7 @@ export default function ProposalDetailScreen() {
       seasonality: null,
       suggestedValueMin: template.suggestedValueMin ?? template.suggestedValue ?? null,
       suggestedValueMax: template.suggestedValueMax ?? null,
+      unitValue: template.suggestedValue ?? template.suggestedValueMin ?? null,
     };
     setCatalogOpen(false);
     setEditingProduct(product);
@@ -400,6 +392,7 @@ export default function ProposalDetailScreen() {
       durationLabel: null,
       airTime: null,
       seasonality: null,
+      unitValue: null,
     });
   };
 
@@ -432,9 +425,7 @@ export default function ProposalDetailScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 10, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Feather name="arrow-left" size={24} color={colors.foreground} />
-        </TouchableOpacity>
+        <NativeBackButton onPress={() => runAfterProposalFlush(autosave.flush, () => router.back()).catch(() => undefined)} />
         <View style={styles.headerCenter}>
           <Text style={[styles.headerTitle, { color: colors.foreground }]} numberOfLines={1}>{clientName}</Text>
           <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>{period}</Text>
@@ -615,6 +606,7 @@ export default function ProposalDetailScreen() {
             <UIInput
               placeholder="Nome do cliente na proposta"
               value={clientLine1}
+              editable={!isCommercial}
               onChangeText={handleClientLine1Change}
             />
             {proposal.advertiser && (
@@ -623,19 +615,20 @@ export default function ProposalDetailScreen() {
               </Text>
             )}
             <View style={[styles.divider, { backgroundColor: colors.border }]} />
+            {isCommercial && <Text style={[styles.investHint, { color: colors.mutedForeground }]}>A apresentação institucional desta empresa será aplicada automaticamente.</Text>}
             <View style={styles.productsHeader}>
               <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>APRESENTACAO</Text>
-              <TouchableOpacity style={[styles.addProductButton, { borderColor: colors.primary }]} onPress={addStat}>
+              {!isCommercial && <TouchableOpacity style={[styles.addProductButton, { borderColor: colors.primary }]} onPress={addStat}>
                 <Feather name="plus" size={15} color={colors.primary} />
                 <Text style={[styles.addProductText, { color: colors.primary }]}>Item</Text>
-              </TouchableOpacity>
+              </TouchableOpacity>}
             </View>
-            {stats.length === 0 && (
+            {!isCommercial && stats.length === 0 && (
               <Text style={[styles.investHint, { color: colors.mutedForeground }]}>
                 Adicione ate 4 indicadores para aparecerem na proposta.
               </Text>
             )}
-            {stats.map((stat, index) => (
+            {!isCommercial && stats.map((stat, index) => (
               <View key={index} style={[styles.statEditor, { borderColor: colors.border }]}>
                 <View style={styles.statInputs}>
                   <View style={styles.statNumberRow}>
@@ -704,6 +697,7 @@ export default function ProposalDetailScreen() {
                       {[p.durationLabel, p.airTime, p.seasonality].filter(Boolean).join(' - ')}
                     </Text>
                   )}
+                  {p.unitValue && <Text style={[styles.productQty, { color: colors.mutedForeground }]}>Unitário: {formatCentsBRL(parseMoneyCents(p.unitValue))}</Text>}
                   {p.program && <Text style={[styles.productProg, { color: colors.mutedForeground }]}>{p.program}</Text>}
                 </View>
                 {canEdit && (
@@ -728,6 +722,15 @@ export default function ProposalDetailScreen() {
                 )}
               </View>
             ))}
+            {isCommercial && (() => {
+              const totals = proposalProductTotals(proposal.products, investValue);
+              const differenceLabel = totals.differenceCents < 0 ? 'Desconto' : totals.differenceCents > 0 ? 'Acréscimo' : 'Diferença';
+              return <View style={[styles.productTotals, { borderTopColor: colors.border }]}>
+                <Text style={[styles.productQty, { color: colors.mutedForeground }]}>Total dos produtos: {formatCentsBRL(totals.productTotalCents)}</Text>
+                <Text style={[styles.productTotal, { color: colors.foreground }]}>Investimento final: {formatCentsBRL(totals.finalInvestmentCents)}</Text>
+                <Text style={[styles.productQty, { color: totals.differenceCents === 0 ? colors.mutedForeground : totals.differenceCents < 0 ? colors.success : colors.warning }]}>{differenceLabel}: {formatCentsBRL(Math.abs(totals.differenceCents))} ({totals.differencePercent}%)</Text>
+              </View>;
+            })()}
           </View>
         )}
 
@@ -799,7 +802,7 @@ export default function ProposalDetailScreen() {
                 </View>
               </View>
             ))}
-            {canEdit && (
+            {canEdit && !isCommercial && (
               <View style={styles.addTimeline}>
                 <UIInput
                   containerStyle={styles.timelineNoteInput}
@@ -848,7 +851,10 @@ export default function ProposalDetailScreen() {
             title={isGenerating ? 'Gerando PDF...' : 'Gerar e compartilhar PDF'}
             style={styles.actionBtn}
             disabled={isGenerating}
-            onPress={() => shareProposalPdf(proposal).catch((error) => {
+            onPress={() => runAfterProposalFlush(autosave.flush, async () => {
+              const freshProposal = await queryClient.fetchQuery({ queryKey: ['proposal', id], queryFn: () => apiCall<Proposal>('GET', `/proposals/${id}`) });
+              return shareProposalPdf(freshProposal);
+            }).catch((error) => {
               showToast(
                 error instanceof ProposalPdfLayoutError
                   ? 'Nao foi possivel montar o PDF em A4. Tente novamente.'
@@ -870,7 +876,7 @@ export default function ProposalDetailScreen() {
         </View>
 
         {/* Actions */}
-        {canEdit && proposal.status !== 'APPROVED' && (
+        {canEdit && (proposal.status !== 'APPROVED' || user?.role === 'ADMIN') && (
           <View style={styles.actionsSection}>
             <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>AÇÕES</Text>
             <View style={styles.actionButtons}>
@@ -902,22 +908,16 @@ export default function ProposalDetailScreen() {
                   <Text style={[styles.actionBtnText, { color: colors.danger }]}>Rejeitar</Text>
                 </TouchableOpacity>
               )}
-              {proposal.status === 'DRAFT' && (
+              {canPermanentlyDeleteProposal({ user, proposal }) && (
                 <TouchableOpacity
                   style={[styles.actionBtn, { backgroundColor: colors.danger, borderColor: colors.danger }]}
-                  onPress={() => showConfirm({
-                    title: 'Excluir rascunho?',
-                    message: 'Esta proposta sera cancelada e removida do fluxo de rascunhos.',
-                    confirmText: 'Excluir',
-                    destructive: true,
-                    onConfirm: () => deleteMutation.mutate(),
-                  })}
+                  onPress={() => setTypedDeleteVisible(true)}
                   activeOpacity={0.7}
                   disabled={deleteMutation.isPending}
                 >
                   <Feather name="trash-2" size={16} color="#FFF" />
                   <Text style={[styles.actionBtnText, { color: '#FFF' }]}>
-                    {deleteMutation.isPending ? 'Excluindo...' : 'Excluir Rascunho'}
+                    {deleteMutation.isPending ? 'Excluindo...' : 'Excluir permanentemente'}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -948,6 +948,16 @@ export default function ProposalDetailScreen() {
         restoring={restoreVersionMutation.isPending}
         onClose={() => setSelectedVersionId(null)}
         onRestore={() => restoreVersionMutation.mutate()}
+      />
+      <TypedConfirmDialog
+        visible={typedDeleteVisible}
+        title="Excluir proposta permanentemente"
+        resourceName={clientName}
+        description="A rejeição continua sendo uma ação separada. Esta exclusão remove a proposta do histórico permitido pela API."
+        confirmLabel="Excluir permanentemente"
+        pending={deleteMutation.isPending}
+        onCancel={() => setTypedDeleteVisible(false)}
+        onConfirm={() => deleteMutation.mutate()}
       />
     </View>
   );
@@ -988,6 +998,8 @@ const styles = StyleSheet.create({
   productTitle: { fontSize: 14, fontFamily: 'Inter_500Medium' },
   productQty: { fontSize: 12, fontFamily: 'Inter_400Regular' },
   productProg: { fontSize: 12, fontFamily: 'Inter_400Regular', fontStyle: 'italic' },
+  productTotals: { marginTop: spacing.md, paddingTop: spacing.md, gap: spacing.xs, borderTopWidth: 1 },
+  productTotal: { fontSize: 15, fontFamily: 'Inter_700Bold' },
   statEditor: { borderWidth: 1, borderRadius: 10, padding: 10, flexDirection: 'row', alignItems: 'center', gap: 8 },
   statInputs: { flex: 1, gap: 8 },
   statNumberRow: { flexDirection: 'row', gap: 8 },

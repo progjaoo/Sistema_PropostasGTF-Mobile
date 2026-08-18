@@ -107,3 +107,29 @@ Os testes do pipeline ficam em `src/features/proposals/print/__tests__`. Mudanç
 - Documentação atualizada.
 - Checklist final registrado no plano.
 - Nenhum segredo versionado.
+
+## Padrões aplicados na Entrega 1
+
+- Operações destrutivas de Empresa e Proposta usam `TypedConfirmDialog` com comparação exata do nome, alvo mínimo de 44 pontos e região de anúncio acessível.
+- Rejeição de proposta, desativação de Empresa, exclusão permanente de Empresa e exclusão permanente de Proposta permanecem ações distintas.
+- O autosave aceita somente campos mutáveis, serializa revisões e expõe `flush()` para PDF, navegação, status, duplicação e exclusão.
+- PDF aplica `min-width: 0` e `overflow-wrap: anywhere` em cards de apresentação e produtos.
+- Valores de Contratos são convertidos para centavos inteiros no cliente e enviados como strings decimais.
+
+## Padrões aplicados no Kanban contextual de Propostas
+
+- Empresa e Programa são os únicos contextos de organização; não existem modos concorrentes de Lista, Empresas ou Programas.
+- O board sempre monta as sete etapas e deduplica propostas por `proposal.id` no contexto Empresa.
+- O modo focado usa paginação horizontal; o modo expandido usa colunas compactas e rolagem livre.
+- Busca e filtros avançados ficam fora do topo permanente e não duplicam a seleção de contexto.
+- Cards respeitam `viewerCanEdit`, estados vazios, refresh por coluna e alvos de toque acessíveis.
+- Listas usam `FlatList` com janela de renderização controlada para evitar renderização excessiva em boards grandes.
+
+## Padrões aplicados na Entrega 2
+
+- A navegação COMERCIAL mantém cinco destinos e redirects para rotas legadas.
+- Nenhum comando administrativo aparece no catálogo COMERCIAL.
+- Conversão Lead → Cliente preserva o mesmo ID; desativação é lógica e usa confirmação digitada.
+- O editor COMERCIAL aceita quantidade inteira de 1 a 9999, valor unitário e subtotal por item.
+- Apresentação institucional e alteração de andamento permanecem fora do editor COMERCIAL; andamento continua no board.
+- Exclusão permanente fica visível apenas para ADMIN ou proprietário editável; a API continua sendo a autoridade final.

@@ -45,13 +45,48 @@ export async function clearTokens(): Promise<void> {
   ]);
 }
 
+export interface ApiErrorPayload {
+  message: string;
+  code?: string;
+  blockers?: Record<string, number>;
+  fields?: unknown;
+  requiresConfirmation?: boolean;
+  [key: string]: unknown;
+}
+
+export function parseApiErrorPayload(status: number, data: unknown): ApiErrorPayload {
+  const raw = data && typeof data === 'object' ? data as Record<string, unknown> : {};
+  const errorValue = raw.error;
+  const nested = errorValue && typeof errorValue === 'object' ? errorValue as Record<string, unknown> : undefined;
+  const message = String(
+    nested?.message ??
+      (typeof errorValue === 'string' ? errorValue : undefined) ??
+      raw.message ??
+      `Erro ${status}`,
+  );
+  return {
+    ...raw,
+    ...(nested ?? {}),
+    message,
+    code: typeof raw.code === 'string' ? raw.code : typeof nested?.code === 'string' ? nested.code : undefined,
+    blockers: (raw.blockers ?? nested?.blockers) as Record<string, number> | undefined,
+    fields: raw.fields ?? nested?.fields,
+    requiresConfirmation: Boolean(raw.requiresConfirmation ?? nested?.requiresConfirmation),
+  };
+}
+
 export class ApiError extends Error {
+  readonly code?: string;
+  readonly fieldErrors?: unknown;
   constructor(
     public readonly status: number,
     message: string,
+    public readonly payload: ApiErrorPayload = { message },
   ) {
     super(message);
     this.name = 'ApiError';
+    this.code = payload.code;
+    this.fieldErrors = payload.fields;
   }
 }
 
@@ -153,15 +188,12 @@ export async function apiCall<T>(method: HttpMethod, path: string, body?: unknow
   }
 
   if (!response.ok) {
-    let errorMessage = `Erro ${response.status}`;
+    let payload: ApiErrorPayload = { message: `Erro ${response.status}` };
     try {
       const data = await response.json();
-      errorMessage =
-        (typeof data?.error === 'object' ? data.error?.message : data?.error) ??
-        data?.message ??
-        errorMessage;
+      payload = parseApiErrorPayload(response.status, data);
     } catch {}
-    throw new ApiError(response.status, errorMessage);
+    throw new ApiError(response.status, payload.message, payload);
   }
 
   if (response.status === 204) return null as T;

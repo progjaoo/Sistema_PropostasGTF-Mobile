@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform, Pressable } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,11 +9,13 @@ import { FormInput } from '@/components/FormInput';
 import { ImagePickerField } from '@/components/ImagePickerField';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useToast } from '@/components/ToastProvider';
+import { showConfirm } from '@/components/ConfirmDialog';
 import { apiCall, ApiError } from '@/src/api/client';
 import { Station, StationPresentationItem } from '@/src/types';
 import { useColors } from '@/hooks/useColors';
 import { StationPresentationEditor } from '@/src/features/admin/stations/StationPresentationEditor';
-import { UIButton, UICard, UIHeader } from '@/src/ui';
+import { deactivateStation, getStationDeletionImpact, permanentlyDeleteStation } from '@/src/features/admin/stations/api';
+import { TypedConfirmDialog, UIButton, UICard, UIHeader } from '@/src/ui';
 import { spacing } from '@/src/theme';
 
 export default function StationDetailScreen() {
@@ -33,7 +35,10 @@ export default function StationDetailScreen() {
   const [contactPhone, setContactPhone] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [logoBase64, setLogoBase64] = useState<string | null>(null);
+  const [usesPrograms, setUsesPrograms] = useState(true);
   const [isDirty, setIsDirty] = useState(isNew);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [deleteDescription, setDeleteDescription] = useState('A exclusão permanente remove todos os dados vinculados.');
   const [presentationItems, setPresentationItems] = useState<StationPresentationItem[]>([]);
 
   const { data: station, isLoading, isError, error, refetch } = useQuery({
@@ -57,6 +62,7 @@ export default function StationDetailScreen() {
       setContactPhone(station.contactPhone ?? '');
       setContactEmail(station.contactEmail ?? '');
       setLogoBase64(station.logoBase64 ?? null);
+      setUsesPrograms(station.usesPrograms !== false);
     }
   }, [station?.id]);
   useEffect(() => {
@@ -76,6 +82,7 @@ export default function StationDetailScreen() {
         contactPhone: contactPhone.trim() || undefined,
         contactEmail: contactEmail.trim() || undefined,
         logoBase64,
+        usesPrograms,
       };
       if (isNew) return apiCall<Station>('POST', '/stations', body);
       return apiCall<Station>('PATCH', `/stations/${id}`, body);
@@ -90,6 +97,51 @@ export default function StationDetailScreen() {
     },
     onError: (err) => showToast(err instanceof ApiError ? err.message : 'Erro ao salvar.', 'error'),
   });
+  const deactivateMutation = useMutation({
+    mutationFn: () => deactivateStation(id!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stations'] });
+      queryClient.invalidateQueries({ queryKey: ['station', id] });
+      showToast('Empresa desativada. O histórico foi preservado.', 'success');
+    },
+    onError: (err) => showToast(err instanceof ApiError ? err.message : 'Erro ao desativar empresa.', 'error'),
+  });
+  const reactivateMutation = useMutation({
+    mutationFn: () => apiCall<Station>('PATCH', `/stations/${id}`, { active: true }),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(['station', id], updated);
+      queryClient.invalidateQueries({ queryKey: ['stations'] });
+      showToast('Empresa reativada.', 'success');
+    },
+    onError: (err) => showToast(err instanceof ApiError ? err.message : 'Erro ao reativar empresa.', 'error'),
+  });
+  const permanentDeleteMutation = useMutation({
+    mutationFn: () => permanentlyDeleteStation(id!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stations'] });
+      queryClient.invalidateQueries({ queryKey: ['proposals'] });
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
+      setDeleteDialogVisible(false);
+      showToast('Empresa excluída permanentemente.', 'success');
+      router.replace('/admin/stations');
+    },
+    onError: (err) => showToast(err instanceof ApiError ? err.message : 'Erro ao excluir empresa.', 'error'),
+  });
+
+  const openPermanentDelete = async () => {
+    if (!id || isNew) return;
+    try {
+      const impact = await getStationDeletionImpact(id);
+      if (!impact.canDelete) {
+        showToast(`Não é possível excluir: ${impact.blockers.proposals} propostas e ${impact.blockers.referencedProposalProducts} produtos históricos vinculados.`, 'warning');
+        return;
+      }
+      setDeleteDescription(`Serão removidos ${impact.removable.products} produtos, ${impact.removable.programs} programas, ${impact.removable.proposalTemplates} modelos, ${impact.removable.presentationItems} itens de apresentação e ${impact.removable.userAccesses} acessos.`);
+      setDeleteDialogVisible(true);
+    } catch (err) {
+      showToast(err instanceof ApiError ? err.message : 'Não foi possível verificar o impacto da exclusão.', 'error');
+    }
+  };
   const presentationMutation = useMutation({
     mutationFn: () => apiCall('PUT', `/stations/${id}/presentation`, {
       items: presentationItems.map(({ highlight, description, order }) => ({ highlight, description, order })),
@@ -145,6 +197,24 @@ export default function StationDetailScreen() {
         <FormInput label="Slogan" leftIcon="type" placeholder="Slogan ou tagline" value={slogan} onChangeText={(t) => { setSlogan(t); setIsDirty(true); }} />
       </UICard>
 
+      <UICard variant="elevated" style={styles.form}>
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>CATÁLOGO</Text>
+        <Pressable
+          style={[styles.toggleRow, { borderColor: colors.border }]}
+          onPress={() => { setUsesPrograms((value) => !value); setIsDirty(true); }}
+          accessibilityRole="switch"
+          accessibilityState={{ checked: usesPrograms }}
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.activeTitle, { color: colors.foreground }]}>Esta Empresa usa Programas</Text>
+            <Text style={[styles.colorHint, { color: colors.mutedForeground }]}>Desative para trabalhar apenas com produtos avulsos.</Text>
+          </View>
+          <View style={[styles.switchTrack, { backgroundColor: usesPrograms ? colors.primary : colors.muted }]}>
+            <View style={[styles.switchThumb, usesPrograms && styles.switchThumbOn]} />
+          </View>
+        </Pressable>
+      </UICard>
+
       {!isNew && (
         <UICard variant="elevated" style={styles.form}>
           <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>APRESENTACAO PADRAO</Text>
@@ -185,6 +255,26 @@ export default function StationDetailScreen() {
           <UIButton title={saveMutation.isPending ? 'Criando empresa' : 'Criar empresa'} size="lg" onPress={() => saveMutation.mutate()} disabled={!name.trim() || saveMutation.isPending} />
         </View>
       )}
+      {!isNew && station && (
+        <View style={styles.dangerActions}>
+          {station.active ? (
+            <UIButton variant="outline" title={deactivateMutation.isPending ? 'Desativando...' : 'Desativar empresa'} onPress={() => showConfirm({ title: 'Desativar empresa?', message: 'O histórico será preservado e a empresa poderá ser reativada depois.', confirmText: 'Desativar', destructive: true, onConfirm: () => deactivateMutation.mutate() })} disabled={deactivateMutation.isPending} />
+          ) : (
+            <UIButton variant="outline" title={reactivateMutation.isPending ? 'Reativando...' : 'Reativar empresa'} onPress={() => reactivateMutation.mutate()} disabled={reactivateMutation.isPending} />
+          )}
+          <UIButton variant="destructive" title={permanentDeleteMutation.isPending ? 'Excluindo...' : 'Excluir permanentemente'} onPress={openPermanentDelete} disabled={permanentDeleteMutation.isPending} />
+        </View>
+      )}
+      <TypedConfirmDialog
+        visible={deleteDialogVisible}
+        title="Excluir empresa permanentemente"
+        resourceName={station?.name ?? name}
+        description={deleteDescription}
+        confirmLabel="Excluir permanentemente"
+        pending={permanentDeleteMutation.isPending}
+        onCancel={() => setDeleteDialogVisible(false)}
+        onConfirm={() => permanentDeleteMutation.mutate()}
+      />
     </KeyboardAwareScrollViewCompat>
   );
 }
@@ -199,4 +289,10 @@ const styles = StyleSheet.create({
   colorHint: { fontSize: 12, fontFamily: 'Inter_400Regular' },
   centerState: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28, gap: spacing.md },
   centerTitle: { fontSize: 17, fontFamily: 'Inter_700Bold', textAlign: 'center' },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, padding: 14, gap: 12 },
+  activeTitle: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
+  switchTrack: { width: 44, height: 26, borderRadius: 13, padding: 3, justifyContent: 'center' },
+  switchThumb: { width: 20, height: 20, borderRadius: 10, backgroundColor: '#FFF' },
+  switchThumbOn: { alignSelf: 'flex-end' },
+  dangerActions: { padding: spacing.lg, gap: spacing.sm },
 });

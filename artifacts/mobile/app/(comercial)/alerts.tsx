@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FlatList, Platform, RefreshControl, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -15,13 +15,18 @@ import { getRecallAdvertiserName, getRecallReminderList, type RecallReminderPayl
 import { useColors } from '@/hooks/useColors';
 import { UIBadge, UIButton, UICard, UIEmptyState, UIHeader } from '@/src/ui';
 import { spacing } from '@/src/theme';
+import { RecallAlertFilterBar } from '@/src/features/recall/RecallAlertFilterBar';
+import { filterRecallAlerts, type RecallAlertFilterState } from '@/src/features/recall/recallAlertFilters';
 
 export default function AlertsScreen() {
+  const { legacy } = useLocalSearchParams<{ legacy?: string }>();
+  if (legacy !== '1') return <Redirect href={"/(comercial)/more?section=alerts" as any} />;
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
+  const [filters, setFilters] = useState<RecallAlertFilterState>({ search: '', status: 'ALL', milestone: 'ALL' });
 
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ['recall-reminders'],
@@ -50,9 +55,10 @@ export default function AlertsScreen() {
 
   const now = new Date();
   const all = getRecallReminderList(data);
-  const overdue = all.filter((reminder) => reminder.status === 'PENDING' && new Date(reminder.dueAt) <= now);
-  const upcoming = all.filter((reminder) => reminder.status === 'PENDING' && new Date(reminder.dueAt) > now);
-  const others = all.filter((reminder) => reminder.status !== 'PENDING');
+  const filtered = filterRecallAlerts(all, filters);
+  const overdue = filtered.filter((reminder) => reminder.status === 'PENDING' && new Date(reminder.dueAt) <= now);
+  const upcoming = filtered.filter((reminder) => reminder.status === 'PENDING' && new Date(reminder.dueAt) > now);
+  const others = filtered.filter((reminder) => reminder.status !== 'PENDING');
   const allItems = [
     ...overdue.map((item) => ({ item, isOverdue: true })),
     ...upcoming.map((item) => ({ item, isOverdue: false })),
@@ -135,15 +141,18 @@ export default function AlertsScreen() {
       ) : isError ? (
         <UIEmptyState icon="alert-circle" title="Erro ao carregar" actionLabel="Tentar novamente" onAction={refetch} />
       ) : (
-        <FlatList
-          data={allItems}
-          keyExtractor={({ item }) => item.id}
-          renderItem={({ item: { item, isOverdue } }) => renderItem(item, isOverdue)}
-          contentContainerStyle={styles.listContent}
-          refreshControl={<RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={colors.primary} />}
-          ListEmptyComponent={<UIEmptyState icon="bell" title="Sem avisos" description="Nenhum aviso de recaptura pendente." />}
-          scrollEnabled={allItems.length > 0}
-        />
+        <>
+          <RecallAlertFilterBar value={filters} resultCount={filtered.length} onChange={setFilters} />
+          <FlatList
+            data={allItems}
+            keyExtractor={({ item }) => item.id}
+            renderItem={({ item: { item, isOverdue } }) => renderItem(item, isOverdue)}
+            contentContainerStyle={styles.listContent}
+            refreshControl={<RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={colors.primary} />}
+            ListEmptyComponent={<UIEmptyState icon="bell" title="Sem avisos" description="Nenhum aviso de recaptura pendente." />}
+            scrollEnabled={allItems.length > 0}
+          />
+        </>
       )}
     </View>
   );

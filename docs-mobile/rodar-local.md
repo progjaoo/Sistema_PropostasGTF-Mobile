@@ -163,7 +163,7 @@ LOCAL_API_PORT=8092 pnpm run start:api:host
 Para ignorar a deteccao automatica, defina a URL completa:
 
 ```bash
-EXPO_PUBLIC_API_URL=http://propostasmosaico-one.vercel.app pnpm exec expo start -c
+EXPO_PUBLIC_API_URL=https://propostasmosaico-one.vercel.app/api pnpm exec expo start -c
 ```
 
 O app possui um fallback para a API publicada quando `EXPO_PUBLIC_API_URL` nao e definida. Em desenvolvimento, prefira sempre os scripts acima: eles deixam claro qual ambiente esta sendo usado e falham cedo quando a API esta indisponivel.

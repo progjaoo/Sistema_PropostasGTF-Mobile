@@ -153,16 +153,16 @@ export function renderProposalPrintHtml({ data, pages, fontFaceCss }: RenderProp
     .proposal-print-section-label strong { display: flex; align-items: baseline; gap: 2mm; color: #111; font-size: 7.5pt; font-weight: 900; text-transform: uppercase; letter-spacing: .22em; }
     .proposal-print-section-label em { color: #727272; font-size: 6.5pt; font-style: normal; letter-spacing: .12em; }
     .proposal-print-stats-section { margin-bottom: 5mm; break-inside: avoid; page-break-inside: avoid; }
-    .proposal-print-stats-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); overflow: hidden; min-height: 20mm; background: #f8fbff; border: 1px solid #e1e7f0; border-radius: 12px; }
-    .proposal-print-stat-card { border-right: 1px solid #e1e7f0; }
+    .proposal-print-stats-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); min-width: 0; overflow: hidden; min-height: 20mm; background: #f8fbff; border: 1px solid #e1e7f0; border-radius: 12px; }
+    .proposal-print-stat-card { min-width: 0; overflow-wrap: anywhere; border-right: 1px solid #e1e7f0; }
     .proposal-print-stat-card:last-child { border-right: 0; }
     .proposal-print-stat-bar { height: 1.5mm; }
-    .proposal-print-stat-body { padding: 3.2mm 4mm; }
-    .proposal-print-stat-value { font-size: 20pt; font-weight: 900; line-height: 1; }
-    .proposal-print-stat-description { margin-top: 2mm; color: #555; font-size: 6.8pt; font-weight: 800; line-height: 1.18; text-transform: uppercase; letter-spacing: .08em; white-space: pre-line; }
+    .proposal-print-stat-body { min-width: 0; padding: 3.2mm 4mm; }
+    .proposal-print-stat-value { min-width: 0; overflow-wrap: anywhere; font-size: 20pt; font-weight: 900; line-height: 1; }
+    .proposal-print-stat-description { min-width: 0; margin-top: 2mm; overflow-wrap: anywhere; color: #555; font-size: 6.8pt; font-weight: 800; line-height: 1.18; text-transform: uppercase; letter-spacing: .08em; white-space: pre-line; }
     .proposal-print-products-section { margin-bottom: 5mm; }
     .proposal-print-products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
-    .proposal-print-product-card { min-height: 37mm; max-height: 39mm; padding: 4mm 4.5mm 3.5mm 6mm; overflow: hidden; background: #f8fbff; border: 1px solid #dce7f6; border-left: 10px solid; border-radius: 16px; break-inside: avoid; page-break-inside: avoid; }
+    .proposal-print-product-card { min-width: 0; min-height: 37mm; max-height: 39mm; padding: 4mm 4.5mm 3.5mm 6mm; overflow: hidden; overflow-wrap: anywhere; background: #f8fbff; border: 1px solid #dce7f6; border-left: 10px solid; border-radius: 16px; break-inside: avoid; page-break-inside: avoid; }
     .proposal-print-product-top { display: flex; align-items: flex-start; gap: 2.5mm; margin-bottom: 2.2mm; }
     .proposal-print-product-qty { font-size: 24pt; font-weight: 900; line-height: 1; }
     .proposal-print-product-qty-label { padding-top: 1mm; color: #727272; font-size: 6.7pt; font-weight: 900; line-height: 1.1; text-transform: uppercase; letter-spacing: .12em; }

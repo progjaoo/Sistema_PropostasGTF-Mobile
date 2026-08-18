@@ -42,3 +42,11 @@ Homologar o plano mobile 002 em aparelhos iOS e Android, com os dois perfis, red
 3. Build EAS preview e distribuição interna.
 4. Upload de imagens e observabilidade.
 5. Preparação de publicação nas lojas.
+
+## Estado após a Entrega 1
+
+As lacunas funcionais ADMIN dos planos 033 e 034 foram implementadas no aplicativo: ciclo de Empresa, catálogo condicionado por `usesPrograms`, board por Empresa, autosave/flush, ações destrutivas seguras, perfil comercial de usuários e Contratos ADMIN. A exportação Expo para iOS/Android foi concluída em `/tmp/gtf-propostas-admin-parity`; permanecem como homologação a validação em aparelhos reais e a confirmação de comportamento contra a API oficial em ambiente integrado.
+
+## Estado após a Entrega 2
+
+Os fluxos COMERCIAL de navegação, ownership, conversão, desativação, catálogo autorizado, editor com valores por item, exclusão própria e Meus Contratos foram implementados. A exportação Expo da Entrega 2 e a homologação com dois vendedores em iOS/Android permanecem como próximos gates.

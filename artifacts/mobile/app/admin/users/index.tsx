@@ -71,6 +71,7 @@ export default function UsersScreen() {
               <View style={styles.userInfo}>
                 <Text style={[styles.userName, { color: user.active ? colors.foreground : colors.mutedForeground }]}>{user.name}</Text>
                 <Text style={[styles.userEmail, { color: colors.mutedForeground }]}>{user.email}</Text>
+                {(user.jobTitle || user.contactPhone) && <Text style={[styles.userEmail, { color: colors.mutedForeground }]}>{[user.jobTitle, user.contactPhone].filter(Boolean).join(' · ')}</Text>}
               </View>
               <View style={styles.userMeta}>
                 <UIBadge label={user.role === 'ADMIN' ? 'Admin' : 'Comercial'} color={user.role === 'ADMIN' ? colors.primary : colors.mutedForeground} size="sm" />

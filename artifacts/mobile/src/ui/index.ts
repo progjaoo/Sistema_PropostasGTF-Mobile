@@ -8,4 +8,5 @@ export { UIAvatar } from './Avatar';
 export { UIEmptyState } from './EmptyState';
 export { UIHeader } from './Header';
 export { UIInput } from './Input';
+export { TypedConfirmDialog } from './TypedConfirmDialog';
 export { UISeparator } from './Separator';

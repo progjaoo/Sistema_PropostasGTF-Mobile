@@ -69,3 +69,13 @@ Os arquivos de API e banco copiados pelo Replit não serão removidos nesta etap
 - alterações exclusivas de web continuam no projeto principal;
 - alterações de API, Prisma e migrations são feitas primeiro em `Sistema-Propostas`;
 - o sistema web e o aplicativo mobile devem ser validados contra a mesma API oficial.
+
+## Entrega 1 — Paridade ADMIN implementada no aplicativo
+
+O aplicativo agora possui contratos locais para erros estruturados, impacto de exclusão, quadro de propostas por Empresa e Contratos. O fluxo ADMIN inclui `usesPrograms`, desativação/reativação e exclusão permanente protegida por confirmação digitada, catálogo condicionado à Empresa, visão de propostas por Empresa, autosave serializado com `flush()`, exclusão permanente distinta de rejeição, perfil comercial de usuários e gestão administrativa de Contratos.
+
+As mudanças desta entrega estão restritas ao aplicativo. O backend, OpenAPI e PostgreSQL permanecem no projeto oficial do site e não foram alterados nesta execução.
+
+## Entrega 2 — Paridade COMERCIAL implementada no aplicativo
+
+O fluxo COMERCIAL agora usa navegação por Propostas, Clientes, Produtos, Contratos e Mais. Clientes e Leads compartilham a mesma tela com segmentação; as rotas antigas continuam acessíveis por redirecionamento. Ownership, conversão Lead → Cliente, desativação explicativa, catálogo read-only, editor com quantidade/valor unitário, exclusão da própria proposta e Meus Contratos foram implementados no app.

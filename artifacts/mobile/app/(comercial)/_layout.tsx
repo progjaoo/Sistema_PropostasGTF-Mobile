@@ -26,17 +26,17 @@ function NativeTabLayout() {
         <Icon sf={{ default: 'person.2', selected: 'person.2.fill' }} />
         <Label>Clientes</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="leads">
-        <Icon sf={{ default: 'person.badge.plus', selected: 'person.badge.plus.fill' }} />
-        <Label>Leads</Label>
+      <NativeTabs.Trigger name="products">
+        <Icon sf={{ default: 'shippingbox', selected: 'shippingbox.fill' }} />
+        <Label>Produtos</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="alerts">
-        <Icon sf={{ default: 'bell', selected: 'bell.fill' }} />
-        <Label>Avisos</Label>
+      <NativeTabs.Trigger name="contracts">
+        <Icon sf={{ default: 'signature', selected: 'signature' }} />
+        <Label>Contratos</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="profile">
-        <Icon sf={{ default: 'person.circle', selected: 'person.circle.fill' }} />
-        <Label>Perfil</Label>
+      <NativeTabs.Trigger name="more">
+        <Icon sf={{ default: 'ellipsis.circle', selected: 'ellipsis.circle.fill' }} />
+        <Label>Mais</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
@@ -94,30 +94,9 @@ function ClassicTabLayout() {
             isIOS ? <SymbolView name="person.2" tintColor={color} size={24} /> : <Feather name="users" size={22} color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="leads"
-        options={{
-          title: 'Leads',
-          tabBarIcon: ({ color }) =>
-            isIOS ? <SymbolView name="person.badge.plus" tintColor={color} size={24} /> : <Feather name="user-plus" size={22} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="alerts"
-        options={{
-          title: 'Avisos',
-          tabBarIcon: ({ color }) =>
-            isIOS ? <SymbolView name="bell" tintColor={color} size={24} /> : <Feather name="bell" size={22} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Perfil',
-          tabBarIcon: ({ color }) =>
-            isIOS ? <SymbolView name="person.circle" tintColor={color} size={24} /> : <Feather name="user" size={22} color={color} />,
-        }}
-      />
+      <Tabs.Screen name="products" options={{ title: 'Produtos', tabBarIcon: ({ color }) => isIOS ? <SymbolView name="shippingbox" tintColor={color} size={24} /> : <Feather name="package" size={22} color={color} /> }} />
+      <Tabs.Screen name="contracts" options={{ title: 'Contratos', tabBarIcon: ({ color }) => isIOS ? <SymbolView name="signature" tintColor={color} size={24} /> : <Feather name="file-text" size={22} color={color} /> }} />
+      <Tabs.Screen name="more" options={{ title: 'Mais', tabBarIcon: ({ color }) => isIOS ? <SymbolView name="ellipsis.circle" tintColor={color} size={24} /> : <Feather name="more-horizontal" size={22} color={color} /> }} />
     </Tabs>
   );
 }

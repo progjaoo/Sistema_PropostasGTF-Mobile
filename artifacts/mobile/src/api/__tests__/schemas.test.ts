@@ -5,9 +5,35 @@ import {
   proposalProductSchema,
   proposalProgramBoardSchema,
   proposalProgressBoardSchema,
+  stationDeletionImpactSchema,
+  stationProposalBoardSchema,
 } from '../schemas';
 
 describe('mobile API contracts', () => {
+  it('parses station deletion impact and station board contracts', () => {
+    const impact = stationDeletionImpactSchema.parse({
+      stationId: 'station-1',
+      canDelete: false,
+      blockers: { proposals: 2, referencedProposalProducts: 1 },
+      removable: { products: 4, programs: 2, proposalTemplates: 1, presentationItems: 4, userAccesses: 3 },
+    });
+    const board = stationProposalBoardSchema.parse({
+      stations: [{
+        id: 'station-1', name: 'Rádio Centro', primaryColor: '#427EFF', usesPrograms: true,
+        proposalCount: 1, investmentTotal: 100,
+        proposals: [{
+          id: 'proposal-1', status: 'DRAFT', statusLabel: 'Em conversa', advertiserId: 'advertiser-1',
+          advertiserName: 'Cliente Centro', advertiserStatus: 'LEAD', proposalTypeName: 'Comercial',
+          createdByName: 'Ana', investValue: '100.00', updatedAt: '2026-08-01T00:00:00.000Z',
+          currentStep: 'IN_CONVERSATION', currentStepLabel: 'Em conversa', programNames: ['Jornal', 'Esporte'], products: [],
+        }],
+      }],
+    });
+
+    expect(impact.blockers.proposals).toBe(2);
+    expect(board.stations[0].proposals.filter((item) => item.id === 'proposal-1')).toHaveLength(1);
+    expect(board.stations[0].proposals[0].programNames).toEqual(['Jornal', 'Esporte']);
+  });
   it('parses a progress board grouped by programs and commercial steps', () => {
     const result = proposalProgressBoardSchema.parse({
       programs: [

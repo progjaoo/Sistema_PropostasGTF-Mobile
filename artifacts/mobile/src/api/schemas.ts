@@ -36,6 +36,7 @@ export const proposalProductSchema = z.object({
   id: z.string(),
   order: z.number(),
   qty: z.string(),
+  unitValue: z.string().nullish(),
   title: z.string(),
   description: z.string().nullish(),
   detail: z.string().nullish(),
@@ -78,26 +79,29 @@ export const leadMetricsSchema = z.object({
   ),
 });
 
+const progressBoardProductSchema = z.object({
+  id: z.string(),
+  title: displayString('Produto sem nome'),
+  qty: displayString('01'),
+  airTime: z.string().nullish(),
+  durationLabel: z.string().nullish(),
+  seasonality: proposalProductSeasonalitySchema,
+}).passthrough();
+
 const progressBoardProposalSchema = z.object({
   id: z.string(),
   status: proposalStatusSchema,
   currentStep: proposalTimelineStepSchema,
+  viewerCanEdit: z.boolean().default(false),
+  stationId: z.string().nullish(),
   proposalTypeName: displayString('Proposta comercial'),
   advertiserName: z.string().nullish(),
+  primaryColor: z.string().nullish(),
   stationName: z.string().nullish(),
   createdByName: displayString('Sem responsavel'),
   updatedAt: z.string().optional(),
   investValue: z.string().nullish(),
-  products: z.array(
-    z.object({
-      id: z.string(),
-      title: displayString('Produto sem nome'),
-      qty: displayString('01'),
-      airTime: z.string().nullish(),
-      durationLabel: z.string().nullish(),
-      seasonality: proposalProductSeasonalitySchema,
-    }).passthrough(),
-  ),
+  products: z.array(progressBoardProductSchema),
 }).passthrough();
 
 export const proposalProgressBoardSchema = z.object({
@@ -187,8 +191,96 @@ export const advertiserWithProposalsSchema = z.object({
   notes: z.string().nullish(),
   active: z.boolean(),
   status: z.enum(['LEAD', 'CLIENT']).optional(),
+  ownerId: z.string().nullish(),
+  owner: z.object({ id: z.string(), name: z.string(), email: z.string() }).nullish(),
+  viewerCanEdit: z.boolean().optional(),
   leadSourceId: z.string().nullish(),
   leadSource: leadSourceSchema.nullish(),
   createdAt: z.string(),
   proposals: z.array(advertiserLinkedProposalSchema).default([]),
+});
+
+export const stationDeletionImpactSchema = z.object({
+  stationId: z.string(),
+  canDelete: z.boolean(),
+  blockers: z.object({ proposals: z.number().int(), referencedProposalProducts: z.number().int() }),
+  removable: z.object({
+    products: z.number().int(),
+    programs: z.number().int(),
+    proposalTemplates: z.number().int(),
+    presentationItems: z.number().int(),
+    userAccesses: z.number().int(),
+  }),
+});
+
+export const stationSchema = z.object({
+  id: z.string(), name: z.string(), slogan: z.string().nullish(), primaryColor: z.string(),
+  logoBase64: z.string().nullish(), contactPhone: z.string().nullish(), contactEmail: z.string().nullish(),
+  address: z.string().nullish(), city: z.string().nullish(), active: z.boolean(),
+  usesPrograms: z.boolean().default(true), viewerCanCreateProposals: z.boolean().optional(),
+  viewerCanViewCatalog: z.boolean().optional(), presentationItems: z.array(z.unknown()).optional(), createdAt: z.string(),
+});
+
+const stationBoardProductSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  qty: z.string(),
+  durationLabel: z.string().nullish(),
+  airTime: z.string().nullish(),
+  seasonality: z.string().nullish(),
+  programName: z.string().nullish(),
+});
+
+const stationBoardProposalSchema = z.object({
+  id: z.string(),
+  status: proposalStatusSchema,
+  statusLabel: z.string(),
+  advertiserId: z.string().nullish(),
+  advertiserName: z.string(),
+  advertiserStatus: z.enum(['LEAD', 'CLIENT']).nullish(),
+  proposalTypeName: z.string(),
+  createdByName: z.string(),
+  investValue: z.string().nullish(),
+  updatedAt: z.string(),
+  currentStep: proposalTimelineStepSchema,
+  currentStepLabel: z.string(),
+  programNames: z.array(z.string()),
+  products: z.array(stationBoardProductSchema),
+});
+
+export const stationProposalBoardSchema = z.object({
+  stations: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    primaryColor: z.string(),
+    usesPrograms: z.boolean().default(true),
+    proposalCount: z.number().int(),
+    investmentTotal: z.number(),
+    proposals: z.array(stationBoardProposalSchema),
+  })),
+});
+
+export const commercialContractSchema = z.object({
+  id: z.string(), ownerId: z.string(), ownerName: z.string().nullish(),
+  advertiserId: z.string(), advertiserName: z.string().nullish(), proposalId: z.string(),
+  proposalName: z.string().nullish(), stationName: z.string().nullish(), monthlyValue: z.string(),
+  saleDate: z.string(), startDate: z.string(), endDate: z.string(),
+  installmentDueDay: z.number().int().min(1).max(31), status: z.enum(['ACTIVE', 'CANCELLED']),
+  cancelledAt: z.string().nullish(), notes: z.string().nullish(), createdAt: z.string(), updatedAt: z.string(),
+});
+
+export const commercialContractSummarySchema = z.object({
+  month: z.string(), soldThisMonth: z.string(), expectedRevenue: z.string(),
+  activeContracts: z.number().int(), endingIn30Days: z.number().int(),
+});
+
+export const commercialContractForecastSchema = z.object({
+  from: z.string(), months: z.number().int(),
+  data: z.array(z.object({ month: z.string(), expectedRevenue: z.string() })),
+});
+
+export const eligibleContractProposalSchema = z.object({
+  id: z.string(), advertiserId: z.string().nullish(), advertiserName: z.string().nullish(),
+  stationId: z.string().nullish(), stationName: z.string().nullish(), proposalName: z.string().nullish(),
+  investValue: z.string().nullish(), status: proposalStatusSchema.optional(),
 });

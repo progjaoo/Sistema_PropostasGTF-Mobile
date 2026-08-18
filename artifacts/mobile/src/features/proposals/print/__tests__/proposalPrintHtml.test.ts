@@ -4,6 +4,15 @@ import { paginateProposalPrintProducts } from '../proposalPrintPagination';
 import { renderProposalPrintHtml } from '../proposalPrintHtml';
 
 describe('renderProposalPrintHtml', () => {
+  it('keeps four presentation cards isolated with long unbroken content', () => {
+    const proposal = makePrintProposal({
+      stats: Array.from({ length: 4 }, (_, index) => ({ num: `${index}${'9'.repeat(39)}`, suf: '', desc: 'PALAVRA'.repeat(20) })),
+    });
+    const data = mapProposalToPrintData(proposal);
+    const html = renderProposalPrintHtml({ data, pages: paginateProposalPrintProducts(data), fontFaceCss: '' });
+    expect(html).toContain('overflow-wrap: anywhere');
+    expect(html.match(/proposal-print-stat-card/g)?.length).toBeGreaterThanOrEqual(4);
+  });
   it('renders the web parity fixture as one explicit A4 page', () => {
     const data = mapProposalToPrintData(makePrintProposal());
     const pages = paginateProposalPrintProducts(data);

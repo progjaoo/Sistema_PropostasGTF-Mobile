@@ -1,6 +1,6 @@
 import { apiCall } from '@/src/api/client';
-import { proposalProgramBoardSchema, proposalProgressBoardSchema } from '@/src/api/schemas';
-import type { ProposalProgramBoard, ProposalProgressBoard } from '@/src/api/contracts';
+import { proposalProgramBoardSchema, proposalProgressBoardSchema, stationProposalBoardSchema } from '@/src/api/schemas';
+import type { ProposalProgramBoard, ProposalProgressBoard, StationProposalBoard } from '@/src/api/contracts';
 import type { Proposal, ProposalTimelineStep, ProposalVersion } from '@/src/types';
 
 export interface BoardFilters {
@@ -11,6 +11,7 @@ export interface BoardFilters {
   dateFrom?: string;
   dateTo?: string;
   createdByName?: string;
+  createdById?: string;
   proposalTypeName?: string;
 }
 
@@ -34,6 +35,19 @@ export async function getProposalProgramBoard(filters: BoardFilters): Promise<Pr
   return parseProgramBoardPayload(payload);
 }
 
+export async function getProposalStationBoard(filters: BoardFilters): Promise<StationProposalBoard> {
+  const params = new URLSearchParams();
+  Object.entries({
+    search: filters.search,
+    stationId: filters.stationId,
+    programId: filters.programId,
+    status: filters.status,
+    createdById: filters.createdById,
+  }).forEach(([key, value]) => { if (value) params.set(key, value); });
+  const suffix = params.toString() ? `?${params}` : '';
+  return stationProposalBoardSchema.parse(await apiCall<unknown>('GET', `/proposals/station-board${suffix}`));
+}
+
 export async function moveProposal(proposalId: string, step: ProposalTimelineStep, note?: string) {
   return apiCall('POST', `/proposals/${proposalId}/timeline`, { step, note });
 }
@@ -44,6 +58,10 @@ export async function duplicateProposal(proposalId: string) {
 
 export async function deleteProposal(proposalId: string) {
   return apiCall<{ message: string }>('DELETE', `/proposals/${proposalId}`);
+}
+
+export async function permanentlyDeleteProposal(proposalId: string) {
+  return apiCall<{ id: string; message: string }>('DELETE', `/proposals/${proposalId}/permanent`);
 }
 
 export async function getProposalVersionDetail(proposalId: string, versionId: string): Promise<ProposalVersion> {
@@ -176,8 +194,11 @@ function normalizeProposals(proposals: unknown): ProposalProgressBoard['programs
       id: normalizeText(raw?.id, `proposal-${index}`),
       status: normalizeProposalStatus(raw?.status),
       currentStep: normalizeProposalStep(raw?.currentStep),
+      viewerCanEdit: Boolean(raw?.viewerCanEdit),
+      stationId: normalizeNullableText(raw?.stationId),
       proposalTypeName: normalizeText(raw?.proposalTypeName, 'Proposta comercial'),
       advertiserName: normalizeNullableText(raw?.advertiserName),
+      primaryColor: normalizeNullableText(raw?.primaryColor),
       stationName: normalizeNullableText(raw?.stationName),
       createdByName: normalizeText(raw?.createdByName, 'Sem responsavel'),
       updatedAt: normalizeNullableText(raw?.updatedAt) ?? undefined,

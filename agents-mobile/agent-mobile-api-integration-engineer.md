@@ -31,4 +31,3 @@ Garantir integração confiável, tipada e segura entre o aplicativo e a API com
 - [ ] Rede lenta/offline considerados
 - [ ] Refresh e repetição sem loop
 - [ ] Documentação atualizada
-

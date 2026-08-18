@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { FormInput } from '@/components/FormInput';
+import { ImagePickerField } from '@/components/ImagePickerField';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { showConfirm } from '@/components/ConfirmDialog';
 import { useToast } from '@/components/ToastProvider';
@@ -14,6 +15,7 @@ import { Station, User, UserRole, UserStationAccess } from '@/src/types';
 import { useColors } from '@/hooks/useColors';
 import { UIButton, UICard, UIChip, UIHeader } from '@/src/ui';
 import { spacing } from '@/src/theme';
+import { buildAdminUserPayload } from '@/src/features/admin/users/userProfilePayload';
 
 export default function UserDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -28,6 +30,10 @@ export default function UserDetailScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [avatarBase64, setAvatarBase64] = useState<string | null>(null);
   const [role, setRole] = useState<UserRole>('COMERCIAL');
   const [active, setActive] = useState(true);
   const [stationAccesses, setStationAccesses] = useState<UserStationAccess[]>([]);
@@ -51,6 +57,10 @@ export default function UserDetailScreen() {
     if (user) {
       setName(user.name ?? '');
       setEmail(user.email ?? '');
+      setJobTitle(user.jobTitle ?? '');
+      setContactPhone(user.contactPhone ?? '');
+      setContactEmail(user.contactEmail ?? '');
+      setAvatarBase64(user.avatarBase64 ?? null);
       setRole(user.role ?? 'COMERCIAL');
       setActive(user.active ?? true);
       setStationAccesses(user.stationAccesses ?? []);
@@ -118,10 +128,11 @@ export default function UserDetailScreen() {
       const validationError = validateBeforeSave();
       if (validationError) throw new ApiError(400, validationError);
       const stationAccessesPayload = buildStationAccessPayload();
+      const profile = buildAdminUserPayload({ name, email, password: isNew ? password : undefined, role, active, jobTitle, contactPhone, contactEmail, avatarBase64, stationAccesses });
       if (isNew) {
-        return apiCall<User>('POST', '/users', { name: name.trim(), email: email.trim().toLowerCase(), password, role, active, stationAccesses: stationAccessesPayload });
+        return apiCall<User>('POST', '/users', { ...profile, stationAccesses: stationAccessesPayload });
       }
-      return apiCall<User>('PATCH', `/users/${id}`, { name: name.trim(), email: email.trim().toLowerCase(), role, active, stationAccesses: stationAccessesPayload });
+      return apiCall<User>('PATCH', `/users/${id}`, { ...profile, stationAccesses: stationAccessesPayload });
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -162,9 +173,17 @@ export default function UserDetailScreen() {
 
       <UICard variant="elevated" style={styles.form}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>DADOS</Text>
+        <ImagePickerField label="Avatar" value={avatarBase64} emptyText="Nenhum avatar cadastrado" pending={saveMutation.isPending} onChange={(value) => { setAvatarBase64(value); setIsDirty(true); }} onError={(message) => showToast(message, 'warning')} />
         <FormInput label="Nome" required leftIcon="user" value={name} onChangeText={(t) => { setName(t); setIsDirty(true); }} />
         <FormInput label="E-mail" required leftIcon="mail" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={(t) => { setEmail(t); setIsDirty(true); }} />
         {isNew && <FormInput label="Senha" required leftIcon="lock" isPassword value={password} onChangeText={(t) => { setPassword(t); setIsDirty(true); }} hint="Mínimo 8 caracteres." />}
+      </UICard>
+
+      <UICard variant="elevated" style={styles.form}>
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>CONTATO COMERCIAL</Text>
+        <FormInput label="Cargo / Função" leftIcon="briefcase" value={jobTitle} onChangeText={(t) => { setJobTitle(t); setIsDirty(true); }} />
+        <FormInput label="Telefone comercial" leftIcon="phone" keyboardType="phone-pad" value={contactPhone} onChangeText={(t) => { setContactPhone(t); setIsDirty(true); }} />
+        <FormInput label="E-mail comercial" leftIcon="mail" keyboardType="email-address" autoCapitalize="none" value={contactEmail} onChangeText={(t) => { setContactEmail(t); setIsDirty(true); }} />
       </UICard>
 
       <UICard variant="elevated" style={styles.form}>

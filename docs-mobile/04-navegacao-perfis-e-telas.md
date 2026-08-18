@@ -21,7 +21,7 @@
 
 | Rota | Estado | Função |
 |---|---|---|
-| `/(comercial)` | Implementada | Board de propostas por etapa e programa |
+| `/(comercial)` | Implementada | Kanban contextual por Empresa ou Programa, com modos focado/expandido |
 | `/(comercial)/clients` | Implementada | Clientes |
 | `/(comercial)/leads` | Implementada | Leads |
 | `/(comercial)/alerts` | Implementada | Avisos de recaptura |
@@ -36,7 +36,7 @@
 | Rota | Estado | Função |
 |---|---|---|
 | `/(admin)` | Implementada | Dashboard |
-| `/(admin)/proposals` | Implementada | Mesmo board nativo da operação comercial |
+| `/(admin)/proposals` | Implementada | Mesmo Kanban contextual nativo da operação comercial |
 | `/(admin)/clients` | Implementada | Clientes e Leads conforme regras da API |
 | `/(admin)/alerts` | Implementada | Tratar e adiar 7/15/30 dias |
 | `/(admin)/menu` | Implementada | Acesso aos cadastros administrativos |
@@ -70,3 +70,37 @@ O Hero, o logo e as bordas usam a cor cadastrada na Empresa. A identidade Mosaic
 ## Regra de Navegação
 
 Links só devem ser exibidos se a tela existir e se o usuário tiver permissão. Rotas administrativas também devem validar o perfil ao montar a tela, sem depender apenas da visibilidade do menu.
+
+## Rotas ADMIN da Entrega 1
+
+| Rota | Estado | Função |
+|---|---|---|
+| `/admin/contracts` | Implementada | Lista global, filtro por responsável, KPIs e previsão |
+| `/admin/contracts/new` | Implementada | Contrato a partir de proposta aprovada elegível |
+| `/admin/contracts/[id]` | Implementada | Edição e cancelamento com histórico |
+
+`/(admin)/proposals` inicia na visão por Empresa para ADMIN. O menu administrativo apresenta Contratos. A marca no menu retorna ao Dashboard com label acessível.
+
+## Rotas COMERCIAL da Entrega 2
+
+| Rota | Estado | Função |
+|---|---|---|
+| `/(comercial)` | Implementada | Propostas próprias e board com andamento |
+| `/(comercial)/clients` | Implementada | Clientes e Leads segmentados |
+| `/(comercial)/products` | Implementada | Catálogo autorizado read-only |
+| `/(comercial)/contracts` | Implementada | Meus Contratos, resumo e forecast |
+| `/(comercial)/more` | Implementada | Hub de Avisos e Perfil |
+| `/contracts/new`, `/contracts/[id]` | Implementada | Criação, edição e cancelamento de contrato próprio |
+
+`/(comercial)/leads`, `/(comercial)/alerts` e `/(comercial)/profile` preservam compatibilidade e redirecionam para os novos destinos.
+
+## Kanban contextual de Propostas
+
+A tela de Propostas possui um único caminho de renderização para ADMIN e COMERCIAL. O usuário escolhe `Empresa` ou `Programa` na barra de contexto; essa seleção define o board e não aparece novamente nos filtros avançados.
+
+- **Focado:** uma etapa por vez, swipe horizontal com snap e indicadores das sete etapas.
+- **Expandido:** colunas lado a lado, rolagem horizontal livre e cards compactos.
+- **Etapas:** Lead criado, Em conversa, Proposta enviada, Cliente analisando, Negociação, Aprovada e Rejeitada.
+- **Contexto:** seleção de Empresa e Programa fica preservada separadamente durante a sessão da tela; `Sem programa` é tratado como grupo sintético.
+- **Filtros:** busca em overlay; status, responsável (somente ADMIN), tipo e período no sheet avançado; chips ativos removíveis.
+- **Permissões:** o movimento só é exibido quando `viewerCanEdit` permite; a API continua sendo a autoridade final.

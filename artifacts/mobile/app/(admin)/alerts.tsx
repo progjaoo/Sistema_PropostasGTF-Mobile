@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FlatList, Platform, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -19,6 +19,8 @@ import {
 import { useColors } from '@/hooks/useColors';
 import { UIBadge, UIButton, UICard, UIEmptyState, UIHeader } from '@/src/ui';
 import { spacing } from '@/src/theme';
+import { RecallAlertFilterBar } from '@/src/features/recall/RecallAlertFilterBar';
+import { filterRecallAlerts, type RecallAlertFilterState } from '@/src/features/recall/recallAlertFilters';
 
 export default function AdminAlertsScreen() {
   const colors = useColors();
@@ -26,6 +28,7 @@ export default function AdminAlertsScreen() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
+  const [filters, setFilters] = useState<RecallAlertFilterState>({ search: '', status: 'ALL', milestone: 'ALL' });
 
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ['admin-recall-reminders'],
@@ -57,6 +60,8 @@ export default function AdminAlertsScreen() {
   const overdue = all.filter((reminder) => reminder.status === 'PENDING' && new Date(reminder.dueAt) <= now);
   const rest = all.filter((reminder) => !(reminder.status === 'PENDING' && new Date(reminder.dueAt) <= now));
   const sorted = [...overdue, ...rest];
+  const filtered = filterRecallAlerts(sorted, filters);
+  const filteredOverdue = filtered.filter((reminder) => reminder.status === 'PENDING' && new Date(reminder.dueAt) <= now);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -64,7 +69,7 @@ export default function AdminAlertsScreen() {
         <UIHeader
           title="Avisos de Recaptura"
           subtitle="Visão geral dos clientes e leads prontos para nova abordagem."
-          action={overdue.length > 0 ? <UIBadge label={String(overdue.length)} color={colors.danger} /> : undefined}
+          action={filteredOverdue.length > 0 ? <UIBadge label={String(filteredOverdue.length)} color={colors.danger} /> : undefined}
         />
       </View>
 
@@ -73,8 +78,10 @@ export default function AdminAlertsScreen() {
       ) : isError ? (
         <UIEmptyState icon="alert-circle" title="Erro ao carregar" actionLabel="Tentar novamente" onAction={refetch} />
       ) : (
-        <FlatList
-          data={sorted}
+        <>
+          <RecallAlertFilterBar value={filters} resultCount={filtered.length} onChange={setFilters} />
+          <FlatList
+          data={filtered}
           keyExtractor={(reminder) => reminder.id}
           contentContainerStyle={styles.listContent}
           refreshControl={<RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={colors.primary} />}
@@ -132,7 +139,8 @@ export default function AdminAlertsScreen() {
               </UICard>
             );
           }}
-        />
+          />
+        </>
       )}
     </View>
   );

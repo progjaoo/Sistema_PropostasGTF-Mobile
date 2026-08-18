@@ -31,8 +31,8 @@ export function StationPresentationEditor({
               textStyle={{ color: colors.destructive }}
             />
           </View>
-          <FormInput label="Destaque" placeholder="Ex: 34,5%" value={item.highlight} onChangeText={(highlight) => onChange(items.map((value, itemIndex) => itemIndex === index ? { ...value, highlight } : value))} />
-          <FormInput label="Descricao" placeholder="Ex: Audiencia mensal" value={item.description} onChangeText={(description) => onChange(items.map((value, itemIndex) => itemIndex === index ? { ...value, description } : value))} />
+          <FormInput label={`Destaque (${item.highlight.length}/40)`} placeholder="Ex: 34,5%" value={item.highlight} maxLength={40} onChangeText={(highlight) => onChange(items.map((value, itemIndex) => itemIndex === index ? { ...value, highlight } : value))} />
+          <FormInput label={`Descricao (${item.description.length}/140)`} placeholder="Ex: Audiencia mensal" value={item.description} maxLength={140} onChangeText={(description) => onChange(items.map((value, itemIndex) => itemIndex === index ? { ...value, description } : value))} />
         </UICard>
       ))}
       {items.length < 4 && (

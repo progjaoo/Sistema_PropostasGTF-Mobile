@@ -12,6 +12,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { leadMetricsSchema } from '@/src/api/schemas';
 import { UIBadge, UIBottomSheet, UIButton, UICard, UIChip, UIEmptyState, UIHeader, UIInput } from '@/src/ui';
 import { spacing } from '@/src/theme';
+import { canManagePrograms, normalizeProductProgram } from './catalogRules';
 
 type CatalogKind = 'programs' | 'products' | 'proposal-types' | 'lead-sources';
 type CatalogItem = {
@@ -20,6 +21,7 @@ type CatalogItem = {
   title?: string | null;
   active: boolean;
   stationId?: string | null;
+  programId?: string | null;
   slug?: string;
   order?: number;
   suggestedValueMin?: string | null;
@@ -46,6 +48,7 @@ export function CatalogListScreen({ kind }: { kind: CatalogKind }) {
   const [editing, setEditing] = useState<CatalogItem | null | undefined>(undefined);
   const [name, setName] = useState('');
   const [stationId, setStationId] = useState('');
+  const [programId, setProgramId] = useState<string | null>(null);
   const [suggestedValue, setSuggestedValue] = useState('');
   const [order, setOrder] = useState(0);
   const queryKey = ['admin-catalog', kind, search];
@@ -67,7 +70,7 @@ export function CatalogListScreen({ kind }: { kind: CatalogKind }) {
     mutationFn: () => {
       const activeOnCreate = editing ? {} : { active: true };
       const base = kind === 'products'
-        ? { title: name.trim(), name: name.trim(), stationId, suggestedValueMin: suggestedValue || null, ...activeOnCreate }
+        ? { title: name.trim(), name: name.trim(), stationId, programId: normalizeProductProgram(stationQuery.data?.find((station) => station.id === stationId), programId), suggestedValueMin: suggestedValue || null, ...activeOnCreate }
         : kind === 'programs'
           ? { name: name.trim(), slug: slugify(name), stationId, ...activeOnCreate }
           : kind === 'lead-sources'
@@ -96,6 +99,7 @@ export function CatalogListScreen({ kind }: { kind: CatalogKind }) {
     setEditing(item);
     setName(item?.title || item?.name || '');
     setStationId(item?.stationId || stationQuery.data?.[0]?.id || '');
+    setProgramId(item?.programId ?? null);
     setSuggestedValue(item?.suggestedValueMin ?? '');
     setOrder(item?.order ?? 0);
   }
@@ -167,10 +171,13 @@ export function CatalogListScreen({ kind }: { kind: CatalogKind }) {
                 </ScrollView>
               </>
             )}
+            {kind === 'programs' && stationId && !canManagePrograms(stationQuery.data?.find((station) => station.id === stationId)) && (
+              <Text style={[styles.label, { color: colors.mutedForeground }]}>Esta Empresa não usa Programas. Ative essa configuração no cadastro da Empresa para criar Programas.</Text>
+            )}
             {kind === 'products' && <UIInput value={suggestedValue} onChangeText={setSuggestedValue} keyboardType="decimal-pad" placeholder="Valor sugerido minimo" />}
             <UIButton
               title="Salvar"
-              disabled={!name.trim() || (config.needsStation && !stationId) || saveMutation.isPending}
+              disabled={!name.trim() || (config.needsStation && !stationId) || (kind === 'programs' && !canManagePrograms(stationQuery.data?.find((station) => station.id === stationId))) || saveMutation.isPending}
               onPress={() => saveMutation.mutate()}
             />
       </UIBottomSheet>

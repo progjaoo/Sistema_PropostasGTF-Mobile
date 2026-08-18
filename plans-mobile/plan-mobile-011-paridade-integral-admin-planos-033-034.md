@@ -4,6 +4,8 @@
 
 **Goal:** Entregar no aplicativo todas as funcionalidades administrativas dos planos web 033 e 034, preservando a API e o PostgreSQL únicos.
 
+**Execution scope:** Esta execução foi autorizada somente no `Sistema-PropostasGTF_App`. Nenhum arquivo ou commit foi criado no `Sistema-Propostas-kanban`; os passos de alteração de OpenAPI/codegen e commits abaixo ficam registrados como omitidos por esse limite.
+
 **Architecture:** A implementação começa pela formalização dos contratos reais da API e por utilitários mobile compartilhados. Em seguida, evolui Empresas/Catálogo, Propostas, Usuários e Contratos em módulos independentes, usando TanStack Query para estado remoto, Zod para respostas críticas e Expo Router para navegação nativa.
 
 **Tech Stack:** Expo SDK 54, React Native 0.81, React 19, TypeScript 5.9, Expo Router 6, TanStack Query, Zustand, Zod, Jest, Testing Library React Native e API Express/Prisma compartilhada.
@@ -105,7 +107,7 @@ export class ApiError extends Error {
 
 Atualizar `apiCall()` para ler o JSON uma única vez em respostas não OK, normalizar `error` string/objeto e lançar `ApiError` com o payload completo.
 
-- [ ] **Step 4: Complete the canonical OpenAPI**
+- [x] **Step 4: Complete the canonical OpenAPI — omitido por escopo app-only**
 
 Documentar exatamente:
 
@@ -233,12 +235,12 @@ export const forecastFixture: CommercialContractForecastResponse = {
 
 Adicionar fixtures válidas e inválidas a `schemas.test.ts`; cada fixture válida acima deve passar pelo schema correspondente.
 
-- [ ] **Step 6: Regenerate the official clients**
+- [x] **Step 6: Regenerate the official clients — omitido por escopo app-only**
 
 Run: `pnpm --filter @workspace/api-spec run codegen` in `../Sistema-Propostas-kanban`  
 Expected: generated React and Zod clients include the six paths above and compile without manual edits.
 
-- [ ] **Step 7: Run contract verification**
+- [x] **Step 7: Run contract verification**
 
 Run:
 
@@ -249,7 +251,7 @@ pnpm --filter @workspace/mobile run typecheck
 
 Expected: PASS.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit — omitido por instrução do usuário**
 
 ```bash
 git add lib/api-spec lib/api-client-react/src/generated lib/api-zod/src/generated
@@ -258,7 +260,7 @@ git add artifacts/mobile/src/api
 git commit -m "feat(mobile): add structured parity contracts"
 ```
 
-Executar o primeiro commit em `Sistema-Propostas-kanban` e o segundo em `Sistema-PropostasGTF_App`.
+Não executar commits nesta entrega. O usuário determinou que `Sistema-Propostas-kanban` não deve receber alterações nem commits; o aplicativo também foi deixado sem commit para preservar o controle do workspace.
 
 ---
 
@@ -308,7 +310,7 @@ pnpm --filter @workspace/mobile run typecheck
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit — omitido por instrução do usuário**
 
 ```bash
 git add artifacts/mobile/src/ui
@@ -387,7 +389,7 @@ pnpm --filter @workspace/mobile run typecheck
 
 Expected: PASS.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit — omitido por instrução do usuário**
 
 ```bash
 git add artifacts/mobile/src/types artifacts/mobile/src/features/admin/stations artifacts/mobile/app/admin/stations
@@ -444,7 +446,7 @@ pnpm --filter @workspace/mobile run typecheck
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit — omitido por instrução do usuário**
 
 ```bash
 git add artifacts/mobile/src/features/admin/catalog artifacts/mobile/app/admin/programs artifacts/mobile/app/admin/products
@@ -511,7 +513,7 @@ pnpm --filter @workspace/mobile run typecheck
 
 Expected: PASS.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit — omitido por instrução do usuário**
 
 ```bash
 git add artifacts/mobile/src/api artifacts/mobile/src/features/proposals
@@ -598,7 +600,7 @@ pnpm --filter @workspace/mobile run typecheck
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit — omitido por instrução do usuário**
 
 ```bash
 git add artifacts/mobile/src/features/proposals/editor artifacts/mobile/app/proposal
@@ -671,7 +673,7 @@ pnpm --filter @workspace/mobile run typecheck
 
 Expected: PASS.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit — omitido por instrução do usuário**
 
 ```bash
 git add artifacts/mobile/src/features/proposals artifacts/mobile/app/proposal
@@ -725,7 +727,7 @@ pnpm --filter @workspace/mobile run typecheck
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit — omitido por instrução do usuário**
 
 ```bash
 git add artifacts/mobile/app/admin/users artifacts/mobile/src/features/admin/users
@@ -801,7 +803,7 @@ pnpm --filter @workspace/mobile run typecheck
 
 Expected: PASS.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit — omitido por instrução do usuário**
 
 ```bash
 git add artifacts/mobile/src/features/contracts artifacts/mobile/app/admin/contracts artifacts/mobile/app/admin/_layout.tsx 'artifacts/mobile/app/(admin)/menu.tsx'
@@ -829,7 +831,7 @@ git commit -m "feat(mobile): add admin contract management"
 - Consumes all deliverables from Tasks 1–9.
 - Produces documented ADMIN route inventory and completed implementation checklist.
 
-- [ ] **Step 1: Extend PDF long-content regression**
+- [x] **Step 1: Extend PDF long-content regression**
 
 ```ts
 it('keeps four presentation cards isolated with long unbroken content', () => {
@@ -842,19 +844,19 @@ it('keeps four presentation cards isolated with long unbroken content', () => {
 });
 ```
 
-- [ ] **Step 2: Add character counters and safe wrapping**
+- [x] **Step 2: Add character counters and safe wrapping**
 
 O editor institucional deve indicar limites 40/140. O HTML do PDF deve aplicar `min-width: 0`, `overflow-wrap: anywhere` e altura/line-height compatíveis com quatro cards.
 
-- [ ] **Step 3: Add native home navigation from the ADMIN brand context**
+- [x] **Step 3: Add native home navigation from the ADMIN brand context**
 
 A marca exibida no Menu navega para `/(admin)`, possui label acessível e não substitui o botão nativo de voltar em telas empilhadas.
 
-- [ ] **Step 4: Update mobile documentation**
+- [x] **Step 4: Update mobile documentation**
 
 Registrar rotas, contratos, exclusão versus desativação/rejeição, `usesPrograms`, quadro por Empresa, autosave/flush e Contratos ADMIN.
 
-- [ ] **Step 5: Run the complete automated gate**
+- [x] **Step 5: Run the complete automated gate**
 
 Run:
 
@@ -881,11 +883,11 @@ Validar em iOS e Android:
 9. gerar PDF imediatamente após uma edição e confirmar dados persistidos;
 10. criar, editar, filtrar e cancelar contrato administrativo.
 
-- [ ] **Step 7: Record actual implementation status**
+- [x] **Step 7: Record actual implementation status**
 
 Preencher no fim deste plano itens concluídos, comandos executados, dispositivos usados e riscos residuais objetivos.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit — omitido por instrução do usuário**
 
 ```bash
 git add artifacts/mobile docs-mobile plans-mobile/plan-mobile-011-paridade-integral-admin-planos-033-034.md
@@ -909,27 +911,29 @@ git commit -m "docs(mobile): complete admin parity delivery"
 
 ## Rollback e Dependência da Entrega 2
 
-- Cada task possui commit independente e pode ser revertida sem remover migrations já publicadas.
+- Cada task foi mantida como unidade de alteração independente e pode ser revertida sem remover migrations; nenhum commit foi criado por instrução do usuário.
 - A Entrega 2 depende das interfaces das Tasks 1, 2, 6, 7 e 9.
 - Não iniciar o plano mobile 012 enquanto os critérios 1–10 desta entrega não forem aprovados.
 
 ## Checklist da Implementação
 
-- [ ] Task 1 — Contratos e erros estruturados
-- [ ] Task 2 — Confirmação destrutiva digitada
-- [ ] Task 3 — Ciclo de Empresa e `usesPrograms`
-- [ ] Task 4 — Catálogo condicionado à Empresa
-- [ ] Task 5 — Quadro ADMIN por Empresa
-- [ ] Task 6 — Autosave determinístico
-- [ ] Task 7 — Exclusão permanente e PDF após flush
-- [ ] Task 8 — Perfil comercial na gestão de usuários
-- [ ] Task 9 — Contratos ADMIN
-- [ ] Task 10 — Robustez, documentação e homologação
+- [x] Task 1 — Contratos e erros estruturados
+- [x] Task 2 — Confirmação destrutiva digitada
+- [x] Task 3 — Ciclo de Empresa e `usesPrograms`
+- [x] Task 4 — Catálogo condicionado à Empresa
+- [x] Task 5 — Quadro ADMIN por Empresa
+- [x] Task 6 — Autosave determinístico
+- [x] Task 7 — Exclusão permanente e PDF após flush
+- [x] Task 8 — Perfil comercial na gestão de usuários
+- [x] Task 9 — Contratos ADMIN
+- [x] Task 10 — Robustez, documentação e homologação — homologação de dispositivo pendente
 
 ### Validações Executadas
 
 - Baseline de planejamento: 20 suítes, 65 testes e typecheck aprovados em 17/08/2026.
+- Após a implementação: 31 suítes, 78 testes, 0 snapshots e typecheck aprovados no aplicativo.
+- Exportações iOS/Android concluídas em `/tmp/gtf-propostas-admin-parity`; QA em aparelhos reais permanece pendente.
 
 ### Pendências e Riscos Residuais
 
-- Homologação funcional e de dispositivo será registrada durante a execução.
+- Homologação funcional integrada à API oficial e de dispositivo iOS/Android permanece como risco residual; nenhum backend/web foi alterado nesta entrega.

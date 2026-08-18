@@ -38,8 +38,11 @@ export interface ProgressBoardProposal {
   id: string;
   status: ProposalStatus;
   currentStep: ProposalTimelineStep;
+  viewerCanEdit: boolean;
+  stationId?: string | null;
   proposalTypeName: string;
   advertiserName?: string | null;
+  primaryColor?: string | null;
   stationName?: string | null;
   createdByName: string;
   updatedAt?: string;
@@ -57,6 +60,104 @@ export interface ProgressBoardProgram {
 
 export interface ProposalProgressBoard {
   programs: ProgressBoardProgram[];
+}
+
+export interface StationDeletionImpact {
+  stationId: string;
+  canDelete: boolean;
+  blockers: { proposals: number; referencedProposalProducts: number };
+  removable: {
+    products: number;
+    programs: number;
+    proposalTemplates: number;
+    presentationItems: number;
+    userAccesses: number;
+  };
+}
+
+export interface StationBoardProposal {
+  id: string;
+  status: ProposalStatus;
+  statusLabel: string;
+  advertiserId?: string | null;
+  advertiserName: string;
+  advertiserStatus?: 'LEAD' | 'CLIENT' | null;
+  proposalTypeName: string;
+  createdByName: string;
+  investValue?: string | null;
+  updatedAt: string;
+  currentStep: ProposalTimelineStep;
+  currentStepLabel: string;
+  programNames: string[];
+  products: Array<{
+    id: string;
+    title: string;
+    qty: string;
+    durationLabel?: string | null;
+    airTime?: string | null;
+    seasonality?: string | null;
+    programName?: string | null;
+  }>;
+}
+
+export interface StationProposalBoard {
+  stations: Array<{
+    id: string;
+    name: string;
+    primaryColor: string;
+    usesPrograms: boolean;
+    proposalCount: number;
+    investmentTotal: number;
+    proposals: StationBoardProposal[];
+  }>;
+}
+
+export type CommercialContractStatus = 'ACTIVE' | 'CANCELLED';
+
+export interface CommercialContract {
+  id: string;
+  ownerId: string;
+  ownerName?: string | null;
+  advertiserId: string;
+  advertiserName?: string | null;
+  proposalId: string;
+  proposalName?: string | null;
+  stationName?: string | null;
+  monthlyValue: string;
+  saleDate: string;
+  startDate: string;
+  endDate: string;
+  installmentDueDay: number;
+  status: CommercialContractStatus;
+  cancelledAt?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CommercialContractSummary {
+  month: string;
+  soldThisMonth: string;
+  expectedRevenue: string;
+  activeContracts: number;
+  endingIn30Days: number;
+}
+
+export interface CommercialContractForecastResponse {
+  from: string;
+  months: number;
+  data: Array<{ month: string; expectedRevenue: string }>;
+}
+
+export interface EligibleContractProposal {
+  id: string;
+  advertiserId?: string | null;
+  advertiserName?: string | null;
+  stationId?: string | null;
+  stationName?: string | null;
+  proposalName?: string | null;
+  investValue?: string | null;
+  status?: ProposalStatus;
 }
 
 export interface ProgramBoardProduct {
@@ -114,6 +215,9 @@ export interface AdvertiserLinkedProposal {
 }
 
 export interface AdvertiserWithProposals extends Advertiser {
+  ownerId?: string | null;
+  owner?: Pick<import('@/src/types').AuthUser, 'id' | 'name' | 'email'> | null;
+  viewerCanEdit?: boolean;
   leadSourceId?: string | null;
   leadSource?: LeadSource | null;
   proposals: AdvertiserLinkedProposal[];

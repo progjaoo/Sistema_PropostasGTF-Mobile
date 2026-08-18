@@ -14,6 +14,7 @@ import { Station, ProposalType, Proposal, Advertiser } from '@/src/types';
 import { useColors } from '@/hooks/useColors';
 import { UIBadge, UIButton, UICard, UIChip, UIEmptyState, UIHeader, UIInput } from '@/src/ui';
 import { shadows, spacing, tokens } from '@/src/theme';
+import { NativeBackButton } from '@/src/navigation/NativeBackButton';
 
 export default function NewProposalScreen() {
   const colors = useColors();
@@ -94,9 +95,7 @@ export default function NewProposalScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.background }]}>
-        <Pressable onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityRole="button" accessibilityLabel="Fechar nova proposta">
-          <Feather name="x" size={24} color={colors.foreground} />
-        </Pressable>
+        <NativeBackButton onPress={() => router.back()} accessibilityLabel="Voltar da nova proposta" />
         <UIHeader title="Nova Proposta" subtitle="Escolha empresa, cliente e tipo para iniciar o rascunho." style={styles.headerCopy} />
         <View style={{ width: 24 }} />
       </View>

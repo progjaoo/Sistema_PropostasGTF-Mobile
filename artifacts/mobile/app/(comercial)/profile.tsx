@@ -4,7 +4,7 @@ import {
   ActivityIndicator,
   Pressable,
 } from 'react-native';
-import { router } from 'expo-router';
+import { Redirect, router, useLocalSearchParams, usePathname } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useMutation } from '@tanstack/react-query';
@@ -19,9 +19,12 @@ import { AuthUser } from '@/src/types';
 import { useColors } from '@/hooks/useColors';
 import { UIBadge, UICard, UIAvatar, UIButton, UIHeader } from '@/src/ui';
 import { shadows, spacing, tokens } from '@/src/theme';
-import { getProfileFallbackRoute } from '@/src/features/auth/profileNavigation';
+import { getProfileFallbackRoute, shouldRedirectLegacyProfile } from '@/src/features/auth/profileNavigation';
+import { NativeBackButton } from '@/src/navigation/NativeBackButton';
 
 export default function ProfileScreen() {
+  const { legacy } = useLocalSearchParams<{ legacy?: string }>();
+  const pathname = usePathname();
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, clearAuth, updateUser } = useAuthStore();
@@ -94,6 +97,8 @@ export default function ProfileScreen() {
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom;
 
+  if (shouldRedirectLegacyProfile(pathname, legacy)) return <Redirect href={"/(comercial)/more?section=profile" as any} />;
+
   return (
     <KeyboardAwareScrollViewCompat
       style={{ flex: 1, backgroundColor: colors.background }}
@@ -104,18 +109,7 @@ export default function ProfileScreen() {
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.background }]}>
         <View style={styles.headerRow}>
-          <Pressable
-            onPress={handleBack}
-            accessibilityRole="button"
-            accessibilityLabel="Voltar"
-            hitSlop={10}
-            style={({ pressed }) => [
-              styles.backButton,
-              { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.72 : 1 },
-            ]}
-          >
-            <Feather name="arrow-left" size={20} color={colors.foreground} />
-          </Pressable>
+          <NativeBackButton onPress={handleBack} />
           <UIHeader
             title="Meu Perfil"
             subtitle="Atualize seus dados comerciais usados nas propostas."

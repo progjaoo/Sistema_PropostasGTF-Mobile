@@ -18,7 +18,9 @@ import { useColors } from '@/hooks/useColors';
 import { useAuthStore } from '@/src/store/authStore';
 import { AdvertiserProposalList } from '@/src/features/advertisers/AdvertiserProposalList';
 import { LeadSourcePicker } from '@/src/features/advertisers/LeadSourcePicker';
-import { getAdvertiser, listLeadSources, saveAdvertiser } from '@/src/features/advertisers/api';
+import { deactivateAdvertiser, getAdvertiser, getAdvertiserErrorMessage, listLeadSources, promoteAdvertiserToClient, saveAdvertiser } from '@/src/features/advertisers/api';
+import { AdvertiserDeactivateAction } from '@/src/features/advertisers/AdvertiserDeactivateAction';
+import { NativeBackButton } from '@/src/navigation/NativeBackButton';
 import { queryKeys } from '@/src/api/queryKeys';
 import { UIButton, UICard, UIChip, UIHeader } from '@/src/ui';
 import { shadows, spacing, tokens } from '@/src/theme';
@@ -44,11 +46,19 @@ export default function AdvertiserDetailScreen() {
   const [leadSourceId, setLeadSourceId] = useState<string | null>(null);
   const [sourceError, setSourceError] = useState('');
 
-  const { data: advertiser, isLoading, isError } = useQuery({
+  const { data: advertiser, isLoading, isError, error: advertiserError } = useQuery({
     queryKey: queryKeys.advertisers.detail(id),
     queryFn: () => getAdvertiser(id),
     enabled: !isNew && !!id,
     staleTime: 30000,
+  });
+  const promoteMutation = useMutation({
+    mutationFn: () => promoteAdvertiserToClient(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.advertisers.all });
+      showToast('Lead convertido em cliente.', 'success');
+    },
+    onError: (error) => showToast(getAdvertiserErrorMessage(error), 'error'),
   });
   const { data: leadSources = [] } = useQuery({
     queryKey: queryKeys.leadSources.list({ active: true }),
@@ -100,7 +110,7 @@ export default function AdvertiserDetailScreen() {
   });
 
   if (!isNew && isLoading) return <LoadingSpinner message="Carregando..." />;
-  if (!isNew && isError) return <EmptyState icon="alert-circle" title="Não encontrado" actionLabel="Voltar" onAction={() => router.back()} />;
+  if (!isNew && isError) return <EmptyState icon="alert-circle" title="Não encontrado" description={getAdvertiserErrorMessage(advertiserError)} actionLabel="Voltar" onAction={() => router.back()} />;
 
   const title = isNew ? 'Novo' : (advertiser?.tradeName ?? 'Anunciante');
   const isLead = (advertiser?.status ?? status) === 'LEAD';
@@ -113,9 +123,7 @@ export default function AdvertiserDetailScreen() {
       bottomOffset={20}
     >
       <View style={[styles.header, { paddingTop: topPad + spacing.md, backgroundColor: colors.card, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Feather name="arrow-left" size={24} color={colors.foreground} />
-        </TouchableOpacity>
+        <NativeBackButton onPress={() => router.back()} />
         <UIHeader
           title={title}
           subtitle={isNew ? 'Cadastre um novo contato comercial.' : 'Dados comerciais e propostas vinculadas.'}
@@ -174,6 +182,14 @@ export default function AdvertiserDetailScreen() {
         <UICard variant="elevated" style={styles.form}>
           <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>PROPOSTAS VINCULADAS</Text>
           <AdvertiserProposalList proposals={advertiser?.proposals ?? []} />
+        </UICard>
+      )}
+
+      {!isNew && advertiser && role === 'COMERCIAL' && (
+        <UICard variant="elevated" style={styles.form}>
+          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>AÇÕES COMERCIAIS</Text>
+          {isLead && <UIButton title={promoteMutation.isPending ? 'Convertendo...' : 'Converter em cliente'} iconLeft="repeat" onPress={() => promoteMutation.mutate()} disabled={promoteMutation.isPending} />}
+          <AdvertiserDeactivateAction advertiser={advertiser} deactivate={deactivateAdvertiser} onSuccess={() => { queryClient.invalidateQueries({ queryKey: queryKeys.advertisers.all }); showToast('Cadastro desativado.', 'success'); router.back(); }} />
         </UICard>
       )}
 

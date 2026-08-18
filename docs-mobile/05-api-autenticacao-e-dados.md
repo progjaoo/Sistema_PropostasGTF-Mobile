@@ -78,8 +78,8 @@ Prioridades:
 
 ## Incompatibilidades Conhecidas
 
-- O editor mobile de proposta ainda não possui paridade com o editor web.
-- A tela mobile de Admin ainda não implementa Programas, Produtos e Tipos de Proposta; o menu marca esses itens como "Em breve".
+- A paridade funcional ADMIN desta entrega foi implementada no aplicativo; a validação visual e de dispositivo ainda depende de homologação iOS/Android.
+- A geração de tipos a partir do OpenAPI oficial continua sendo uma evolução do backend compartilhado; os contratos críticos desta entrega possuem schemas Zod locais para evitar respostas inválidas em runtime.
 - O refresh token é revogável, porém a estratégia atual do backend deve ser revisada para armazenamento por hash.
 
 ## Banco de Dados
@@ -94,3 +94,15 @@ O aplicativo não executa SQL e não possui migrations próprias. Mudanças de d
 6. validar sistema web e mobile contra a mesma API.
 
 Em produção, migrations devem ser aplicadas com `prisma migrate deploy`. O `db push` presente no Compose atual é adequado apenas ao fluxo local controlado e não substitui migrations de produção.
+
+## Contratos mobile da Entrega 1
+
+`src/api/client.ts` preserva o payload completo de erros HTTP em `ApiError.payload`, incluindo `code`, `blockers`, `fields` e `requiresConfirmation`. As respostas críticas são validadas com Zod para impacto de Empresa, quadro `station-board`, Contratos, resumo, forecast e propostas elegíveis.
+
+O aplicativo consome, sem duplicar autorização, os endpoints `/stations/:id/deletion-impact`, `/stations/:id/permanent`, `/proposals/station-board`, `/proposals/:id/permanent` e `/contracts/*`. Nenhum endpoint ou regra de servidor é implementado no mobile.
+
+## Contratos mobile da Entrega 2
+
+Advertisers carregam `ownerId`, `owner` e `viewerCanEdit` quando fornecidos pela API. O app não envia `ownerId` ao criar/editar como COMERCIAL e apresenta mensagens neutras para `403/404` fora da carteira. Conversão usa `POST /advertisers/:id/promote-to-client`; desativação usa `DELETE /advertisers/:id` com `confirmWithProposals=true` somente após conflito estruturado.
+
+O catálogo COMERCIAL consome `GET /product-templates` e `GET /stations`, exibindo apenas dados autorizados. Propostas persistem `unitValue` por item; cálculos de subtotal e diferença são feitos em centavos inteiros. Contratos COMERCIAL não enviam `ownerId`, pois a API restringe a carteira ao usuário autenticado.

@@ -4,6 +4,8 @@
 
 **Goal:** Entregar no aplicativo todos os fluxos do perfil COMERCIAL definidos nos planos web 033 e 034, depois da aprovação integral da Entrega ADMIN.
 
+**Execution scope:** Implementação somente em `Sistema-PropostasGTF_App`. Nenhum arquivo ou commit será criado em `Sistema-Propostas-kanban`; os passos de commit abaixo ficam omitidos.
+
 **Architecture:** A entrega reutiliza contratos, erros estruturados, confirmação digitada, autosave e módulo de contratos criados no plano mobile 011. Ownership e autorização permanecem no backend; o aplicativo adapta navegação, formulários, catálogo, editor e contratos ao uso nativo sem duplicar regras de segurança.
 
 **Tech Stack:** Expo SDK 54, React Native 0.81, React 19, TypeScript 5.9, Expo Router 6, TanStack Query, Zustand, Zod, Jest, Testing Library React Native e API Express/Prisma compartilhada.
@@ -688,20 +690,22 @@ git commit -m "docs(mobile): complete commercial parity delivery"
 
 ## Checklist da Implementação
 
-- [ ] Task 1 — Navegação COMERCIAL
-- [ ] Task 2 — Ownership explícito
-- [ ] Task 3 — Conversão Lead → Cliente
-- [ ] Task 4 — Desativação explicativa
-- [ ] Task 5 — Catálogo read-only
-- [ ] Task 6 — Editor, quantidade e valores
-- [ ] Task 7 — Exclusão da proposta própria
-- [ ] Task 8 — Meus Contratos
-- [ ] Task 9 — Documentação e homologação
+- [x] Task 1 — Navegação COMERCIAL
+- [x] Task 2 — Ownership explícito
+- [x] Task 3 — Conversão Lead → Cliente
+- [x] Task 4 — Desativação explicativa
+- [x] Task 5 — Catálogo read-only
+- [x] Task 6 — Editor, quantidade e valores
+- [x] Task 7 — Exclusão da proposta própria
+- [x] Task 8 — Meus Contratos
+- [x] Task 9 — Documentação e homologação — QA de dois vendedores/dispositivo pendente
 
 ### Validações Executadas
 
-- Esta entrega usa como baseline a validação registrada no plano mobile 011.
+- Baseline: plano mobile 011 aprovado com 31 suítes, 78 testes, typecheck e exportações Expo iOS/Android.
+- Após a implementação: 39 suítes e 91 testes aprovados; typecheck aprovado.
+- Exportação iOS/Android concluída em `/tmp/gtf-propostas-commercial-parity-final`; QA com dois vendedores/dispositivos permanece pendente.
 
 ### Pendências e Riscos Residuais
 
-- Homologação com dois usuários COMERCIAIS distintos será registrada durante a execução.
+- Homologação integrada com dois usuários COMERCIAIS distintos, rede/offline e aparelhos iOS/Android permanece pendente; nenhum backend/web foi alterado.
